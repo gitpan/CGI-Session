@@ -1,6 +1,6 @@
 package CGI::Session::DB_File;
 
-# $Id: DB_File.pm,v 3.2.2.1 2002/11/28 03:16:52 sherzodr Exp $
+# $Id: DB_File.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $
 
 use strict;
 use base qw(
@@ -83,7 +83,7 @@ sub teardown {
 
 
 
-# $Id: DB_File.pm,v 3.2.2.1 2002/11/28 03:16:52 sherzodr Exp $
+# $Id: DB_File.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $
 
 1;
 
@@ -106,10 +106,16 @@ CGI::Session::DB_File is a CGI::Session driver to store session data in Berkeley
 Filename to store the session data is by default 'cgisess.db'. If you want different
 name, you can either specify it with the "FileName" option as below:
 
-    $s = new CGI::Session::DB_File(undef, 
-					{Directory=>'/tmp', FileName=>'sessions.db'});
+    $s = new CGI::Session::DB_File(undef, {Directory=>'/tmp', FileName=>'sessions.db'});
 
-The only driver option required, as in the above examples, is "Directory", which tells the driver where the session file and lock files should be created.
+or by setting the value of the $CGI::Session::DB_File::NAME variable before creating
+the session object:
+
+    $CGI::Session::DB_File::NAME = 'sessions.db';
+    $s = new CGI::Session("driver:DB_File", undef, {Directory=>'/tmp'});
+
+The only driver option required, as in the above examples, is "Directory", which tells the
+driver where the session file and lock files should be created.
 
 "FileName" option is also available, but not required.
 
@@ -159,4 +165,4 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 
 =cut
 
-# $Id: DB_File.pm,v 3.2.2.1 2002/11/28 03:16:52 sherzodr Exp $
+# $Id: DB_File.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $

@@ -1,6 +1,6 @@
 package CGI::Session::ID::Incr;
 
-# $Id: Incr.pm,v 3.1.2.1 2002/11/28 03:42:05 sherzodr Exp $
+# $Id: Incr.pm,v 3.1 2002/11/27 12:26:05 sherzodr Exp $
 
 use strict;
 use File::Spec;
@@ -9,7 +9,7 @@ use Fcntl (':DEFAULT', ':flock');
 
 use vars qw($VERSION);
 
-($VERSION) = '$Revision: 3.1.2.1 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 3.1 $' =~ m/Revision:\s*(\S+)/;
 
 sub generate_id {
     my ($self, $options) = @_;
@@ -58,14 +58,16 @@ CGI::Session::ID::Incr - CGI::Session ID driver
 
     use CGI::Session qw/-api3/;
 
-    $session = new CGI::Session("driver:SomeDriver;id:Incr", undef,
-                            {   IDFile      => '/tmp/cgisession.id',
+    $session = new CGI::Session("id:Incr", undef,
+                            {   Directory   => '/tmp',
+                                IDFile      => '/tmp/cgisession.id',
                                 IDInit      => 1000,
                                 IDIncr      => 2 });
 
 =head1 DESCRIPTION
 
 CGI::Session::ID::Incr is to generate auto incrementing Session IDs. Compare it with CGI::Session::ID::MD5, where session ids are truely random 32 character long strings.
+
 CGI::Session::ID::Incr expects the following arguments passed to CGI::Session->new() as the third argument
 
 =over 4

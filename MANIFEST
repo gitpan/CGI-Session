@@ -15,6 +15,7 @@ Session/Serialize/Default.pm
 Session/Serialize/FreezeThaw.pm
 Session/Serialize/Storable.pm
 Session/Tutorial.pm
+rfc2965.txt
 t/api3_db_file.t
 t/api3_db_file_freezethaw.t
 t/api3_db_file_storable.t

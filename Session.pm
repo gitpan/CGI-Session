@@ -1,19 +1,17 @@
 package CGI::Session;
 
-# $Id: Session.pm,v 3.2.2.8 2002/11/29 21:26:49 sherzodr Exp $
+# $Id: Session.pm,v 3.12 2002/12/03 16:22:10 sherzodr Exp $
 
 use strict;
 #use diagnostics;
 use Carp ('confess');
 use AutoLoader 'AUTOLOAD';
 
-use vars qw($VERSION $REVISION $errstr $IP_MATCH $NAME $API_3);
+use vars qw($VERSION $REVISION $errstr $IP_MATCH $NAME $API_3 $FROZEN);
 
-
-
-($REVISION) = '$Revision: 3.2.2.8 $' =~ m/Revision:\s*(\S+)/;
-$VERSION    = '3.7';
-$NAME     = 'CGISESSID';
+($REVISION) = '$Revision: 3.12 $' =~ m/Revision:\s*(\S+)/;
+$VERSION    = '3.8';
+$NAME       = 'CGISESSID';
 
 # import() - we do not import anything into the callers namespace, however,
 # we enable the user to specify hooks at compile time
@@ -23,6 +21,7 @@ sub import {
     for ( my $i=0; $i < @_; $i++ ) {
         $IP_MATCH   = ( $_[$i] eq '-ip_match'   ) and next;
         $API_3      = ( $_[$i] eq '-api3'       ) and next;
+        $FROZEN     = ( $_[$i] eq '-frozen'     ) and next;
     }
 }
 
@@ -46,10 +45,10 @@ sub new {
         _API3       => { },
     };
 
-    if ( $API_3 ) {
+    if ( $API_3 || (@_ == 3 ) ) {
         return $class->api_3(@_);
     }
-
+    
     bless ($self, $class);
     $self->_validate_driver() && $self->_init() or return;
     return $self;
@@ -68,9 +67,8 @@ sub api_3 {
     my $class = shift;
     $class = ref($class) || $class;
 
-
     my $self = {
-        _OPTIONS    => [ $_[1], $_[2] ], # for now settle for empty option
+        _OPTIONS    => [ $_[1], $_[2] ],
         _DATA       => undef,
         _STATUS     => MODIFIED,
         _API_3      => {
@@ -80,10 +78,15 @@ sub api_3 {
         }
     };
 
+    # supporting DSN namme abbreviations:
+    require Text::Abbrev;
+    my $dsn_abbrev = Text::Abbrev::abbrev('driver', 'serializer', 'id');
+
     if ( defined $_[0] ) {
         my @arg_pairs = split (/;/, $_[0]);
         for my $arg ( @arg_pairs ) {
             my ($key, $value) = split (/:/, $arg) or next;
+            $key = $dsn_abbrev->{$key};
             $self->{_API_3}->{ uc($key) } = $value || $self->{_API_3}->{uc($key)};
         }
     }
@@ -101,7 +104,7 @@ sub api_3 {
     # Now re-defining ISA according to what we have above
     {
         no strict 'refs';
-        @{$driver . "::ISA"} = ( 'CGI::Session', $serializer, $id );
+        @{$driver . "::ISA"} = ( $class, $serializer, $id );
     }
 
     bless ($self, $driver);
@@ -121,6 +124,14 @@ sub DESTROY {
 }
 
 
+# options() - used by drivers only. Returns the driver
+# specific options. To be used in the future releases of the 
+# library, may be
+sub driver_options {
+    my $self = shift;
+
+    return $self->{_OPTIONS}->[1];
+}
 
 # _validate_driver() - checks driver's validity.
 # Return value doesn't matter. If the driver doesn't seem
@@ -134,7 +145,7 @@ sub _validate_driver {
         unless ( $self->can($method) ) {
             my $class = ref($self);
             confess "$class doesn't seem to be a valid CGI::Session driver. " .
-                "At least one method('$method') is missing";
+                "At least one method ('$method') is missing";
         }
     }
     return 1;
@@ -371,7 +382,7 @@ sub _set_param {
         return;
     }
 
-    # session parameters starting with '_SESSION_' are
+    # session parameters starting with '_session_' are
     # private to the class
     if ( $key =~ m/^_SESSION_/ ) {
         return undef;
@@ -432,18 +443,18 @@ sub flush {
 __END__;
 
 
-# $Id: Session.pm,v 3.2.2.8 2002/11/29 21:26:49 sherzodr Exp $
+# $Id: Session.pm,v 3.12 2002/12/03 16:22:10 sherzodr Exp $
 
 =pod
 
 =head1 NAME
 
-CGI::Session - persistent session in CGI applications
+CGI::Session - persistent session data in CGI applications
 
 =head1 SYNOPSIS
 
     # Object initialization:
-    use CGI::Session qw/-api3/;
+    use CGI::Session;
 
     my $session = new CGI::Session("driver:File", undef, {Directory=>'/tmp'});
 
@@ -482,21 +493,21 @@ does that and many more
 
 =head1 TO LEARN MORE
 
-Current manual is optimized to be used as a quick reference. To learn more both about
-the logic behind session management and CGI::Session programming style, consider
-the following:
+Current manual is optimized to be used as a quick reference. To learn more both about the logic behind session management and CGI::Session programming style, consider the following:
 
 =over 4
 
 =item *
 
-L<CGI::Session::Tutorial|CGI::Session::Tutorial> - extended CGI::Session manual. Also 
-includes library architecture and driver specifications.
+L<CGI::Session::Tutorial|CGI::Session::Tutorial> - extended CGI::Session manual. Also includes library architecture and driver specifications.
 
 =item *
 
-L<CGI::Session::CookBook|CGI::Session::CookBook> - practical solutions for real life 
-problems
+L<CGI::Session::CookBook|CGI::Session::CookBook> - practical solutions for real life problems
+
+=item *
+
+We also provide mailing lists for CGI::Session users. To subscribe to the list or browse the archives visit https://lists.sourceforge.net/lists/listinfo/cgi-session-user
 
 =item *
 
@@ -552,9 +563,14 @@ Default is "Default", which uses standard L<Data::Dumper|Data::Dumper>
 
 =item *
 
-C<id> - ID generator to use when new session is to be created. Available ID generators are "MD5" and "Incr". Default is "MD5".
+C<id> - ID generator to use when new session is to be created. Available ID generators
+are "MD5" and "Incr". Default is "MD5".
 
 =back
+
+Note: you can also use unambiguous abbreviations of the DSN parameters. Examples:
+
+    new CGI::Session("dr:File;ser:Storable", undef, {Diretory=>'/tmp'});
 
 
 =item C<id()>
@@ -577,10 +593,6 @@ parameter set to C<$name> or undef on failure.
 method used in either of the above syntax assigns a new value to $name
 parameter, which can later be retrieved with previously introduced
 param() syntax.
-
-You can also save several parameters at once by passing param() a hash:
-
-	$cgi->param(%params);
 
 =item C<param_hashref()>
 
@@ -606,6 +618,12 @@ to be either CGI.pm object, or any other object which can provide
 param() method. If second argument is present and is a reference to an
 array, only the parameters found in that array will be loaded to CGI
 object.
+
+=item C<sync_param($cgi)>
+
+=item C<sync_param($cgi, $arrayref)>
+
+experimental feature. Synchronizes CGI and session objects. In other words, it's the same as calling respective syntaxes of save_param() and load_param().
 
 =item C<clear()>
 
@@ -633,7 +651,7 @@ epoch. This time is used internally while auto-expiring sessions and/or session 
 
 =item C<ctime()>
 
-returns the time when the session was first created. 
+returns the time when the session was first created.
 
 =item C<expires()>
 
@@ -685,7 +703,7 @@ immediate expiration after which the session will not be accessible
 =item C<error()>
 
 returns the last error message from the library. It's the same as the
-value of $CGI::Session::errstr. Example:	
+value of $CGI::Session::errstr. Example:
 
     $session->flush() or die $session->error();
 
@@ -697,11 +715,92 @@ creates a dump of the session object. Argument, if passed, will be
 interpreted as the name of the file object should be dumped in. Used
 mostly for debugging.
 
+=item C<header()>
+
+header() is simply a replacement for L<CGI.pm|CGI>'s header() method. Without this method, you usually need to create a CGI::Cookie object and send it as part of the HTTP header:
+
+    $cookie = new CGI::Cookie(-name=>'CGISESSID', -value=>$session->id);
+    print $cgi->header(-cookie=>$cookie);
+
+You can minimize the above into:
+
+    $session->header()
+
+It will retrieve the name of the session cookie from $CGI::Session::NAME variable, which can also be accessed via CGI::Session->name() method. If you want to use a different name for your session cookie, do something like following before creating session object:
+
+    CGI::Session->name("MY_SID");
+    $session = new CGI::Session(undef, $cgi, \%attrs);
+
+Now, $session->header() uses "MY_SID" as a name for the session cookie.
+
 =back
+
+=head1 DATA TABLE
+
+Session data is stored in the form of hash table, in key value pairs.
+All the parameter names you assign through param() method become keys 
+in the table, and whatever value you assign become a value associated with
+that key. Every key/value pair is also called a record. 
+
+All the data you save through param() method are called public records.
+There are several read-only private records as well. Normally, you don't have to know anything about them to make the best use of the library. But knowing wouldn't hurt either. Here are the list of the private records and some description  of what they hold:
+
+=over 4
+
+=item _SESSION_ID
+
+Session id of that data. Accessible through id() method.
+
+=item _SESSION_CTIME
+
+Session creation time. Accessible through ctime() method.
+
+=item _SESSION_ATIME
+
+Session last access time. Accessible through atime() method.
+
+=item _SESSION_ETIME
+
+Session's expiration time, if any. Accessible through expire() method.
+
+=item _SESSION_REMOTE_ADDR
+
+IP address of the user who create that session. Accessible through remote_addr() 
+method
+
+=item _SESSION_EXPIRE_LIST 
+
+Another internal hash table that holds the expiration information for each
+expirable public record, if any. This table is updated with the two-argument-syntax of expires() method.
+
+=back
+
+These private methods are essential for the proper operation of the library
+while working with session data. For this purpose, CGI::Session doesn't allow
+overriding any of these methods through the use of param() method. In addition,
+it doesn't allow any parameter names that start with string B<_SESSION_> either
+to prevent future collisions.
+
+So the following attempt will have no effect on the session data whatsoever
+
+    $session->param(_SESSION_XYZ => 'xyz');
+
+Although private methods are not writable, the library allows reading them
+using param() method:
+
+    my $sid = $session->param(_SESSION_ID);
+
+The above is the same as:
+
+    my $sid = $session->id();
+
+But we discourage people from accessing private records using param() method.
+In the future we are planning to store private records in their own namespace
+to avoid name collisions and remove restrictions on session parameter names.
 
 =head1 DISTRIBUTION
 
-CGI::Session consists of several modular components such as L<drivers|"DRIVERS">, L<serializers|"SERIALIZERS"> and L<id generators|"ID Generators">. This section lists what is available. 
+CGI::Session consists of several modular components such as L<drivers|"DRIVERS">, L<serializers|"SERIALIZERS"> and L<id generators|"ID Generators">. This section lists what is available.
 
 =head2 DRIVERS
 
@@ -749,7 +848,7 @@ Following ID generators are available:
 
 =item *
 
-L<MD5|CGI::Session::ID::MD5> - generates 32 character long hexidecimal string. 
+L<MD5|CGI::Session::ID::MD5> - generates 32 character long hexidecimal string.
 Requires L<Digest::MD5|Digest::MD5>. Full name: B<CGI::Session::ID::MD5>.
 
 =item *
@@ -760,6 +859,8 @@ L<Incr|CGI::Session::ID::Incr> - generates auto-incrementing ids. Full name: B<C
 
 
 =head1 COPYRIGHT
+
+Copyright (C) 2001-2002 Sherzod Ruzmetov <sherzodr@cpan.org>. All rights reserved.
 
 This library is free software. You can modify and or distribute it under the same terms as Perl itself.
 
@@ -795,12 +896,13 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 
 =cut
 
-# dump() - dumps the session object using Data::Dumper
+# dump() - dumps the session object using Data::Dumper.
+# during development it defines global dump().
 sub dump {
     my ($self, $file, $data_only) = @_;
 
     require Data::Dumper;
-    local $Data::Dumper::Indent = 1;
+    local $Data::Dumper::Indent = 2;
 
     my $ds = $data_only ? $self->{_DATA} : $self;
 
@@ -847,18 +949,14 @@ sub delete {
 # clear() - clears a list of parameters off the session's '_DATA' table
 sub clear {
     my $self = shift;
-    my $class   = ref($self);
+    $class   = ref($self);
 
-    my @params = ();
+    my @params = $self->param();
     if ( defined $_[0] ) {
         unless ( ref($_[0]) eq 'ARRAY' ) {
             confess "Usage: $class->clear([\@array])";
         }
         @params = @{ $_[0] };
-
-    } else {
-        @params = $self->param();
-
     }
 
     my $n = 0;
@@ -1062,13 +1160,13 @@ sub _time_alias {
         s           => 1,
         m           => 60,
         h           => 3600,
-        d           => 3600 * 24,
-        w           => 3600 * 24 * 7,
-        M           => 3600 * 24 * 30,
-        y           => 3600 * 24 * 365,
+        d           => 86400,
+        w           => 604800,
+        M           => 2592000,
+        y           => 31536000
     );
 
-    my ($koef, $d) = $str =~ m/([+-]?\d+)(\w)/;
+    my ($koef, $d) = $str =~ m/^([+-]?\d+)(\w)$/;
 
     if ( defined($koef) && defined($d) ) {
         return $koef * $time_map{$d};
@@ -1094,24 +1192,57 @@ sub param_hashref {
 
 # name() - returns the cookie name associated with the session id
 sub name {
-	my ($class, $name)  = @_;
+    my ($class, $name)  = @_;
 
-	if ( defined $name ) {
-		return $CGI::Session::NAME = $name;
-	}
+    if ( defined $name ) {
+        $CGI::Session::NAME = $name;
+    }
 
     return $CGI::Session::NAME;
 }
 
 
-# cookie() - returns CGI::Cookie object
-sub cookie {
+# header() - replacement for CGI::header() method
+sub header {
     my $self = shift;
-    confess "cookie(): don't use me! I'm broken";
+
+    my $cgi = $self->{_SESSION_OBJ};
+    unless ( defined $cgi ) {
+        require CGI;
+        $self->{_SESSION_OBJ} = CGI->new();
+        return $self->header();
+    }
+
+    my $cookie = $cgi->cookie($self->name(), $self->id() );
+
+    return $cgi->header(
+        -type   => 'text/html',
+        -cookie => $cookie,
+        @_
+    );
+}
+
+
+# sync_param() - synchronizes CGI and Session parameters.
+sub sync_param {
+    my ($self, $cgi, $list) = @_;
+
+    unless ( ref($cgi) ) {
+        confess("$cgi doesn't look like an object");
+    }
+
+    unless ( $cgi->UNIVERSAL::can('param') ) {
+        confess(ref($cgi) . " doesn't support param() method");
+    }
+
+    # we first need to save all the available CGI parameters to the
+    # object
+    $self->save_param($cgi, $list);
+
+    # we now need to load all the parameters back to the CGI object
+    return $self->load_param($cgi, $list);
 }
 
 
 
-
-
-# $Id: Session.pm,v 3.2.2.8 2002/11/29 21:26:49 sherzodr Exp $
+# $Id: Session.pm,v 3.12 2002/12/03 16:22:10 sherzodr Exp $

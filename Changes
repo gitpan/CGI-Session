@@ -1,5 +1,7 @@
-.::What is new in CGI::Session 3.0-alpha?::.
+.::What is new in CGI::Session?::.
+
+What is new in 3.7
+	* clear() method was fixed
 
 
-under construction
 

@@ -1,6 +1,6 @@
 package CGI::Session;
 
-# $Id: Session.pm,v 3.2.2.5 2002/11/28 17:11:11 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.8 2002/11/29 21:26:49 sherzodr Exp $
 
 use strict;
 #use diagnostics;
@@ -11,8 +11,8 @@ use vars qw($VERSION $REVISION $errstr $IP_MATCH $NAME $API_3);
 
 
 
-($REVISION) = '$Revision: 3.2.2.5 $' =~ m/Revision:\s*(\S+)/;
-$VERSION    = '3.6';
+($REVISION) = '$Revision: 3.2.2.8 $' =~ m/Revision:\s*(\S+)/;
+$VERSION    = '3.7';
 $NAME     = 'CGISESSID';
 
 # import() - we do not import anything into the callers namespace, however,
@@ -371,9 +371,9 @@ sub _set_param {
         return;
     }
 
-    # session parameters starting with '_session_' are
+    # session parameters starting with '_SESSION_' are
     # private to the class
-    if ( $key =~ m/^_session_/ ) {
+    if ( $key =~ m/^_SESSION_/ ) {
         return undef;
     }
 
@@ -432,7 +432,7 @@ sub flush {
 __END__;
 
 
-# $Id: Session.pm,v 3.2.2.5 2002/11/28 17:11:11 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.8 2002/11/29 21:26:49 sherzodr Exp $
 
 =pod
 
@@ -847,7 +847,7 @@ sub delete {
 # clear() - clears a list of parameters off the session's '_DATA' table
 sub clear {
     my $self = shift;
-    $class   = ref($class);
+    my $class   = ref($self);
 
     my @params = ();
     if ( defined $_[0] ) {
@@ -863,7 +863,7 @@ sub clear {
 
     my $n = 0;
     for ( @params ) {
-        /^_session_/ and next;
+        /^_SESSION_/ and next;
         # If this particular parameter has an expiration ticker,
         # remove it.
         if ( $self->{_DATA}->{_SESSION_EXPIRE_LIST}->{$_} ) {
@@ -1114,4 +1114,4 @@ sub cookie {
 
 
 
-# $Id: Session.pm,v 3.2.2.5 2002/11/28 17:11:11 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.8 2002/11/29 21:26:49 sherzodr Exp $

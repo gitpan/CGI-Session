@@ -1,49 +1,7 @@
-# $Id: Makefile.PL,v 3.3.2.3 2002/11/28 06:49:16 sherzodr Exp $
+# $Id: Makefile.PL,v 3.3.2.4 2002/11/28 17:15:21 sherzodr Exp $
 
 use strict;
 use ExtUtils::MakeMaker;
-
-
-sub MY::postamble {
-    return <<'TAG';
-upload: dist
-	cpan-upload $(DISTVNAME).tar$(SUFFIX)
-
-DOC_BASE = /home/sherzodr/public_html/modules/CGI
-DIST_BASE = /home/sherzodr/public_html/modules/dist/CGI-Session
-POD2HTML = pod2html --backlink="[toc]" --podroot=/usr/lib/perl5/5.6.1 \
-	                               --recurse --header --css=style.css
-publish: dist
-
-	cp $(DISTVNAME).tar$(SUFFIX) $(DIST_BASE)/$(DISTVNAME).tar$(SUFFIX)	
-	mv $(DISTVNAME).tar$(SUFFIX) $(DIST_BASE)/$(DISTNAME)-latest.tar$(SUFFIX)
-	touch $(DIST_BASE)/latest-is-$(VERSION)
-
-	$(RM_RF)  $(DOC_BASE)
-	$(MKPATH) $(DOC_BASE)/Session/Serialize
-	$(MKPATH) $(DOC_BASE)/Session/ID
-
-	$(POD2HTML) Session.pm > $(DOC_BASE)/Session.html
-	
-	$(POD2HTML) Session/File.pm > $(DOC_BASE)/Session/File.html
-	$(POD2HTML) Session/DB_File.pm > $(DOC_BASE)/Session/DB_File.html
-	$(POD2HTML) Session/MySQL.pm > $(DOC_BASE)/Session/MySQL.html
-
-	$(POD2HTML) Session/Serialize/Default.pm > $(DOC_BASE)/Session/Serialize/Default.html
-	$(POD2HTML) Session/Serialize/Storable.pm > $(DOC_BASE)/Session/Serialize/Storable.html
-	$(POD2HTML) Session/Serialize/FreezeThaw.pm > $(DOC_BASE)/Session/Serialize/FreezeThaw.html
-	
-	$(POD2HTML) Session/ID/Incr.pm > $(DOC_BASE)/Session/ID/Incr.html
-	$(POD2HTML) Session/ID/MD5.pm > $(DOC_BASE)/Session/ID/MD5.html	
-
-	$(POD2HTML) Session/Tutorial.pm > $(DOC_BASE)/Session/Tutorial.html
-	$(POD2HTML) Session/CookBook.pm > $(DOC_BASE)/Session/CookBook.html
-	
-	$(RM_RF) pod2htm*
-TAG
-}
-
-
 
 WriteMakefile(
     NAME            => 'CGI::Session',

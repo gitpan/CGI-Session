@@ -1,14 +1,13 @@
 package CGI::Session::Serialize::Default;
 
-# $Id: Default.pm,v 1.6 2002/12/06 03:56:33 sherzodr Exp $ 
+# $Id: Default.pm,v 1.5 2002/11/27 12:26:08 sherzodr Exp $ 
 use strict;
 use Safe;
 use Data::Dumper;
 
-use vars qw($VERSION $SIGNATURE);
+use vars qw($VERSION);
 
-$SIGNATURE = '';
-($VERSION) = '$Revision: 1.6 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 1.5 $' =~ m/Revision:\s*(\S+)/;
 
 
 sub freeze {
@@ -16,12 +15,11 @@ sub freeze {
     
     local $Data::Dumper::Indent   = 0;
     local $Data::Dumper::Purity   = 0;
-    local $Data::Dumper::Useqq    = 0;
+    local $Data::Dumper::Useqq    = 1;
     local $Data::Dumper::Deepcopy = 0;   
-    local $Data::Dumper::Quotekeys= 0;    
     
     my $d = new Data::Dumper([$data], ["D"]);
-    return $SIGNATURE . ';' . $d->Dump();
+    return $d->Dump();    
 }
 
 
@@ -30,10 +28,16 @@ sub thaw {
     my ($self, $string) = @_;    
 
     # To make -T happy
-    my ($safe_string) = $string =~ m/^$SIGNATURE;(.*)$/;    
+    my ($safe_string) = $string =~ m/^(.*)$/;
     
+    my $D = undef;
     my $cpt = new Safe();
-    return $cpt->reval ($safe_string );
+    $D = $cpt->reval ($safe_string );
+    if ( $@ ) {
+        die $@;
+    }
+
+    return $D;
 }
 
 

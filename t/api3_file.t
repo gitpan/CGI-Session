@@ -1,7 +1,7 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
-# $Id: api3_file.t,v 1.5 2002/12/06 04:11:51 sherzodr Exp $
+# $Id: api3_file.t,v 1.3 2002/11/29 22:55:46 sherzodr Exp $
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
@@ -20,7 +20,6 @@ ok(1); # If we made it this far, we're ok.
 
 # Insert your test code below, the Test module is use()ed here so read
 # its man page ( perldoc Test ) for help writing this test script.
-
 my $s = new CGI::Session("dr:File;ser:Default;id:MD5", undef, {Directory=>"t"} );
 
 ok($s);
@@ -42,7 +41,7 @@ ok($s->param(-name=>'email'));
 
 ok(!$s->expire() );
 
-$s->expire("+10s");
+$s->expire("+10m");
 
 ok($s->expire());
 
@@ -60,6 +59,6 @@ ok($s2->param('author'));
 ok($s2->expire());
 
 
-#$s2->delete();
+$s2->delete();
 
 

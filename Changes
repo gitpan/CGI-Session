@@ -1,3 +1,12 @@
+Change log for CGI::Session
+  $Date: 2003/03/09 11:25:28 $
+
+What is new in 3.91?
+
+	* use of close() from within dump() method used to produce warnings
+	 if -w switch is enabled. Should've been replaced with CORE::close()
+  * MySQL driver manual fixed
+
 What is new in 3.8?
 
 	* Abbreviations in DSN parameters are supported via Text::Abbrev.
@@ -27,11 +36,4 @@ What is new in 3.x?
 	* Bug in POD documentation is fixed (thanks to Graham Barr)	
 
 
-
-
-
-
-
-
-
-$Id: Changes,v 3.3 2002/12/03 16:16:39 sherzodr Exp $
+$Id: Changes,v 3.3.2.2 2003/03/09 11:25:28 sherzodr Exp $

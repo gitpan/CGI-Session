@@ -1,24 +1,21 @@
 Changes
-MANIFEST
+MANIFEST			This list of files
 MANIFEST.SKIP
-MANIFEST.bak
 Makefile.PL
 README
 Session.pm
 Session/BluePrint.pm
 Session/CookBook.pm
 Session/DB_File.pm
+Session/Example.pm
 Session/File.pm
 Session/ID/Incr.pm
 Session/ID/MD5.pm
-Session/ID/Static.pm
 Session/MySQL.pm
-Session/PostgreSQL.pm
 Session/Serialize/Default.pm
 Session/Serialize/FreezeThaw.pm
 Session/Serialize/Storable.pm
 Session/Tutorial.pm
-examples/subscriptions.cgi
 rfc2965.txt
 t/api3_db_file.t
 t/api3_db_file_freezethaw.t
@@ -33,7 +30,6 @@ t/api3_incr.t
 t/api3_mysql.t
 t/api3_obj_store.t
 t/api3_obj_store_db_file.t
-t/api3_static_id.t
 t/complex_ds.t
 t/db_file.t
 t/file.t

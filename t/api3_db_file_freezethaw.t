@@ -1,7 +1,7 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
-# $Id: api3_db_file_freezethaw.t,v 1.3 2002/12/06 03:56:37 sherzodr Exp $
+# $Id: api3_db_file_freezethaw.t,v 1.2 2002/11/22 22:54:41 sherzodr Exp $
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
@@ -26,7 +26,7 @@ BEGIN {
     plan(tests => 14); 
 };
 
-use CGI::Session;
+use CGI::Session qw/-api3/;
 ok(1); # If we made it this far, we're ok.
 
 #########################
@@ -54,7 +54,7 @@ ok($s->param(-name=>'email'));
 
 ok(!$s->expire() );
 
-$s->expire("+10s");
+$s->expire("+10m");
 
 ok($s->expire());
 
@@ -72,6 +72,6 @@ ok($s2->param('author'));
 ok($s2->expire());
 
 
-#$s2->delete();
+$s2->delete();
 
 

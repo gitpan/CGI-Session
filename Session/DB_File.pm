@@ -1,6 +1,6 @@
 package CGI::Session::DB_File;
 
-# $Id: DB_File.pm,v 3.3 2002/12/06 01:42:45 sherzodr Exp $
+# $Id: DB_File.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $
 
 use strict;
 use base qw(
@@ -28,7 +28,7 @@ sub store {
     my $args = $options->[1];
     my $file = File::Spec->catfile($args->{Directory}, $args->{FileName} || $FILE_NAME);
 
-    tie my %db, "DB_File", $file, O_RDWR|O_CREAT, 0600 or die $!;
+    tie my %db, "DB_File", $file, O_RDWR|O_CREAT, 0644 or die $!;
     $db{$sid} = $storable_data;
     untie(%db) or die $!;
 
@@ -46,7 +46,7 @@ sub retrieve {
     my $args = $options->[1];
     my $file = File::Spec->catfile($args->{Directory}, $args->{FileName} || $FILE_NAME);
 
-    tie my %db, "DB_File", $file, O_RDWR|O_CREAT, 0600 or die $!;
+    tie my %db, "DB_File", $file, O_RDWR|O_CREAT, 0644 or die $!;
     my $data = $self->thaw($db{$sid});
     untie(%db);
 
@@ -63,7 +63,7 @@ sub remove {
 
     my $args = $options->[1];
     my $file = File::Spec->catfile($args->{Directory}, $args->{FileName} || $FILE_NAME);
-    tie my %db, "DB_File", $file, O_RDWR or die $!;
+    tie my %db, "DB_File", $file, O_RDWR|O_CREAT, 0644 or die $!;
     delete $db{$sid};
     untie(%db) or die $!;
 
@@ -83,7 +83,7 @@ sub teardown {
 
 
 
-# $Id: DB_File.pm,v 3.3 2002/12/06 01:42:45 sherzodr Exp $
+# $Id: DB_File.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $
 
 1;
 
@@ -165,4 +165,4 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 
 =cut
 
-# $Id: DB_File.pm,v 3.3 2002/12/06 01:42:45 sherzodr Exp $
+# $Id: DB_File.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $

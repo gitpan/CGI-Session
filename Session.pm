@@ -1,15 +1,17 @@
 package CGI::Session;
 
-# $Id: Session.pm,v 3.17 2002/12/09 20:05:14 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.5 2003/03/09 11:25:28 sherzodr Exp $
+# $Name:  $
 
 use strict;
-use diagnostics;
-use Carp ('confess', 'carp');
+#use diagnostics;
+use Carp ('confess');
 use AutoLoader 'AUTOLOAD';
 
-use vars qw($VERSION $errstr $IP_MATCH $NAME $API_3 $TOUCH);
+use vars qw($VERSION $REVISION $errstr $IP_MATCH $NAME $API_3 $FROZEN);
 
-$VERSION    = '3.11';
+($REVISION) = '$Revision: 3.12.2.5 $' =~ m/Revision:\s*(\S+)/;
+$VERSION    = '3.91';
 $NAME       = 'CGISESSID';
 
 # import() - we do not import anything into the callers namespace, however,
@@ -19,7 +21,8 @@ sub import {
     @_ or return;
     for ( my $i=0; $i < @_; $i++ ) {
         $IP_MATCH   = ( $_[$i] eq '-ip_match'   ) and next;
-        $API_3      = ( $_[$i] eq '-api3'       ) and next;        
+        $API_3      = ( $_[$i] eq '-api3'       ) and next;
+        $FROZEN     = ( $_[$i] eq '-frozen'     ) and next;
     }
 }
 
@@ -76,7 +79,7 @@ sub api_3 {
         }
     };
 
-    # supporting DSN name abbreviations:
+    # supporting DSN namme abbreviations:
     require Text::Abbrev;
     my $dsn_abbrev = Text::Abbrev::abbrev('driver', 'serializer', 'id');
 
@@ -90,13 +93,13 @@ sub api_3 {
     }
 
     my $driver = "CGI::Session::$self->{_API_3}->{DRIVER}";
-    eval "require $driver" or carp $@;
+    eval "require $driver" or die $@;
 
     my $serializer = "CGI::Session::Serialize::$self->{_API_3}->{SERIALIZER}";
-    eval "require $serializer" or carp $@;
+    eval "require $serializer" or die $@;
 
     my $id = "CGI::Session::ID::$self->{_API_3}->{ID}";
-    eval "require $id" or carp $@;
+    eval "require $id" or die $@;
 
 
     # Now re-defining ISA according to what we have above
@@ -109,24 +112,6 @@ sub api_3 {
     $self->_validate_driver() && $self->_init() or return;
     return $self;
 }
-
-
-
-
-
-
-sub touch {
-    my $class = shift;
-    
-    $CGI::Session::TOUCH = 1;
-    return $class->new(@_);
-}
-
-
-
-
-
-
 
 
 
@@ -175,44 +160,23 @@ sub _validate_driver {
 sub _init {
     my $self = shift;
 
-    # default behavior is to assume no id at all.
     my $claimed_id = undef;
-
-    # Getting the first argument passed to new (in api3 syntax, it's
-    # actually the second argument)
     my $arg = $self->{_OPTIONS}->[0];
-
-    # Checking if that argument is defined, and if it is, is it a reference
-    # or instance of some object
     if ( defined ($arg) && ref($arg) ) {
-
-        # Check if we're getting instance of CGI object...
         if ( $arg->isa('CGI') ) {
-            # .. in which case, try to retrieve the claimed session id
-            # from either HTTP cookie or query string.
-            $claimed_id = $arg->cookie($NAME) || $arg->param($NAME) || undef;            
-
-        # Otherwise check if we're getting a reference to some code...
+            $claimed_id = $arg->cookie($NAME) || $arg->param($NAME) || undef;
+            $self->{_SESSION_OBJ} = $arg;
         } elsif ( ref($arg) eq 'CODE' ) {
+            $claimed_id = $arg->() || undef;
 
-            # ... and try to call that code and use its return value as a 
-            # claimed id.
-            $claimed_id = $arg->($self) || undef;
         }
-
-    # If the argument is defined, but not a reference, treat it literally as 
-    # claimed session id
-    } elsif ( defined($arg) ) {        
+    } else {
         $claimed_id = $arg;
     }
 
-
-    # If claimed id is defined, try to initialize already existing session
-    # data from disk...
     if ( defined $claimed_id ) {
         my $rv = $self->_init_old_session($claimed_id);
 
-        # ...If the data couldn't be restored, initialize a new session
         unless ( $rv ) {
             return $self->_init_new_session();
         }
@@ -406,7 +370,7 @@ sub param {
         return $n;
     }
 
-    confess "param(): unknown syntax.";
+    confess "param(): something smells fishy here. RTFM!";
 }
 
 
@@ -480,7 +444,7 @@ sub flush {
 __END__;
 
 
-# $Id: Session.pm,v 3.17 2002/12/09 20:05:14 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.5 2003/03/09 11:25:28 sherzodr Exp $
 
 =pod
 
@@ -720,9 +684,9 @@ time aliases are also supported for your convenience:
 
 Examples:
 
-    $session->expire("+1y");   # expires in one year
-    $session->expire(0);       # cancel expiration
-    $session->expire("~logged-in", "+10m");# expires ~logged-in flag in 10 mins
+    $session->expires("+1y");   # expires in one year
+    $session->expires(0);       # cancel expiration
+    $session->expires("~logged-in", "+10m");# expires ~logged-in flag in 10 mins
 
 Note: all the expiration times are relative to session's last access time, not to its creation time. To expire a session immediately, call C<delete()>. To expire a specific session parameter immediately, call C<clear()> on that parameter.
 
@@ -746,21 +710,11 @@ value of $CGI::Session::errstr. Example:
 
 =item C<dump()>
 
-=item C<dump("file.txt")>
+=item C<dump("logs/dump.txt")>
 
-=item C<dump("file.txt", 1)>
-
-=item C<dump("file.txt", 1, 2)>
-
-creates a dump of the session object. The first argument, if passed,
-will be interperated as the name of the file dump should be written into.
-The second argument, if true, creates a dump of only the B<_DATA> table.
-This table contains only the session data that is stored in to the file. 
-Otherwise, dump() will return the whole objecet dump, including object's
-run time attributes, in addition to B<_DATA> table.
-
-The third argument can be between 0 to 3. It denotes what indentation to use
-for the dump. Default is 2.
+creates a dump of the session object. Argument, if passed, will be
+interpreted as the name of the file object should be dumped in. Used
+mostly for debugging.
 
 =item C<header()>
 
@@ -902,39 +856,18 @@ Requires L<Digest::MD5|Digest::MD5>. Full name: B<CGI::Session::ID::MD5>.
 
 L<Incr|CGI::Session::ID::Incr> - generates auto-incrementing ids. Full name: B<CGI::Session::ID::Incr>
 
-=item *
-
-L<Static|CGI::Session::ID::Static> - generates static, session ids. B<CGI::Session::ID::Static>
-
-
-=back
-
-=head1 CREDITS
-
-Following people contributed with their patches and/or suggestions to the development of CGI::Session. Names are in chronological order:
-
-=over 4
-
-=item Andy Lester E<lt>alester@flr.follett.comE<gt>
-
-=item Brian King E<lt>mrbbking@mac.comE<gt>
-
-=item Olivier Dragon E<lt>dragon@shadnet.shad.caE<gt>
-
-=item Adam Jacob E<lt>adam@sysadminsith.orgE<gt>
-
 =back
 
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001, 2002 Sherzod Ruzmetov E<lt>sherzodr@cpan.orgE<gt>. All rights reserved.
+Copyright (C) 2001-2002 Sherzod Ruzmetov <sherzodr@cpan.org>. All rights reserved.
 
 This library is free software. You can modify and or distribute it under the same terms as Perl itself.
 
 =head1 AUTHOR
 
-Sherzod Ruzmetov E<lt>sherzodr@cpan.orgE<gt>. Feedbacks, suggestions are welcome.
+Sherzod Ruzmetov <sherzodr@cpan.org>. Feedbacks, suggestions are welcome.
 
 =head1 SEE ALSO
 
@@ -965,15 +898,16 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 =cut
 
 # dump() - dumps the session object using Data::Dumper.
+# during development it defines global dump().
 sub dump {
-    my ($self, $file, $data_only, $indent) = @_;
+    my ($self, $file, $data_only) = @_;
 
     require Data::Dumper;
-    local $Data::Dumper::Indent = $indent || 2;
+    local $Data::Dumper::Indent = 2;
 
     my $ds = $data_only ? $self->{_DATA} : $self;
 
-    my $d = new Data::Dumper([$ds], [ref($self) . "_dump"]);
+    my $d = new Data::Dumper([$ds], ["cgisession"]);
 
     if ( defined $file ) {
         unless ( open(FH, '<' . $file) ) {
@@ -1213,7 +1147,7 @@ sub expire {
 }
 
 
-# expires() - alias to expire(). For backward compatibility with older releases.
+# expires() - alias to expire(). For backward compatibility
 sub expires {
 	return expire(@_);
 }
@@ -1317,4 +1251,4 @@ sub sync_param {
 
 
 
-# $Id: Session.pm,v 3.17 2002/12/09 20:05:14 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.5 2003/03/09 11:25:28 sherzodr Exp $

@@ -1,16 +1,16 @@
 package CGI::Session;
 
-# $Id: Session.pm,v 3.12.2.2 2002/12/04 07:36:00 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.3 2002/12/09 08:55:44 sherzodr Exp $
 
 use strict;
-use diagnostics;
+#use diagnostics;
 use Carp ('confess');
 use AutoLoader 'AUTOLOAD';
 
 use vars qw($VERSION $REVISION $errstr $IP_MATCH $NAME $API_3 $FROZEN);
 
-($REVISION) = '$Revision: 3.12.2.2 $' =~ m/Revision:\s*(\S+)/;
-$VERSION    = '3.9';
+($REVISION) = '$Revision: 3.12.2.3 $' =~ m/Revision:\s*(\S+)/;
+$VERSION    = '3.10';
 $NAME       = 'CGISESSID';
 
 # import() - we do not import anything into the callers namespace, however,
@@ -443,7 +443,7 @@ sub flush {
 __END__;
 
 
-# $Id: Session.pm,v 3.12.2.2 2002/12/04 07:36:00 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.3 2002/12/09 08:55:44 sherzodr Exp $
 
 =pod
 
@@ -915,7 +915,7 @@ sub dump {
                 return undef;
             }
             print FH $d->Dump();
-            unless ( close(FH) ) {
+            unless ( CORE::close(FH) ) {
                 $self->error("Couldn't dump into $file: $!");
                 return undef;
             }
@@ -1250,4 +1250,4 @@ sub sync_param {
 
 
 
-# $Id: Session.pm,v 3.12.2.2 2002/12/04 07:36:00 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.3 2002/12/09 08:55:44 sherzodr Exp $

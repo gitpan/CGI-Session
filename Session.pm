@@ -1,17 +1,17 @@
 package CGI::Session;
 
-# $Id: Session.pm,v 3.12.2.7 2003/03/14 13:17:38 sherzodr Exp $
-# $Name:  $
+# $Id: Session.pm,v 3.12.2.7.2.2 2003/05/02 20:10:48 sherzodr Exp $
+
 
 use strict;
 #use diagnostics;
-use Carp ('confess');
+use Carp;
 use AutoLoader 'AUTOLOAD';
 
 use vars qw($VERSION $REVISION $errstr $IP_MATCH $NAME $API_3 $FROZEN);
 
-($REVISION) = '$Revision: 3.12.2.7 $' =~ m/Revision:\s*(\S+)/;
-$VERSION    = '3.93';
+($REVISION) = '$Revision: 3.12.2.7.2.2 $' =~ m/Revision:\s*(\S+)/;
+$VERSION    = '3.94';
 $NAME       = 'CGISESSID';
 
 # import() - we do not import anything into the callers namespace, however,
@@ -122,7 +122,7 @@ sub api_3 {
 sub DESTROY {
     my $self = shift;
 
-    $self->flush();
+    $self->flush() or croak "could not flush: " . $self->error();
     $self->can('teardown') && $self->teardown();
 }
 
@@ -422,24 +422,18 @@ sub _get_param {
 # flush() - flushes the memory into the disk if necessary.
 # Usually called from within DESTROY() or close()
 sub flush {
-    my $self = shift;
+  my $self = shift;
 
-    my $status = $self->{_STATUS};
+  my $status = $self->{_STATUS};
 
-    if ( $status == MODIFIED ) {
-        $self->store($self->id, $self->{_OPTIONS}, $self->{_DATA});
-        $self->{_STATUS} = SYNCED;
-    }
-
-    if ( $status == DELETED ) {
-        return $self->remove($self->id, $self->{_OPTIONS});
-    }
-
-    $self->{_STATUS} = SYNCED;
-
-    return 1;
+  if ( $status == MODIFIED ) {
+      $self->store($self->id, $self->{_OPTIONS}, $self->{_DATA}) or return;
+      $self->{_STATUS} = SYNCED;      
+  } elsif ( $status == DELETED ) {
+      $self->remove($self->id, $self->{_OPTIONS}) or return;
+  }
+  return 1;
 }
-
 
 
 
@@ -452,7 +446,7 @@ sub flush {
 __END__;
 
 
-# $Id: Session.pm,v 3.12.2.7 2003/03/14 13:17:38 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.7.2.2 2003/05/02 20:10:48 sherzodr Exp $
 
 =pod
 
@@ -1263,4 +1257,4 @@ sub is_new {
 	return $self->{_IS_NEW};
 }
 
-# $Id: Session.pm,v 3.12.2.7 2003/03/14 13:17:38 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.7.2.2 2003/05/02 20:10:48 sherzodr Exp $

@@ -1,6 +1,9 @@
 Change log for CGI::Session
-  $Date: 2003/03/14 13:17:38 $
+  $Date: 2003/05/02 20:09:08 $
 
+What is new in 3.94
+  * flush() method kept returning true regardless of the succsess or failure
+  
 What is new in 3.93
 
 	* is_new() method added, which returns true only if it is a brand new session
@@ -46,4 +49,4 @@ What is new in 3.x?
 	* Bug in POD documentation is fixed (thanks to Graham Barr)	
 
 
-$Id: Changes,v 3.3.2.4 2003/03/14 13:17:38 sherzodr Exp $
+$Id: Changes,v 3.3.2.4.2.1 2003/05/02 20:09:08 sherzodr Exp $

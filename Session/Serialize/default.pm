@@ -1,13 +1,15 @@
 package CGI::Session::Serialize::default;
 
-# default.pm,v 1.4 2005/02/09 08:30:53 sherzodr Exp 
+# default.pm,v 1.5 2005/02/11 08:13:31 sherzodr Exp 
 
 use strict;
 #use diagnostics;
 
 use Safe;
 use Data::Dumper;
+use CGI::Session::ErrorHandler;
 
+@CGI::Session::Serialize::default::ISA = qw( CGI::Session::ErrorHandler );
 $CGI::Session::Serialize::default::VERSION = '1.4';
 
 
@@ -29,7 +31,11 @@ sub thaw {
 
     # To make -T happy
     my ($safe_string) = $string =~ m/^(.*)$/;
-    Safe->new()->reval( $safe_string );
+    my $rv = Safe->new()->reval( $safe_string );
+    if ( my $errmsg = $@ ) {
+        return $class->set_error("thaw(): couldn't thaw. $@");
+    }
+    return $rv;
 }
 
 

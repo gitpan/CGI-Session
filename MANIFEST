@@ -1,5 +1,6 @@
 Changes
 docs/rfc2965.txt
+examples/purge.pl
 examples/subscriptions.cgi
 INSTALL
 Makefile.PL

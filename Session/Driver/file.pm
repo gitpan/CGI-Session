@@ -1,17 +1,18 @@
 package CGI::Session::Driver::file;
 
-# file.pm,v 1.5 2005/02/09 09:51:52 sherzodr Exp
+# file.pm,v 1.7 2005/02/11 08:18:27 sherzodr Exp
 
 use strict;
 #use diagnostics;
 
+use Carp;
 use File::Spec;
-use Fcntl qw(:DEFAULT :flock);
+use Fcntl qw( :DEFAULT :flock :mode );
 use CGI::Session::Driver;
 use vars qw( $FileName);
 
 @CGI::Session::Driver::file::ISA        = qw( CGI::Session::Driver );
-$CGI::Session::Driver::file::VERSION    = "3.3";
+$CGI::Session::Driver::file::VERSION    = "3.4";
 $FileName                               = "cgisess_%s";
 
 sub init {
@@ -79,6 +80,34 @@ sub remove {
     return 1;
 }
 
+
+sub traverse {
+    my $self = shift;
+    my ($coderef) = @_;
+
+    unless ( $coderef && ref($coderef) && (ref $coderef eq 'CODE') ) {
+        croak "traverse(): usage error";
+    }
+
+    opendir( DIRHANDLE, $self->{Directory} ) 
+        or return $self->set_error( "traverse(): couldn't open $self->{Directory}, " . $! );
+
+    my $filename_pattern = $FileName;
+    $filename_pattern =~ s/\./\\./g;
+    $filename_pattern =~ s/\%s/(\.\+)/g;
+    while ( my $filename = readdir(DIRHANDLE) ) {
+        next if $filename =~ m/^\.\.?$/;
+        my $full_path = File::Spec->catfile($self->{Directory}, $filename);
+        my $mode = (stat($full_path))[2] 
+            or return $self->set_error( "traverse(): stat failed for $full_path: " . $! );
+        next if S_ISDIR($mode);
+        if ( $filename =~ /^$filename_pattern$/ ) {
+            $coderef->($1);
+        }
+    }
+    closedir( DIRHANDLE );
+    return 1;
+}
 
 
 

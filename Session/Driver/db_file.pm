@@ -1,6 +1,6 @@
 package CGI::Session::Driver::db_file;
 
-# db_file.pm,v 1.4 2005/02/09 08:30:42 sherzodr Exp
+# db_file.pm,v 1.6 2005/02/11 08:18:27 sherzodr Exp
 
 use strict;
 #use diagnostics;
@@ -13,7 +13,7 @@ use CGI::Session::Driver;
 use Fcntl qw( :DEFAULT :flock );
 
 @CGI::Session::Driver::db_file::ISA         = qw( CGI::Session::Driver );
-$CGI::Session::Driver::db_file::VERSION     = '1.0';
+$CGI::Session::Driver::db_file::VERSION     = '1.1';
 $CGI::Session::Driver::db_file::FILE_NAME   = "cgisess.db";
 
 
@@ -108,6 +108,33 @@ sub _tie_db_file {
     }
     return (\%db, $unlock);
 }
+
+
+
+sub traverse {
+    my $self = shift;
+    my ($coderef) = @_;
+
+    unless ( $coderef && ref($coderef) && (ref $coderef eq 'CODE') ) {
+        croak "traverse(): usage error";
+    }
+
+    my ($dbhash, $unlock) = $self->_tie_db_file(O_RDWR, LOCK_SH);
+    unless ( $dbhash ) {
+        return $self->set_error( "traverse(): couldn't get db handle, " . $self->errstr );
+    }
+    while ( my ($sid, undef) = each %$dbhash ) {
+        $coderef->( $sid );
+    }
+    untie(%$dbhash);
+    $unlock->();
+    return 1;
+}
+
+
+
+
+
 
 1;
 

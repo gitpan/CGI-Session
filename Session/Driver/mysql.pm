@@ -1,6 +1,6 @@
 package CGI::Session::Driver::mysql;
 
-# mysql.pm,v 1.5 2005/02/09 08:30:42 sherzodr Exp
+# mysql.pm,v 1.6 2005/02/11 08:13:31 sherzodr Exp
 
 use strict;
 #use diagnostics;
@@ -25,7 +25,7 @@ sub store {
     croak "store(): usage error" unless $sid && $datastr;
 
     my $dbh = $self->{Handle};
-    $dbh->do("REPLACE INTO " . $self->{TableName} . " (id, a_session) VALUES(?, ?)", undef, $sid, $datastr)
+    $dbh->do("REPLACE INTO " . $self->table_name . " (id, a_session) VALUES(?, ?)", undef, $sid, $datastr)
         or return $self->set_error( "store(): \$dbh->do failed " . $dbh->errstr );
     return 1;
 }

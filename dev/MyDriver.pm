@@ -13,6 +13,11 @@ $VERSION = "1.0";
 
 
 
+# DESTROY() is required so that  AUTOLOAD doesn't keep looking for
+# it. Too expensive
+sub DESTROY { }
+
+
 sub store {
 	my ($self, $sid, $hashref, $options) = @_;
 
@@ -70,7 +75,7 @@ CGI::Session::MyDriver - Perl extension for  CGI::Session driver
 
 =head1 DESCRIPTION
 
-Here goes the description of the module
+This is a blueprint for your driver code. 
 
 =head1 AUTHOR
 

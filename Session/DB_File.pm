@@ -9,7 +9,7 @@ use Data::Dumper;
 use Fcntl qw(:DEFAULT :flock);
 use DB_File;
 
-$VERSION = "2.4";
+$VERSION = "2.5";
 
 
 # do not use any indentation
@@ -95,42 +95,20 @@ CGI::Session::DB_File - Driver for CGI::Session class
 	use constant COOKIE => "TEST_SID";	# cookie to store the session id
 
 	use CGI::Session::DB_File;
-	use CGI;
 
-	my $cgi = new CGI;
-
-	# getting the 
-	my $c_sid = $cgi->cookie(COOKIE) || undef;
-	
-	my $session = new CGI::Session::DB_File($c_sid, 
+	my $session = new CGI::Session::DB_File(undef, 
 		{
 			LockDirectory	=>'/tmp/locks', 
 			FileName		=> '/tmp/sessions.db'
 		});
-	
-	# now let's create a sid cookie and send it to the client's browser.
-	# if it is an existing session, it will be the same as before,
-	# but if it's a new session, $session->id() will return a new session id.
-	{
-		my $new_cookie = $cgi->cookie(-name=>COOKIE, -value=>$session->id);
-		print $cgi->header(-cookie=>$new_cookie);
-	}
-
-	print $cgi->start_html("CGI::Session::File");
-
-	# assuming we already saved the users first name in the session
-	# when he visited it couple of days ago, we can greet him with
-	# his first name
-
-	print "Hello", $session->param("f_name"), ", how have you been?";
-
-	print $cgi->end_html();
+		
+	# For examples look at CGI::Session manual
 
 =head1 DESCRIPTION
 
 C<CGI::Session::DB_File> is the driver for C<CGI::Session> to store and retrieve
 the session data in and from the Berkeley DB 1.x. To be able to write your own
-drivers for the L<CGI::Session>, please consult L<developer section|CGI::Session/DEVEROPER SECTION>
+drivers for the L<CGI::Session>, please consult L<developer section|CGI::Session/DEVELOPER SECTION>
 of the L<manual|CGI::Session>.
 
 Constructor requires two arguments, as all other L<CGI::Session> drivers do.
@@ -152,17 +130,6 @@ path in the file system where all the lock files for the sessions will be stored
 
 C<CGI::Session::DB_File> uses L<Data::Dumper|Data::Dumper> to serialize the session data
 before storing it in the session file. 
-
-=head2 Example
-	
-	# get the sessino id either from the SID cookie, or from
-	# the sid parameter in the URL
-	my $c_sid = $cgi->cookie("SID") || $cgi->param("sid") || undef;
-	my $session = new CGI::Session::DB_File($c_sid, 
-		{
-			LockDirectory=>'/tmp', 
-			FileName=>'/tmp/sessions.db'
-		});
 
 For more extensive examples of the C<CGI::Session> usage, please refer to L<CGI::Session manual|CGI::Session>
 

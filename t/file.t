@@ -1,115 +1,132 @@
-# file.t - CGI::Session::File test
+#!/usr/bin/perl
 
-use constant F_NAME => "Sherzod";
-use constant L_NAME => "Ruzmetov";
-use constant BROTHERS => [qw(Hasan Husan Sherzod Behzod)];
-use constant PARENTS => { dad => "Bahodir", mom=>"Faroghat"};
+# file.t - CGI::Session::File test suite
 
 use strict;
 use Test;
-use File::Spec;
-use CGI::Session::File;
 use CGI;
-use Cwd;
+use CGI::Session::File;
 
-BEGIN { 
-	plan tests => 26
+my $hashref = {
+	f_name	=> "Sherzod",
+	l_name  => "Ruzmetov",
+	emails	=> ['sherzodr@cpan.org', 'sherzodr@hotmail.com', 'sherzodr@ultracgis.com'],
+	parents => {
+		dad => "Bahodir",
+		mom => "Faroghat"
+	},
 };
+my $arrayref = [qw(one two three four five six seven eight nine ten)];
+my $scalar = "CGI::Session";
 
-ok(1);
 
-my $cgi = new CGI;
-my $lockdir = "t"; # File::Spec->catfile('t', 'lockdir');
-my $dir     = "t"; # File::Spec->catfile('t', 'sessions');
+ok(1);							# 1: Loaded
 
-my $session = new CGI::Session::File(undef, {LockDirectory=>$lockdir, Directory=>$dir})
-	or die $CGI::Session::errstr;
+my $cgi		= new CGI;
+my $_options= { LockDirectory=>'t', Directory=>'t'};
+my $session = new CGI::Session::File(undef, $_options);
 
-ok($session);
-ok($session->id);
+ok($session);					# 2: Object created
 
-$session->param("fname", F_NAME);
-$session->param("lname", L_NAME);
-$session->param("brothers", BROTHERS);
-$session->param("parents", PARENTS);
+ok($session->id);				# 3: Session id exists
 
-ok($session->param("fname"), F_NAME);
-ok($session->param("lname"), L_NAME); # test 5
+ok($session->ctime);			# 4: Created time exists
 
-my $brothers = $session->param("brothers");
+ok($session->atime);			# 5: Last access time set
 
-ok($brothers);
-ok($brothers->[2], BROTHERS->[2]);
+ok($session->expires ? 0 : 1);	# 6: Expires time should be undef
 
-my $parents = $session->param("parents");
+ok($session->param, 0);			# 7: There should be no parameters yet
 
-ok($parents->{mom}, "Faroghat");
-ok($parents->{dad}, "Bahodir");
+ok($session->param("_session_id") ?0 : 1);
+								# 8: special  names shouldn't be getable
 
-ok($session->param(), 4); # test 10
+ok($session->param("_session_id", "abcde") ? 0 : 1);
+								# 9: special names shouldnt be setable
 
-$session->clear(["brothers"]);
+ok($session->param("libname", $scalar));
+								# 10: should return true
 
-ok($session->param(), 3);
+ok($session->param("libname"), $scalar);
+								# 11: should return the value assigned
 
-$session->load_param($cgi, "fname", "lname");
+ok($session->param, 1);			# 12: Should return 1 since just one assignment done
 
-ok($cgi->param(), 2);
-ok($session->param("lname"), $cgi->param("lname"));
+ok($session->param('bio', $hashref));
+								# 13: Another, but more complex assignment
 
-$session->clear();
-my $worked = ($session->param) ? 0 : 1;
-ok($worked);
+ok($session->param, 2);			# 14: Should indicate presence of 2 params
 
-$session->save_param($cgi);
+ok($session->param("numbers", $arrayref));
+								# 15: Third assignment
 
-ok($session->param, 2); # test 15
+ok($session->param, 3);			# 16: Third indeed
 
-$worked = ( $session->param("_session_id") ) ? 0 : 1;
-ok($worked);
 
+# Let's save the SID and time attributes of the session
 my $sid = $session->id();
+my $ctime = $session->ctime();
+my $atime = $session->atime();
 
-$session->delete();
+# Now sleep a while to make sure that some time passes
+sleep(1);
 
-$session = new CGI::Session::File($sid, {LockDirectory=>$lockdir, Directory=>$dir});
+my $new_session = new CGI::Session::File($sid, $_options);
 
-ok($session);
+ok($new_session);					# 17: Seccond object was created
 
-$worked = ($session->id() eq $sid) ? 0 : 1;
-ok($worked);
+ok($new_session->id, $sid);			# 18: Both IDs are the same
 
-# in the new sesssion atime and ctime have to be the same
-ok( $session->atime(), $session->ctime() );
+ok($new_session->ctime(), $ctime);  # 19: Creatiion time should be the same
 
-# in the new session, expiration date has to be undef
-ok($session->expires() ? 0 : 1);  # test 20
+ok($new_session->atime > $atime);   # 20: Check if access times were updated
 
-# let's set the exp date, and see if expires() works this time
-$session->expires("1M");
-ok($session->expires() ? 1 : 0);
+ok($new_session->param, 3);			# 21: Three params should still be present
 
+ok($new_session->param("libname"), "CGI::Session");
+									# 22: Is libname still the same?
 
-$sid = $session->id();
-#now let's reopen the session with the new SID
-
-undef $session;
-
-$session = new CGI::Session::File($sid, {LockDirectory=>$lockdir, Directory=>$dir});
-
-ok($session);
-ok($session->id(), $sid);
-#warn "atime: ", $session->atime(), "ctime: ", $session->ctime(), "\n";
-ok($session->atime, $session->ctime);
+ok(ref($new_session->param("bio")), "HASH");
+									# 23: bio was supposed to be a hashref
 
 
+# re-creating the bio as a hashref
+my $bio = $new_session->param("bio");
 
-$session->param("Author", "Sherzod B. Ruzmetov");
-$session->param("Name", "CGI::Session::File");
-$session->param("Version", CGI::Session::File->VERSION);
-$session->param("email", 'sherzodr@cpan.org');
+ok($bio->{f_name}, "Sherzod");		# 24: Checking the first name
 
-ok($session->param('Version'), $CGI::Session::File::VERSION);  # 25
-ok($session->param("Name"), "CGI::Session::File");
+ok(scalar(@{$bio->{emails}}), 3);	# 25: Should be 3 emails
 
+ok($bio->{parents}->{dad}, "Bahodir");
+									# 26: What's my Dad's name
+
+
+ok($new_session->clear(["libname"]));
+									# 27: Clear a param and synchronize
+
+ok($new_session->param, 2);			# 28: Now we should have just 2 params
+
+# make it expire in two days
+$new_session->expires("2d");
+
+ok($new_session->expires);			# 29: was expiration date set properly
+
+
+# Deleting the session 
+$new_session->delete;
+
+
+
+# now let's try load the same session after delete() was called
+my $another_new_session = new CGI::Session::File( $sid, $_options );
+
+ok($another_new_session);			# 30: was it created?
+
+ok($another_new_session->id ne $sid); # 31: should be a differnet ID now
+
+ok($another_new_session->param, 0); # 32: make sure that it is brand new session
+
+BEGIN {
+	plan tests => 32;
+}
 

@@ -12,7 +12,7 @@ if ( $@ ) {
 	$CGI::Session::errstr = $@;
 }
 
-$VERSION = "2.3";
+$VERSION = "2.4";
 
 # chose the most compat from of serialization in Data::Dumper
 $Data::Dumper::Indent = 0;
@@ -135,41 +135,19 @@ CGI::Session::MySQL - Driver for CGI::Session class
 
 =head1 SYNOPSIS
 
-	use constant COOKIE => "TEST_SID";	# cookie to store the session id
-
-	use CGI::Session::MySQL;
-	use CGI;
+	use CGI::Session::MySQL;	
 	use DBI;
 
 	my $dbh = DBI->connect("DBI:mysql:dev", "dev", "marley01");
-	my $cgi = new CGI;
 
-	# getting the session id from the cookie
-	my $c_sid = $cgi->cookie(COOKIE) || undef;
-	
-	my $session = new CGI::Session::MySQL($c_sid, 
+	my $session = new CGI::Session::MySQL(undef, 
 		{
 			LockHandle		=> $dbh,
 			Handle			=> $dbh
 		});
 	
-	# now let's create a sid cookie and send it to the client's browser.
-	# if it is an existing session, it will be the same as before,
-	# but if it's a new session, $session->id() will return a new session id.
-	{
-		my $new_cookie = $cgi->cookie(-name=>COOKIE, -value=>$session->id);
-		print $cgi->header(-cookie=>$new_cookie);
-	}
-
-	print $cgi->start_html("CGI::Session::MySQL");
-
-	# assuming we already saved the users first name in the session
-	# when he visited it couple of days ago, we can greet him with
-	# his first name
-
-	print "Hello", $session->param("f_name"), ", how have you been?";
-
-	print $cgi->end_html();
+	
+	# For examples see CGI::Session manual
 
 =head1 DESCRIPTION
 
@@ -177,7 +155,7 @@ C<CGI::Session::MySQL> is the driver for the L<CGI::Session> class to store
 and retrieve the session data in and from the MySQL database 
 
 To be able to write your own drivers for L<CGI::Session>, please consult 
-L<CGI::Session manual|CGI::Session>.
+L<developer section|CGI::Session/DEVELOPER SECTION> of L<CGI::Session manual|CGI::Session>.
 
 Constructor requires two arguments, as all other L<CGI::Session> drivers do.
 The first argument has to be session id to be initialized (or undef to tell
@@ -235,30 +213,21 @@ suffice for basic use of the library:
 		a_session TEXT
 	);
 
-=head1 Example
-	
-	# get the sessino id either from the SID cookie, or from
-	# the sid parameter in the URL
-	my $c_sid = $cgi->cookie("SID") || $cgi->param("sid") || undef;
-	my $session = new CGI::Session::MySQL($c_sid, 
-		{
-			Handle => $dbh,
-			LockHandle => $dbh
-		});
 
-For more extensive examples of the L<CGI::Session> usage, please refer to 
-the L<manual|CGI::Session>
+C<sessions> is the default name CGI::Session::MySQL would work with. We
+suggest you to stick with this name for consistency. In case for any reason
+you want to use a different name, just update $CGI::Session::MySQL::TABLE
+variable before creating the object:
 
-=head1 BUGS
+	use CGI::Session::MySQL;
+	my DBI;
 
-Currently no bugs have been detected, but eval() in retrive() method
-produces the following error:
+	$CGI::Session::MySQL::TABLE = 'my_sessions';
+	$dbh = DBI->connect("dbi:mysql:dev", "dev", "marley01");
 
-	Use of uninitialized value in string at blib/lib/CGI/Session/MySQL.pm line 65.
-
-Of which I am quite embarrased. Coulld not figure out how to get rid of it.
-So if you can think of any solution, please take this guilt off my conscious
-ASAP.
+	$session = new CGI::Session::MySQL(undef, {
+				Handle => $dbh,
+				LockHandle => $dbh});
 
 =head1 AUTHOR
 

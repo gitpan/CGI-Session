@@ -1,0 +1,164 @@
+Hi Matthew
+
+> I have been looking at Apache::Session but CGI::Session looks a lot easier to
+> work with. What I am trying to do is use SSI to include a small script in all
+> my html (shtml) pages. This script will check for a valid session; if yes
+> then prints "hello $username" etc, if no then displays login form.
+
+Have you checked out example mentioned in the manual: http://modules.ultracgis.com/cgi-bin/session
+Study the code closely.
+
+If you have never done any member-restricted pages before, it might
+be chalenging task for you at first, but once you get it it's quite easy and
+pretty straightforward.
+
+At the same time it might be a challenging software design issue, which
+I will try to explain below:
+
+In order to make it both secure(reliable) and transparent for both programmer
+and your site's users (that's what lots of programs out there lack),
+we need to follow the below specs:
+
+1) Try to initialize the session at the very beginning of the code
+   with the profile information from the member database (if available)
+
+2) Create a "secure" section  in your CGI application
+   At the top of the "secure" section, perform a simple checking
+   to see if the user is allowed there.
+
+3)  If user is not allowed, display a login_form() and exit(0)
+   ( do not exit if you're under mod_perl, do something else).
+   If he/she is allowed do not do anything!
+
+4)  Put all of your "members area" content inside the "secured" section
+
+5)  Put the "public area" outside the "secure" section
+
+And your visitors are guaranteed to have a pleasant and user friendly
+experience.  You can build your own secured section with a QUERY_STRING
+or PATH_INFO. I almost always prefer PATH_INFO.
+
+Now let's start coding it:
+
+
+        INITIALIZING THE SESSION
+
+We need to think of initializing a session with all the profile
+information from the members database. To do this in more transparent way
+we need to aggree on the following convention:
+
+   * Login form will always have "login" and "password" fields.
+     And these exact field names will not be present in any other form
+     except the user login form.
+
+Of course, you can choose some other names, but that's what I mostly have.
+So while you're initializing the session object, you can check if
+these names are present, in which case it's a clue that user
+just submitted a login form and you should initiailize the session
+accordingly:
+
+ $cgi = new CGI;
+ $session = CGI::Session::File->new(....)
+
+ $login     = $cgi->param("login");
+ $password  = $cgi->param("password");
+
+ if ( $login && $password ) {
+
+        # get the member profile that match the above criteria
+        # if we can find it, load the user profile to the
+        # session data, and also insert a flag in the session
+        # indicating the user is logged in successfully, example:
+        #   $session->param("logged-in", "yes");
+
+}
+
+
+So what happened above? If the user submitted the login form, we
+try to find his profile, and load the whole profile (or partial profile)
+in the session object, and set the "logged-in" session parameter to "yes".
+Remember, this all happens at the very top of your code before anything is
+done at all! It is very important.
+
+
+        CREATING A "SECURED" SECTION IN YOUR CODE
+
+If you have one CGI application to handle all the requests,
+you need to create a "secured" section in your code and put all the
+"members-only" content under that section. But alternative would be
+create on CGI application for public (non-member) browsing, and
+another CGI application for only handling members section, in that
+case you don't need to create a "secured" area, yor whole application
+will be secured.
+
+Now we should create a "secured" section in our code. I prefere using
+a PATH_INFO "/members" to indicate that this is a members area, and
+I put all of the "members-only" content under that section:
+
+   if ( $cgi->path_info eq "/members" ) {
+
+           # so user is asking for a members-only area, let's
+           # check if he/she is welcome here.
+
+           unless ( $session->param("logged-in") eq "yes" ) {
+
+                print login_form($session);
+                exit(0);
+
+           }
+
+           # now put all other content below:
+           if ( $cmd eq "default" ) {
+
+                print default_page($session);
+
+           } elsif ( $cmd eq "register" ) {
+
+                print registration_form($session);
+
+           } elsif {
+                #.....
+           }
+
+   } else {
+
+        # end of /members, so it is an OK page for
+        # non-members
+
+   }
+
+As I said, if you have one seperate application for handling
+members, you don't need to create any "secured" section,
+just do the checking at the top of your program before displayin
+any "members-only" content
+
+
+Now, what happens if the user is already logged and tries to access
+the members_only content? Nothing, they will just see the content,
+and they will not be bothered with the login_form() anymore. How come?
+
+Because as long as the user's session is open, his/her profile will be
+available at our fingertips via CGI::Session object. So assuming he/she
+logged in properly, $session->param("logged-in") will always return "yes",
+and we do not have to initialize the user's session from the databae anymore.
+
+        USER WANT TO SIGN OUT
+
+Should we delete the session, or clear it? CGI::Session manual touches upon
+this question as well, and the answer is, 'DO NOT DELETE THE SESSION'.
+Just clear certain parameters from the session:
+
+ if ( $cmd eq "sign-out" ) {
+        $session->clear(["logged-in"]);
+
+ }
+
+ Now, our check inside the "/members" section will have to show them login_form()
+ again, because $sesion->param("logged-in") isn't there anymore.
+
+ Any more questions?
+
+
+--
+Sherzod
+

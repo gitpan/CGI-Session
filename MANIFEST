@@ -1,3 +1,4 @@
+.Makefile.PL.swp
 Changes
 MANIFEST
 MANIFEST.SKIP
@@ -9,6 +10,12 @@ Session/File.pm
 Session/MD5.pm
 Session/MySQL.pm
 dev/MyDriver.pm
+doc/AS_vs_CS-1.txt
+doc/AS_vs_CS-2.txt
+doc/Members-Area.txt
 t/db_file.t
 t/file.t
 t/mysql.t
+t/tie_db_file.t
+t/tie_file.t
+t/tie_mysql.t

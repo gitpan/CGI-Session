@@ -1,7 +1,7 @@
 
 RCS file: /home/sherzodr/CVS/modules/CGI-Session/Session.pm,v
 Working file: Session.pm
-head: 2.4
+head: 2.7
 branch:
 locks: strict
 access list:
@@ -9,8 +9,24 @@ symbolic names:
 	start: 1.1.1.1
 	UltraCgis: 1.1.1
 keyword substitution: kv
-total revisions: 10;	selected revisions: 10
+total revisions: 13;	selected revisions: 13
 description:
+----------------------------
+revision 2.7
+date: 2002/05/27 09:43:24;  author: sherzodr;  state: Exp;  lines: +66 -70
+tie() Interface added. save_param() and load_param() methods fixed which were not working properly if CGI.pm's param()
+method returned list of values for a given name (for example, in checkboxes).
+
+Inaccuracies in the manual have been fixed
+----------------------------
+revision 2.6
+date: 2002/05/27 09:20:10;  author: sherzodr;  state: Exp;  lines: +1849 -138
+tie() Interface added. save_param() and load_param() methods fixed which were not working properly if CGI.pm's param()
+method returned list of values for a given name (for example, in checkboxes)
+----------------------------
+revision 2.5
+date: 2002/05/18 10:07:35;  author: sherzodr;  state: Exp;  lines: +0 -1135
+Pod documentation is moved to Session.pod
 ----------------------------
 revision 2.4
 date: 2002/05/17 17:51:05;  author: sherzodr;  state: Exp;  lines: +4 -4

@@ -1,0 +1,65 @@
+Sherzod B. Ruzmetov sherzodr@ultracgis.com 
+Sun, 19 May 2002 17:17:49 -0600 (MDT) 
+
+Previous message: [cgi-session] Re: [CGI] session management 
+Next message: [cgi-session] Re: [CGI] session management 
+Messages sorted by: [ date ] [ thread ] [ subject ] [ author ] 
+
+--------------------------------------------------------------------------------
+
+More about Apache::Session vs. CGI::Session...
+Apache::Session is a well written library, I love it myself.
+
+But for your serious web-coding, you still need to 
+wrap Apache::Session into another module for several reasons
+(that's what the initial release of CGI::Session used to do ).
+
+So here are some suggestions that Apache::Session users
+should watch out for in their sites:
+
+1_ If session id cannot be created for ANY reason, tie()ing 
+to Apache::Session dies, so you should watch out for it
+by eval()ing it:
+
+	eval {
+		tie %session, "Apache::Session::MySQL", $sid, {....};
+	}
+
+2_ If session id passed to Apache::Session cannot be initialized
+from the disk, it dies. Even though you eval it, it will leave the
+session w/out any id. And as far as I know you should attempt
+tie()ing it again. That's why you should wrap the library
+if you want to create yourself a more freindly intreface
+
+And the purpose of CGI::Session was to create ulitmate session
+managing library which offers more friendly interface,
+and at the same time is as modular as Apache::Session.
+
+Its interface is quite similiar to CGI.pm's, which a lot of people are
+already familiar with:
+
+	$session = new CGI::Session::MySQL (undef, {LockHandle=>$dbh, 
+Handle=>$dbh});
+	
+	$f_name = $session->param("f_name");
+	$f_name = $session->param(-name=>"f_name");
+
+	$session->param("f_name", "Sherzod");
+	$session->param(-name=>"f_name", -value=>"Sherzod");
+
+	$session->load_param($cgi);
+	$session->save_param($cgi);
+
+Also, two libraries use different ways of serializing session data. 
+Apache::Session uses Storable, and CGI::Session goes with Data::Dumper, so
+it is easier to debug your code by just peeking inside the session data
+in your disk. 
+
+I'd love to receive comments/criticism on CGI::Session. But one more time,
+keep in mind that there seems to be two distinct CGI::Session libraries
+available on CPAN. Go with the one by "Sherzod Ruzmetov"
+
+--  
+Sherzod
+
+

@@ -1,6 +1,6 @@
 package CGI::Session::File;
 
-# $Id: File.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: File.pm,v 3.1.2.1 2002/11/28 03:16:52 sherzodr Exp $
 
 use strict;
 use File::Spec;
@@ -13,7 +13,7 @@ use base qw(
 
 use vars qw($FileName $VERSION);
 
-($VERSION) = '$Revision: 3.1 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 3.1.2.1 $' =~ m/Revision:\s*(\S+)/;
 $FileName = 'cgisess_%s';
 
 sub store {
@@ -90,6 +90,9 @@ sub File_init {
     my ($self, $sid, $options) = @_;
 
     my $dir = $options->[1]->{Directory};
+	if ( defined $options->[1]->{FileName} ) {
+		$FileName = $options->[1]->{FileName};
+	}
     my $path = File::Spec->catfile($dir, sprintf("$FileName", $sid));
     $self->{_file_path} = $path;    
 }
@@ -99,7 +102,7 @@ sub File_init {
 
 
 
-# $Id: File.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: File.pm,v 3.1.2.1 2002/11/28 03:16:52 sherzodr Exp $
 
 1;       
 
@@ -111,7 +114,7 @@ CGI::Session::File - Default CGI::Session driver
 
 =head1 REVISION
 
-This manual refers to $Revision: 3.1 $
+This manual refers to $Revision: 3.1.2.1 $
 
 =head1 SYNOPSIS
     
@@ -122,23 +125,19 @@ For more examples, consult L<CGI::Session> manual
 
 =head1 DESCRIPTION
 
-CGI::Session::File is a default CGI::Session driver. Stores the session data
-in plain files. For the list of available methods, consult L<CGI::Session> manual.
+CGI::Session::File is a default CGI::Session driver. Stores the session data in plain files. For the list of available methods, consult L<CGI::Session> manual.
 
-Each session is stored in a seperate file. File name is by default formatted as "cgisess_%s",
-where '%s' is replaced with the effective session id. To change file name formatting,
-update $CGI::Session::File::NAME variable. Examples:
+Each session is stored in a seperate file. File name is by default formatted as "cgisess_%s", where '%s' is replaced with the effective session id. To change file name formatting, set the second attribute "FileName" like so:
 
-    $CGI::Session::File::FileName = 'cgisess_%s.dat';       # with .dat extention
-    $CGI::Session::File::FileName = '%s.session';
-    $CGI::Session::File::FileName = '%CGI-Session-%s.dat';  # old style
+	$session = new CGI::Session("driver:File", undef, 
+					{Directory=>'/tmp', FileName => 'cgisess_%s.dat'})
 
-The only driver option required is 'Directory', which denotes the location 
-session files are stored in.
+The only driver option required is 'Directory', which denotes the location session files are stored in.
 
 Example:
 
-    $session = new CGI::Session("driver:File", undef, {Directory=>'some/directory'});
+    $session = new CGI::Session("driver:File", undef, 
+						{Directory=>'some/directory'});
 
 =head1 COPYRIGHT
 
@@ -187,4 +186,4 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 =cut
 
 
-# $Id: File.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: File.pm,v 3.1.2.1 2002/11/28 03:16:52 sherzodr Exp $

@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 3.3 2002/11/27 12:25:50 sherzodr Exp $
+# $Id: Makefile.PL,v 3.3.2.2 2002/11/28 03:07:40 sherzodr Exp $
 
 use strict;
 use ExtUtils::MakeMaker;
@@ -10,10 +10,15 @@ upload: dist
 	cpan-upload $(DISTVNAME).tar$(SUFFIX)
 
 DOC_BASE = /home/sherzodr/public_html/modules/CGI
+DIST_BASE = /home/sherzodr/public_html/modules/dist/CGI-Session
 POD2HTML = pod2html --backlink="[toc]" --podroot=/usr/lib/perl5/5.6.1 \
 	                               --recurse --header --css=style.css
 publish: dist
-	mv $(DISTVNAME).tar$(SUFFIX) /home/sherzodr/public_html/modules/dist/
+
+	cp $(DISTVNAME).tar$(SUFFIX) $(DIST_BASE)/$(DISTVNAME).tar$(SUFFIX)	
+	mv $(DISTVNAME).tar$(SUFFIX) $(DIST_BASE)/$(DISTNAME)-latest.tar$(SUFFIX)
+	touch $(DIST_BASE)/latest-is-$(VERSION)
+
 	$(RM_RF)  $(DOC_BASE)
 	$(MKPATH) $(DOC_BASE)/Session/Serialize
 	$(MKPATH) $(DOC_BASE)/Session/ID

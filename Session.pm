@@ -1,15 +1,15 @@
 package CGI::Session;
 
-# $Id: Session.pm,v 3.2 2002/11/27 12:25:51 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.1 2002/11/28 03:16:50 sherzodr Exp $
 
-use strict;
+#use strict;
 #use diagnostics;
-use Carp ('confess', 'croak')   ;
+use Carp ('confess');
 use AutoLoader 'AUTOLOAD';
 
 use vars qw($VERSION $errstr $IP_MATCH $NAME $API_3);
 
-($VERSION)  = '$Revision: 3.2 $' =~ m/Revision:\s*(\S+)/;
+($VERSION)  = '$Revision: 3.2.2.1 $' =~ m/Revision:\s*(\S+)/;
 $NAME     = 'CGISESSID';
 
 # import() - we do not import anything into the callers namespace, however,
@@ -429,7 +429,7 @@ sub flush {
 __END__;
 
 
-# $Id: Session.pm,v 3.2 2002/11/27 12:25:51 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.1 2002/11/28 03:16:50 sherzodr Exp $
 
 =pod
 
@@ -574,6 +574,10 @@ parameter set to C<$name> or undef on failure.
 method used in either of the above syntax assigns a new value to $name
 parameter, which can later be retrieved with previously introduced
 param() syntax.
+
+You can also save several parameters at once by passing param() a hash:
+
+	$cgi->param(%params);
 
 =item C<param_hashref()>
 
@@ -1107,4 +1111,4 @@ sub cookie {
 
 
 
-# $Id: Session.pm,v 3.2 2002/11/27 12:25:51 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.1 2002/11/28 03:16:50 sherzodr Exp $

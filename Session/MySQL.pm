@@ -1,6 +1,6 @@
 package CGI::Session::MySQL;
 
-# $Id: MySQL.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: MySQL.pm,v 3.2.2.1 2002/11/28 01:35:33 sherzodr Exp $
 
 use strict;
 # Inheriting necessary functionalities from the 
@@ -17,7 +17,7 @@ use base qw(
 
 use vars qw($VERSION $TABLE_NAME);
 
-($VERSION) = '$Revision: 3.2 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 3.2.2.1 $' =~ m/Revision:\s*(\S+)/;
 
 $TABLE_NAME = 'sessions';
 
@@ -125,6 +125,10 @@ sub MySQL_dbh {
         return $self->{MySQL_dbh};
 
     }
+
+	if ( defined $args->{TableName} ) {
+		$TABLE_NAME = $args->{TableName};
+	}
     
     require DBI;
 
@@ -144,7 +148,7 @@ sub MySQL_dbh {
 
 
 
-# $Id: MySQL.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: MySQL.pm,v 3.2.2.1 2002/11/28 01:35:33 sherzodr Exp $
 
 1;       
 =pod
@@ -162,14 +166,12 @@ For more examples, consult L<CGI::Session> manual
 
 =head1 DESCRIPTION
 
-CGI::Session::MySQL is a CGI::Session driver to store session data in MySQL table.
-To write your own drivers for B<CGI::Session> refere L<CGI::Session> manual.
+CGI::Session::MySQL is a CGI::Session driver to store session data in MySQL table. To write your own drivers for B<CGI::Session> refere L<CGI::Session> manual.
 
 
 =head1 STORAGE
 
-To store session data in MySQL database, you first need to create a suitable table for it
-with the following command:
+To store session data in MySQL database, you first need to create a suitable table for it with the following command:
 
     CREATE TABLE sessions (
         id CHAR(32) NOT NULL,
@@ -177,30 +179,23 @@ with the following command:
     );
 
 
-You can also add any number of additional columns to the table, but the above "id"
-and "a_session" are required. 
-
-If you want to store the session data in other table than "sessions", before creating
-the session object you need to set the special variable B<$CGI::Session::MySQL::TABLE_NAME>
-to the name of the table:
+You can also add any number of additional columns to the table, but the above "id" and "a_session" are required. If you want to store the session data in other table than "sessions", you will also need to specify B<TableName> attribute as the first argument to new():
 
     use CGI::Session qw/-api3/;
-
-    $CGI::Session::MySQL::TABLE_NAME = 'my_sessions';
-    $session = new CGI::Session("driver:MySQL", undef, {Handle=>$dbh});
+    
+    $session = new CGI::Session("driver:MySQL", undef, 
+						{Handle=>$dbh, TableName=>'my_sessions'});
 
 =head1 COPYRIGHT
 
 Copyright (C) 2001, 2002 Sherzod Ruzmetov. All rights reserved.
 
-This library is free software and can be modified and distributed under the same
-terms as Perl itself. 
+This library is free software and can be modified and distributed under the same terms as Perl itself. 
 
 
 =head1 AUTHOR
 
-Sherzod Ruzmetov <sherzodr@cpan.org>. All the bug reports should be sent to the author
-to sherzodr@cpan.org>
+Sherzod Ruzmetov <sherzodr@cpan.org>. All the bug reports should be sent to the author to sherzodr@cpan.org>
 
 =head1 SEE ALSO
 
@@ -236,4 +231,4 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 
 
 
-# $Id: MySQL.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: MySQL.pm,v 3.2.2.1 2002/11/28 01:35:33 sherzodr Exp $

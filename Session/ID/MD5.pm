@@ -1,12 +1,12 @@
 package CGI::Session::ID::MD5;
 
-# $Id: MD5.pm,v 3.1 2002/11/27 12:26:05 sherzodr Exp $
+# $Id: MD5.pm,v 3.2 2002/11/27 12:30:26 sherzodr Exp $
 
 use strict;
 use Digest::MD5;
 use vars qw($VERSION);
 
-($VERSION) = '$Revision: 3.1 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 3.2 $' =~ m/Revision:\s*(\S+)/;
 
 sub generate_id {
     my $self = shift;
@@ -87,7 +87,4 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 
 =back
 
-
 =cut
-
-

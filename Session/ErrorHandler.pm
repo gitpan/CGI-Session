@@ -1,6 +1,6 @@
 package CGI::Session::ErrorHandler;
 
-# ErrorHandler.pm,v 3.4 2005/02/09 08:30:38 sherzodr Exp
+# $Id: ErrorHandler.pm,v 3.4 2005/02/09 08:30:38 sherzodr Exp $
 
 use strict;
 #use diagnostics;

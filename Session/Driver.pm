@@ -1,6 +1,6 @@
 package CGI::Session::Driver;
 
-# Driver.pm,v 3.7 2005/02/11 08:18:27 sherzodr Exp
+# $Id: Driver.pm,v 3.7 2005/02/11 08:18:27 sherzodr Exp $
 
 use strict;
 #use diagnostics;

@@ -1,6 +1,6 @@
 package CGI::Session::Driver::db_file;
 
-# db_file.pm,v 1.6 2005/02/11 08:18:27 sherzodr Exp
+# $Id: db_file.pm,v 1.6 2005/02/11 08:18:27 sherzodr Exp $
 
 use strict;
 #use diagnostics;

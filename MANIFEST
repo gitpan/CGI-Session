@@ -1,3 +1,5 @@
+.#Changes.3.10
+.#Session.pm.3.33
 Changes
 docs/rfc2965.txt
 examples/purge.pl
@@ -6,6 +8,7 @@ INSTALL
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.yml
 README
 Session.pm
 Session/Driver.pm
@@ -22,6 +25,7 @@ Session/ID/static.pm
 Session/Serialize/default.pm
 Session/Serialize/freezethaw.pm
 Session/Serialize/storable.pm
+Session/Test/.#Default.pm.1.8
 Session/Test/Default.pm
 Session/Tutorial.pm
 t/g4.t
@@ -39,4 +43,5 @@ t/g4_sqlite.t
 t/g4_sqlite_freezethaw.t
 t/g4_sqlite_storable.t
 t/g4_storable.t
-META.yml                                Module meta-data (added by MakeMaker)
+t/sessiondata/cgisess.db
+t/sessiondata/sessions.sqlt

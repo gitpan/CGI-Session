@@ -1,6 +1,6 @@
 package CGI::Session::Driver::postgresql;
 
-# postgresql.pm,v 1.2 2005/02/09 08:30:42 sherzodr Exp
+# $Id: postgresql.pm,v 1.2 2005/02/09 08:30:42 sherzodr Exp $
 
 # CGI::Session::Driver::postgresql - PostgreSQL driver for CGI::Session
 #
@@ -11,7 +11,7 @@ package CGI::Session::Driver::postgresql;
 # by Sherzod Ruzmetov, original author of CGI::Session modules
 # and CGI::Session::Driver::mysql driver.
 #
-# postgresql.pm,v 1.2 2005/02/09 08:30:42 sherzodr Exp
+# $Id: postgresql.pm,v 1.2 2005/02/09 08:30:42 sherzodr Exp $
 
 
 use strict;

@@ -1,6 +1,6 @@
 package CGI::Session::Serialize::default;
 
-# default.pm,v 1.5 2005/02/11 08:13:31 sherzodr Exp 
+# $Id: default.pm,v 1.5 2005/02/11 08:13:31 sherzodr Exp $ 
 
 use strict;
 #use diagnostics;

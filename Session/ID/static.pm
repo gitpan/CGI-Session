@@ -1,6 +1,6 @@
 package CGI::Session::ID::static;
 
-# static.pm,v 1.6 2005/02/17 03:20:34 sherzodr Exp
+# $Id: static.pm,v 1.6 2005/02/17 03:20:34 sherzodr Exp $
 
 use strict;
 #use diagnostics;

@@ -1,4 +1,4 @@
-# Makefile.PL,v 3.12 2005/02/17 03:20:34 sherzodr Exp
+# $Id: Makefile.PL,v 3.12 2005/02/17 03:20:34 sherzodr Exp $
 
 use strict;
 use Text::Wrap;

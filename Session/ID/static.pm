@@ -1,15 +1,15 @@
 package CGI::Session::ID::static;
 
-# static.pm,v 1.5 2005/02/09 08:30:44 sherzodr Exp
+# static.pm,v 1.6 2005/02/17 03:20:34 sherzodr Exp
 
 use strict;
 #use diagnostics;
 
 use Carp;
+use CGI::Session::ErrorHandler;
 
-$CGI::Session::ID::static::VERSION = '1.5';
-
-# Preloaded methods go here.
+$CGI::Session::ID::static::VERSION = '1.6';
+@::CGI::Session::ID::static::ISA   = qw( CGI::Session::ErrorHandler );
 
 sub generate_id {
     my ($self, $args, $claimed_id ) = @_;

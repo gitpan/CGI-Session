@@ -1,17 +1,18 @@
 package CGI::Session::ID::incr;
 
-# incr.pm,v 1.4 2005/02/09 08:30:44 sherzodr Exp
+# incr.pm,v 1.5 2005/02/17 03:20:34 sherzodr Exp
 
 use strict;
 #use diagnostics;
 
 use File::Spec;
 use Carp "croak";
-use CGI::Session::ErrorHandler;
 use Fcntl qw( :DEFAULT :flock );
+use CGI::Session::ErrorHandler;
 
+$CGI::Session::ID::incr::VERSION = '1.5';
 @CGI::Session::ID::incr::ISA     = qw( CGI::Session::ErrorHandler );
-$CGI::Session::ID::incr::VERSION = '1.4';
+
 
 sub generate_id {
     my ($self, $args) = @_;

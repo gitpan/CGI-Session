@@ -1,6 +1,6 @@
 package CGI::Session;
 
-# Session.pm,v 3.28 2005/02/09 08:30:35 sherzodr Exp
+# Session.pm,v 3.29 2005/02/09 09:51:52 sherzodr Exp
 
 use strict;
 #use diagnostics;
@@ -9,7 +9,7 @@ use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.00_01';
+$CGI::Session::VERSION  = '4.00_02';
 $CGI::Session::NAME     = 'CGISESSID';
 
 sub STATUS_NEW      () { 1 }        # denotes session that's just created
@@ -525,7 +525,7 @@ sub clear {
 __END__;
 
 
-# Session.pm,v 3.28 2005/02/09 08:30:35 sherzodr Exp
+# Session.pm,v 3.29 2005/02/09 09:51:52 sherzodr Exp
 
 =pod
 

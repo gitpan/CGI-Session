@@ -27,7 +27,7 @@ use vars qw($VERSION $errstr);
 
 
 
-$VERSION = "2.9";
+$VERSION = "2.91";
 
 
 
@@ -94,10 +94,10 @@ sub _validate_driver {
     my $self = shift;
     my $class = ref($self);
 
-    # Following methods should be either present in the driver or the 
-	# driver should be able to inherit them from other classes
+    # Following methods should be either present in the driver or the
+    # driver should be able to inherit them from other classes
     my @required_methods = qw(store retrieve tear_down generate_id);
-	
+
     for ( @required_methods ) {
         unless ( $self->UNIVERSAL::can($_) ) {
             croak "$class doesn't seem to be a valid CGI::Session driver.\n" .
@@ -851,7 +851,8 @@ CGI::Session - Perl extension for persistent session management
 
 =head1 WARNING
 
-This is a developer release.
+If you have a version prior to 2.91 please upgrade it to the latest
+release As Soon As Possible!
 
 =head1 NOTE
 

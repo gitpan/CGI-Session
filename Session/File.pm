@@ -28,10 +28,10 @@ $VERSION = "2.6";
 
 
 # Configuring Data::Dumper for our needs
-$Data::Dumper::Indent	= 0;
-$Data::Dumper::Purity	= 0;
-$Data::Dumper::Useqq	= 1;
-$Data::Dumper::Deepcopy	= 0;
+$Data::Dumper::Indent   = 0;
+$Data::Dumper::Purity   = 0;
+$Data::Dumper::Useqq    = 1;
+$Data::Dumper::Deepcopy = 0;
 
 
 
@@ -59,13 +59,14 @@ sub retrieve {
 
     local ( $/, *FH );
     sysopen(FH, $file, O_RDONLY) or $self->error("Couldn't open data file ($file), $!"), return;
+    flock (FH, LOCK_SH) or $self->error("Couldn't lock the session file: $!"), return;
     my $tmp = <FH>;
     close (FH);
 
-	# Following line is to keep -T line happy. In fact it is an evil code,
-	# that's why we'll be compiling $tmp under the restricted eval() later
-	# to ensure it's indeed safe. If you have a better solution, please
-	# take this burden of guilt off my conscious.
+    # Following line is to keep -T line happy. In fact it is an evil code,
+    # that's why we'll be compiling $tmp under the restricted eval() later
+    # to ensure it's indeed safe. If you have a better solution, please
+    # take this burden of guilt off my conscious.
     ($tmp) = $tmp =~ m/^(.+)$/s;
 
     my $cpt = Safe->new("CGI::Session::File::CPT");
@@ -74,7 +75,7 @@ sub retrieve {
     if ( $@ ) {
         $self->error("Couldn't eval() the data, $!"), return undef;
     }
-    
+
     return $CGI::Session::File::CPT::data;
 }
 
@@ -95,6 +96,7 @@ sub store {
     # storing the data in the session file
     local (*FH);
     sysopen (FH, $file, O_RDWR|O_CREAT|O_TRUNC, 0664) or $self->error("Couldn't create $file, $!"), return;
+    flock (FH, LOCK_EX) or $self->error("Couldn't lock the session file: $!");
 
     # creating a Data::Dumper object of $hashref
     my $d = Data::Dumper->new([$hashref], ["data"]);

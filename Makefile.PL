@@ -3,9 +3,12 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'		=> 'CGI::Session',
-    'VERSION_FROM'	=> 'Session.pm', # finds $VERSION
-    'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
-    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM => 'Session.pm', # retrieve abstract from module
-       AUTHOR     => 'A. U. Thor <a.u.thor@a.galaxy.far.far.away>') : ()),
+    'VERSION_FROM'	=> 'Session.pm',
+    'PREREQ_PM'		=> {
+			"Digest::MD5" => undef, 
+			"Data::Dumper" => undef
+	},
+	($] >= 5.005 ?
+	(ABSTRACT => 'Perl extension for persistent session management in CGI applications',
+    AUTHOR     => 'Sherzod B. Ruzmetov <sherzodr@cpan.org>') : ()),
 );

@@ -1,6 +1,35 @@
-Revision history for Perl extension CGI::Session.
 
-0.01  Mon Oct 29 21:10:05 2001
-	- original version; created by h2xs 1.21 with options
-		-X -n CGI::Session
-
+RCS file: /home/sherzodr/CVS/modules/CGI-Session/Session.pm,v
+Working file: Session.pm
+head: 1.4
+branch:
+locks: strict
+access list:
+symbolic names:
+	start: 1.1.1.1
+	UltraCgis: 1.1.1
+keyword substitution: kv
+total revisions: 5;	selected revisions: 5
+description:
+----------------------------
+revision 1.4
+date: 2002/05/10 10:25:02;  author: sherzodr;  state: Exp;  lines: +51 -19
+dev/ was added
+----------------------------
+revision 1.3
+date: 2002/05/10 00:40:04;  author: sherzodr;  state: Exp;  lines: +1 -8
+Makefile.PL modified - ABSTRACT sety
+----------------------------
+revision 1.2
+date: 2002/05/10 00:33:15;  author: sherzodr;  state: Exp;  lines: +1018 -114
+atime(), ctime(), expires() methods have been added.
+----------------------------
+revision 1.1
+date: 2002/05/07 21:05:49;  author: sherzodr;  state: Exp;
+branches:  1.1.1;
+Initial revision
+----------------------------
+revision 1.1.1.1
+date: 2002/05/07 21:05:49;  author: sherzodr;  state: Exp;  lines: +0 -0
+Initial Import to CVS
+=============================================================================

@@ -1,118 +1,61 @@
-.::CGI::Session::. version 0.01
-===================
+CGI::Session version 2.0
 
-.:DESCRIPTION:.
-Front end utility for Apache::Session by Jeffrey Baker and set of modules it comes with.
-The interface is pretty similar to that of CGI.pm with some additional methods.
-So it shouldn't take users long to get used to it.
+NAME
 
-.:Example:.
+CGI::Session 2.0 - Perl extension for persistent session management in CGI 
+applications
 
-    #!/usr/bin/perl -w
+SYNOPSIS
 
-    use strict;
-    use CGI;
     use CGI::Session::DB_File;
+    use CGI;
 
-    my ($cgi, $Session, $sid);
+    my $cgi = new File;
 
-    $cgi = new CGI;
+    # get the user's session id either from the cookie, or from the query_string.
+    # If it is  not present, create a new session for the visitor
+    my $session;
+    {
+        my $sid = $cgi->cookie("SITE_SID") || $cgi->param("sid") || undef;
 
-    $sid = $cgi->cookie("Example2_SID");
-
-    $Session = new CGI::Session::DB_File($sid, {FileName=>'sessions.db', LockDirectory=>'.'});
-
-    if ($sid) {
-        $Session->load_param($cgi);
-
+        $session  = new CGI::Session::File($sid, { FileName=>'sessions.db',
+                                                     LockDirectory=>'/tmp'});
     }
 
-    my $cookie = $cgi->cookie(-name=>'Example2_SID', -value=>$Session->id, -expires=>"+1d");
-
-    print $cgi->header(-cookie=>$cookie),
-        $cgi->start_html("CGI::Session / Example 2"),
-        $cgi->h2("Example 2");
-
-
-    if ($cgi->param('_cmd') eq 'save') {
-
-        $Session->save_param($cgi);
-        print $cgi->div("Thanks, for your registration. Just hope that we're not one of those bastards who keep sending you all kinds of spam.");
-
-        # now you could do smt more with that email, but we won't.
-
-    } else {
-
-        $Session->param('name') and
-            print $cgi->div("Wellcome back" . $Session->param('name') );
-
-        print $cgi->h2("Please, subscribe to our magazine");
-        print $cgi->start_form,
-            $cgi->hidden(-name=>'_cmd', -value=>'save'),
-            $cgi->div("Your name:"),
-            $cgi->textfield(-name=>'name', -size=>40),
-            $cgi->div("Your email address:"),
-            $cgi->textfield(-name=>'email', -size=>40),$cgi->br,
-            $cgi->submit(-value=>'Subscribe'),
-            $cgi->end_form;
-
+    # now, don't forget to send the session id back as a cookie
+    {
+        my $cookie = $cgi->cookie(-name=>"SITE_SID", -value=>$session->id);
+        print $cgi->header(-cookie=>$cookie);
     }
 
 
-    print $cgi->end_html;
+    # now, if the user submitted his first name in a form, we can save it
+    # in our session
+    my $first_name  = $cgi->param("first_name");
+    $session->param("first_name", $first_name);
 
 
+    # if it is an old session, we can recognize the user and greet him
+    # with his first name:
+    if ( $session->param("first_name") ) {
+        print "Hello ", $session->param("first_name"), " how have you been?\n";
+        print "You last visited the site on ", scalar(localtime($session->atime));
+    }
 
-.:INSTALLATION:.
+    # posibilities are endless!
 
-After downloading the destribution, you need to uncompress and unpack it.
-In windows you could use WinZip. In *.nix you can use gzip to uncompress
-the file and use 'tar' to unpack it. You can combine the two steps into
-one command like:
+DEPENDANCIES
 
-   % gzip -dc CGI-Session-0.01.tar.gz | tar -xof -
+The library requires Perl 5.003 or higher. No other dependencies.
 
-Then cd into the folder:
+DESCRIPTION
 
-   % cd CGI-Session-0.01
-
-And perform the following commands:
-
-   perl Makefile.PL
-   make
-   make install
-   make realclean
-
-If you are going to do a standard installation, just 
-run the 'install' script found in the distribution folder like
-
-   % ./install
-
-
-
-.:DEPENDENCIES:.
-
-Perl 5 or later is required to install this module.
-Also following Perl modules are required
-
-Apache::Session
-Storable
-
-If your distribution of Perl doesn't provide this module, please
-install it from http://www.cpan.org. Or use your local copy of CPAN
-module like:
-
-% perl -MCPAN -e shell
-cpan> install module_name
-
-
-.:COPYRIGHT AND LICENCE:.
-
-This library is a free software. You can modify and destribute this
-under the same condition as Perl itself.
-
-
-.:AUTHOR:.
-
-Sherzod B. Ruzmetov, sherzodr@cpan.org
-
+C<CGI::Session> is the Perl5 library which provides an easy persistent
+session management system across HTTP requests. Session persistence is a
+very important issue in web applications. Shopping carts, user-recognition
+features, login and authentication methods and many more require persistent
+session management mechanism, which is both secure and reliable.
+C<CGI::Session> provides with just that. You can read the whole documentation
+as a tutorial on session management. But if you are already familiar with
+C<CGI::Session> please go to the L<methods|"METHODS"> section for the list
+of all the methods available. 

@@ -1,12 +1,12 @@
 package CGI::Session::Serialize::FreezeThaw;
 
-# $Id: FreezeThaw.pm,v 1.3 2002/11/27 12:26:08 sherzodr Exp $ 
+# $Id: FreezeThaw.pm,v 1.3.2.1 2002/11/28 03:42:14 sherzodr Exp $ 
 use strict;
 use FreezeThaw;
 
 use vars qw($VERSION);
 
-($VERSION) = '$Revision: 1.3 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 1.3.2.1 $' =~ m/Revision:\s*(\S+)/;
 
 
 sub freeze {
@@ -32,28 +32,14 @@ sub thaw {
 
 CGI::Session::Serialize::FreezeThaw - serializer for CGI::Session
 
+=head1 SYNOPSIS
+
+	use CGI::Session qw/-api3/;
+	$session = new CGI::Session("serializer:FreezeThaw", undef, \%attrs);
+
 =head1 DESCRIPTION
 
-This library is used by CGI::Session driver to serialize session data before storing
-it in disk. Uses FreezeThaw.
-
-=head1 METHODS
-
-=over 4
-
-=item freeze()
-
-receives two arguments. First is the CGI::Session driver object, the second is the data to be
-stored passed as a reference to a hash. Should return true to indicate success, undef otherwise, 
-passing the error message with as much details as possible to $self->error()
-
-=item thaw()
-
-receives two arguments. First being CGI::Session driver object, the second is the string
-to be deserialized. Should return deserialized data structure to indicate successs. undef otherwise,
-passing the error message with as much details as possible to $self->error().
-
-=back
+This library is used by CGI::Session driver to serialize session data before storing it in disk. Uses FreezeThaw.
 
 =head1 COPYRIGHT
 

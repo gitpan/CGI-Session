@@ -1,12 +1,12 @@
 package CGI::Session::ID::MD5;
 
-# $Id: MD5.pm,v 3.2 2002/11/27 12:30:26 sherzodr Exp $
+# $Id: MD5.pm,v 3.2.2.1 2002/11/28 03:42:05 sherzodr Exp $
 
 use strict;
 use Digest::MD5;
 use vars qw($VERSION);
 
-($VERSION) = '$Revision: 3.2 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 3.2.2.1 $' =~ m/Revision:\s*(\S+)/;
 
 sub generate_id {
     my $self = shift;
@@ -30,11 +30,8 @@ CGI::Session::ID::MD5 - default CGI::Session ID driver
 
     use CGI::Session qw/-api3/;
 
-    $session = new CGI::Session("id:MD5", undef,
-                            {   Directory   => '/tmp',
-                                IDFile      => '/tmp/cgisession.id',
-                                IDInit      => 1000,
-                                IDIncr      => 2 });
+    $session = new CGI::Session("driver:SomeDriver;id:MD5", undef, \%attrs);
+                                
 
 =head1 DESCRIPTION
 

@@ -1,8 +1,8 @@
-CGI::Session version 2.0
+CGI::Session version 2.2
 
 NAME
 
-CGI::Session 2.0 - Perl extension for persistent session management in CGI 
+CGI::Session 2.2 - Perl extension for persistent session management in CGI 
 applications
 
 SYNOPSIS

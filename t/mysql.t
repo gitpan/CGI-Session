@@ -1,11 +1,8 @@
 # file.t - CGI::Session::File test
 
 use constant MYSQL_DSN => "DBI:mysql:test";
-use constant MYSQL_USER => "test";
+use constant MYSQL_USER => $ENV{USER} || "test";
 use constant MYSQL_PSSWD => undef;
-
-
-
 
 use constant F_NAME => "Sherzod";
 use constant L_NAME => "Ruzmetov";
@@ -22,8 +19,17 @@ BEGIN {
 	plan todo => [1..18],
 };
 
-
+# let's check if DBI is available. If not skip the whole test
 eval "require DBI";
+if ( $@ ) {	
+	print "skip\n";
+	exit(0);
+}
+
+# let's check if DBI supports mysql
+# thanks to Brian King for his efforts on testing
+# the library on DBD-disabled MacOS X (darwin)
+eval "require DBD::mysql";
 if ( $@ ) {
 	print "skip\n";
 	exit(0);

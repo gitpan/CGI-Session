@@ -1,22 +1,25 @@
 package CGI::Session::MySQL;
 
 use strict;
-use vars qw($VERSION);
+use vars qw($VERSION $TABLE_NAME);
 use base qw(CGI::Session CGI::Session::MD5);
 
 use Data::Dumper;
 use Carp;
 eval "require DBI";
+
 if ( $@ ) {
-	croak "CGI::Session::MySQL requires DBI module, please install it first";
+	$CGI::Session::errstr = $@;
 }
 
-$VERSION = "2.0";
+$VERSION = "2.1";
 
-
-# do not use any indentation
+# chose the most compat from of serialization in Data::Dumper
 $Data::Dumper::Indent = 0;
 
+# This is the sessions table. Change it if you want to 
+# use some other table for your sessions data
+$TABLE_NAME = 'sessions';
 
 # returns $dbh and $lckh
 sub MYSQL_dbh {
@@ -35,12 +38,16 @@ sub MYSQL_dbh {
 		return ($dbh, $lckh);
 	}
 
-	$dbh = DBI->connect($dsn, $username, $psswd) or $self->error($DBI::errstr), return;
-	$lckh=DBI->connect($lcksn, $lckuser, $lckpsswd) or $self->error($DBI::errstr), return;
+	$dbh	= DBI->connect($dsn, $username, $psswd) or $self->error($DBI::errstr), return;
+	$lckh	= DBI->connect($lcksn, $lckuser, $lckpsswd) or $self->error($DBI::errstr), return;
 
 	return ($dbh, $lckh);
-
 }
+
+
+
+
+
 
 
 
@@ -48,11 +55,24 @@ sub MYSQL_dbh {
 sub retrieve {
     my ($self, $sid, $option) = @_;
 
-    my ($dbh, $lckh) = $self->MYSQL_dbh($option) or return;    
-    my $tmp = $dbh->selectrow_array(qq|SELECT a_session FROM sessions WHERE id=?|, undef, $sid);	
-    my $data = {}; eval "$tmp";
-    return $data;
+    my ($dbh, $lckh) = $self->MYSQL_dbh($option) or return;
+	$lckh->do("LOCK TABLES $TABLE_NAME READ");
+
+    my $tmp = $dbh->selectrow_array(qq|SELECT a_session FROM $TABLE_NAME WHERE id=?|, undef, $sid);	
+
+	$lckh->do("UNLOCK TABLES");	
+	
+	my $data = {};
+	eval $tmp;
+
+	return $data;
 }
+
+
+
+
+
+
 
 
 
@@ -62,16 +82,26 @@ sub store {
 
 	my ($dbh, $lckh) = $self->MYSQL_dbh($option);	
     my $d = Data::Dumper->new([$hashref], ["data"]);
-    my $exists = $dbh->selectrow_array(qq|SELECT a_session FROM sessions WHERE id=?|, undef, $sid);
+    my $exists = $dbh->selectrow_array(qq|SELECT a_session FROM $TABLE_NAME WHERE id=?|, undef, $sid);
 
-    if ( $exists ) {
-        return $dbh->do(qq|UPDATE sessions SET a_session=? WHERE id=?|, undef, $d->Dump(), $sid);
+	$lckh->do("LOCK TABLES $TABLE_NAME WRITE");
+
+    if ( $exists ) {		
+        my $rv = $dbh->do(qq|UPDATE $TABLE_NAME SET a_session=? WHERE id=?|, undef, $d->Dump(), $sid);
+		$lckh->do("UNLOCK TABLES");
+		return $rv;
     }
 
-
-    return $dbh->do(qq|INSERT INTO sessions SET id=?, a_session=?|, undef, $sid, $d->Dump());
-    
+    my $rv =  $dbh->do(qq|INSERT INTO $TABLE_NAME SET id=?, a_session=?|, undef, $sid, $d->Dump());
+	$lckh->do("UNLOCK TABLES");
+	return $rv;
 }
+
+
+
+
+
+
 
 
 sub tear_down {
@@ -79,8 +109,17 @@ sub tear_down {
 
 	my ($dbh, $lckh) = $self->MYSQL_dbh($option);    
 
-    return $dbh->do(qq|DELETE FROM sessions WHERE id=?|, undef, $sid);  
+	$lckh->do("LOCK TABLES $TABLE_NAME WRITE");
+    my $rv =  $dbh->do(qq|DELETE FROM $TABLE_NAME WHERE id=?|, undef, $sid);  
+	$lckh->do("UNLOCK TABLES");
+	return $rv;
 }
+
+
+
+
+
+
 
 1;
 

@@ -11,6 +11,10 @@ use File::Spec;
 use CGI::Session::File;
 use CGI;
 
+BEGIN { 
+	plan tests => 26
+};
+
 ok(1);
 
 my $cgi = new CGI;
@@ -92,9 +96,12 @@ ok($session);
 ok($session->id(), $sid);
 ok($session->atime, $session->ctime);
 
+$session->param("Author", "Sherzod B. Ruzmetov");
+$session->param("Name", "CGI::Session::File");
+$session->param("Version", CGI::Session::File->VERSION);
+$session->param("email", 'sherzodr@cpan.org');
 
+ok($session->param('Version'), $CGI::Session::File::VERSION);
+ok($session->param("Name"), "CGI::Session::File");
 
-BEGIN { 
-	plan tests => 24
-};
 

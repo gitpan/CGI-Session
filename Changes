@@ -1,7 +1,7 @@
 
 RCS file: /home/sherzodr/CVS/modules/CGI-Session/Session.pm,v
 Working file: Session.pm
-head: 1.4
+head: 2.2
 branch:
 locks: strict
 access list:
@@ -9,8 +9,21 @@ symbolic names:
 	start: 1.1.1.1
 	UltraCgis: 1.1.1
 keyword substitution: kv
-total revisions: 5;	selected revisions: 5
+total revisions: 8;	selected revisions: 8
 description:
+----------------------------
+revision 2.2
+date: 2002/05/14 18:11:10;  author: sherzodr;  state: Exp;  lines: +241 -15
+Test suite wwas updated with the help of Brian King <mrbbking@mac.com>.
+Documentation updated.
+----------------------------
+revision 2.1
+date: 2002/05/10 17:35:49;  author: sherzodr;  state: Exp;  lines: +0 -0
+*** empty log message ***
+----------------------------
+revision 1.5
+date: 2002/05/10 17:35:11;  author: sherzodr;  state: Exp;  lines: +3 -3
+Manual/Synopsis fixed Se.pm
 ----------------------------
 revision 1.4
 date: 2002/05/10 10:25:02;  author: sherzodr;  state: Exp;  lines: +51 -19

@@ -1,10 +1,13 @@
 package CGI::Session;
 
+require 5.003;
 use strict;
 use Carp;
-use vars qw($VERSION $errstr);
+use vars qw($VERSION $errstr $AUTOLOAD);
 
-$VERSION = "2.1";
+$VERSION = "2.2";
+
+
 
 # constructor
 # Usage: CLASS->new($sid, {Key1 => Value1, Key2 => Value2})
@@ -175,7 +178,8 @@ sub atime {
 sub _assign_param {
     my ($self, $key, $value)  = @_;
 
-    $key =~ m/^_/ and return;
+    $key =~ m/^_/ and
+        $self->error("names with leading underscore are preserved for internal use. $key - illegal name"), return;
 
     my $sid = $self->id();
 
@@ -187,7 +191,8 @@ sub _assign_param {
 sub _return_param {
     my ($self, $key) = @_;
 
-    $key =~ m/^_/ and return;
+    $key =~ m/^_/ and
+        $self->error("names with leading underscore are preserved for internal use. $key - illegal name"), return;
 
     return $self->{_data}->{$key};
 }
@@ -347,7 +352,7 @@ __END__;
 
 =head1 NAME
 
-CGI::Session 2.0 - Perl extension for persistent session management in CGI 
+CGI::Session - Perl extension for persistent session management in CGI
 applications
 
 =head1 SYNOPSIS
@@ -389,10 +394,6 @@ applications
 
     # posibilities are endless!
 
-=head1 DEPENDANCIES
-
-The library requires Perl 5.003 or higher. No other dependencies.
-
 =head1 DESCRIPTION
 
 C<CGI::Session> is the Perl5 library which provides an easy persistent
@@ -403,11 +404,145 @@ session management mechanism, which is both secure and reliable.
 C<CGI::Session> provides with just that. You can read the whole documentation
 as a tutorial on session management. But if you are already familiar with
 C<CGI::Session> please go to the L<methods|"METHODS"> section for the list
-of all the methods available. 
+of all the methods available.
+
+=head1 DISTRIBUTION
+
+Latest distribution includes the following libraries:
+
+=over 4
+
+=item *
+
+L<CGI::Session|CGI::Session> - base class. Heart of the distribution
+
+=item *
+
+L<CGI::Session::File|CGI::Session::File> - driver for storing session data in the plain files
+
+=item *
+
+L<CGI::Session::DB_File|CGI::Session::DB_File> - driver for storing session data using L<DB_File> (Berkeley 1.x)
+
+=item *
+
+L<CGI::Session::MySQL|CGI::Session::MySQL> - driver for storing session data in L<MySQL tables|CGI::Session::MySQL/STORAGE>.
+
+=back
+
+=head1 INSTALLATION
+
+You can download the latest release of the library either from 
+http://www.CPAN.org or from http://modules.ultracgis.com. The library
+is distributed as .tar.gz file, which is a gziped tar-ball. You can 
+unzip and unpack the package with the following single command (% is your shell
+prompt): 
+
+	% gzip -dc CGI-Session-2.2.tar.gz | tar -xof -
+
+It should create a folder named the same as the distribution name except the
+C<.tar.gz> extension. If you have access to system's @INC folders 
+( usually if you are a super user in the system ) you should go with 
+L<standard installation|"STANDARD INSTALLATION">. Otherwise 
+L<custom installation|"CUSTOM INSTALLATION"> is the way to go. 
+
+=head2 STANDARD INSTALLATION
+
+The library is installed with just like other Perl libraries, or via CPAN interactive
+shell (perl -MCPAN -e install CGI::Session).
+
+Installation can also be done by following below instructions:
+
+=over 4
+
+=item 1
+
+After downloading the distribution, C<cd> to the distribution folder
+
+=item 2
+
+In your shell type the following commands in the order listed:
+
+=over 5
+
+=item *
+
+perl Makefile.PL
+
+=item *
+
+make
+
+=item *
+
+make test
+
+If the tests show positive results, type:
+
+=item *
+
+make install
+
+=back
+
+=back
+
+=head2 CUSTOM INSTALLATION
+
+If you do not have access to install libraries in the sytem folders,
+you should install the library in your own private folder, somewhere in your
+home directory. For this purpose, first choose/create a folder where you
+want to keep your Perl libraries. I use C<perllib/> under my home folder.
+Then install the library following the below steps:
+
+=over 4
+
+=item 1
+
+After downloading the distribution, C<cd> to the distribution folder
+
+=item 2
+
+In your shell type the following commands in the order listed:
+
+=over 5
+
+=item *
+
+perl Makefile.PL INSTALLDIRS=site INSTALLSITELIB=/home/your_folder/perllib
+
+=item *
+
+make
+
+=item *
+
+make test
+
+If the tests show positive results, type:
+
+=item *
+
+make install
+
+=back
+
+=back
+
+Then in your perl programs do not forget to include the following line at
+the top of your code:
+
+    use lib "/home/your_folder/perllib";
+
+or the following a little longer alternative works as well:
+
+    BEGIN {
+        unshift @INC, "/home/your_folder/perllib";
+    }
 
 =head1 REFRESHER ON SESSION MANAGEMENT
 
-Since HTTP protocol is stateless, web programs need a way of recognizing
+Since HTTP is a stateless protocol, web programs need a way of recognizing
 clients across different HTTP requests. Each click to a site by the
 same user is considered brand new request for your web applications, and
 all the state information from the previous requests will be lost. These
@@ -671,6 +806,51 @@ access.
 Inverse of the L<save_param()|"METHODS"> is L<load_param()|"METHODS">.
 
 =back
+
+
+=head3 SPECIAL NAMES
+
+When you create a fresh-blank session, it's not blank as it seems. It is
+initialized with the following 4 parameters, which are serialized together
+with other session data. We call these L<"SPECIAL NAMES">.
+
+=over 4
+
+=item *
+
+C<_session_id> - stores the ID of the session
+
+=item *
+
+C<_session_ctime> - stores the creation date of the session
+
+=item *
+
+C<_session_atime> - stores the last access time for the session
+
+=item *
+
+C<_session_etime> -  stores expiration date for the session
+
+=back
+
+So you shouldn't be using parameter names with leading underscrore, because
+CGI::Session preserves them for internal use. They are required for the library
+to funcion properly. Even though you try to do something like:
+
+    $session->param(-name=>"_some_param", -value=>"Some value");
+
+C<param()> returns C<undef>, indicating the failure and assigns the
+error message in the C<$CGI::Session::errstr>, which reads:
+
+    Names with leading underscore are preserved for internal use by CGI::Session.
+    _some_param - illegal name
+
+
+You cannot access these L<"SPECIAL NAMES"> directly via C<param()> either, but
+you can do so by provided accessor methods, C<id()>, C<ctime()>, C<atime()> and
+C<expires()> (see L<methods|"METHODS">).
+
 
 =head2 ACCESSING SESSION DATA
 
@@ -980,8 +1160,6 @@ delete all the data from the session, not only the SHOPPING_CART.
 
 =item expires()
 
-This method is
-
 When a session is created, it's expiration date is undefined, which means,
 it never expires. If you want to set an expiration date to a session,
 C<expires()> method can be used. If it's called without arguments, will
@@ -1028,7 +1206,11 @@ Here is the table of the shortcuts available for C<expires()>:
     |     y     |   Year        |
     +-----------+---------------+
 
-=item ctim()
+
+see L<expiring sessions|"EXPIRING SESSIONS"> for more on this.
+
+
+=item ctime()
 
 Returns the time() value of the date when the session was created:
 
@@ -1140,7 +1322,6 @@ this:
         return 1;
     }
 
-
 It is inheriting from two classes, C<CGI::Session> and C<CGI::Session::MD5>.
 The second library just provides C<generate_id()> method that returns a
 stirng which will be used as a session id. Default C<generate_id()> uses
@@ -1166,6 +1347,41 @@ libraries which allow you to C<freeze()> the Perl data and C<thaw()> it later,
 thus you will be able to re-create the the C<$hashref>. The reason we
 prefered L<Data::Dumper|Data::Dumper> is, it comes standard with Perl.
 
+=head2 LOCKING
+
+Writing and reading from the disk requires a locking mechanism to prevent
+corrupted data. Since CGI::Session itself does not deal with disk access,
+it's the drivers' task to implement their own locking. For more information 
+please refer to the driver manuals distributed with the L<package|"DISTRIBUTION">.
+
+=head1 FREQUANTLY ASKED QUESTIONS
+
+The following section of the library lists answers to some frequanly asked
+questions:
+
+=over 4
+
+=item Q: Can I use CGI::Session in my shell scripts, or is it just for CGI Applications?
+
+=item A: Yes, you can!
+
+CGI::Session does not depend on the presence of the Web Server, so you can
+use it on all kinds of applications, crons, shell scripts, you name it
+
+=back
+
+=over 4
+
+=item Q: What if the user ask for the session which was deleted from the disk?
+
+=item A: New session will be initialized!
+
+Previous version of CGI::Session had a bug, and returned no id for the session
+if the session didn't exist in the disk. But latest version of the library
+should create a new session if the session data cannot be initialized!
+
+=back
+
 =head1 HISTORY
 
 Initial release of the library was just a front-end to Jeffrey Baker
@@ -1179,6 +1395,16 @@ for other storage mechanisms very easily.
 Since CGI::Session used to depend on L<Apache::Session>, the session data used
 to be serialized using L<Storable>. Now it relies on standard L<Data::Dumper|Data::Dumper>
 module to "freeze" and "thaw" the data.
+
+=head1 CREDITS
+
+=over 4
+
+=item Brian King <mrbbking@mac.com>
+
+Helped to fix the B<t/mysql.t> test suite that was failing on MacOS X
+
+=back
 
 =head1 AUTHOR
 

@@ -11,7 +11,7 @@ use Data::Dumper;
 
 # do not use any indentation
 $Data::Dumper::Indent = 0;
-$VERSION = "2.0";
+$VERSION = "2.2";
 
 
 # constructor is inherited from CGI::Session
@@ -42,7 +42,7 @@ sub retrieve {
     close (FH); close (LCK);
 
     # intializing the hashref
-    my $data = {}; eval "$tmp";
+    my $data = {}; eval $tmp;
 
     # did something go wrong?
     if ( $@ ) { $self->error("Couldn't eval() the data, $!"), return }

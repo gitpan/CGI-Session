@@ -35,7 +35,7 @@ sub retrieve {
 	untie %session;
 	close (LCK);
 
-	my $data = {};	eval "$data";
+	my $data = {};	eval $tmp;
 
 	return $data;
 }

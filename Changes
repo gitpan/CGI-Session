@@ -1,35 +1,20 @@
-Change log for CGI::Session
-  $Date: 2003/07/26 13:49:16 $
+What is new in 4.00_01 - Wednesday, February 09, 2005
 
-What is new in 3.95
-  NOTE: 3.95 is a maintainance release, with only certain bug fixes.
-
-	* clear() used to delete all the params if passed any arguments. 
-	* clear() now accepts either an arrayref, or a single scalar
-	  variable. Thanks to MARKSTOS [AT] cpan.org
-	* flush() - internal data status handling fixed. 
-	           Thanks to MARKSTOS [AT] cpan.org
-	* t/api3_dbfile_obj_store.t now checks for DB_File as well. 
+    * NEW: load() - constructor method to prevent unnecessary session creations
+    * NEW: is_expired() - method to intercept expired sessions
+    * NEW: is_empty() - to intercept requests for unexisting sessions
+    * NEW: more optimized source code
+    * NEW: updated and improved driver specs
+    * NEW: standard testing framework
+    * NEW: 'sqlite' driver
 
 
-What is new in 3.94
-        * flush() method kept returning true regardless of the succsess or failure
-  
-What is new in 3.93
+What is new in 3.12?
 
-	* is_new() method added, which returns true only if it is a brand new session
-	* ctime() bug fixed
-
-What is new in 3.92
-
-  * Minor fix in Makefile.PL (finally!)
-  * PostgreSQL re-added to the package
-
-What is new in 3.91?
-
-  * use of close() from within dump() method used to produce warnings
-    if -w switch is enabled. Should've been replaced with CORE::close()
-  * MySQL driver manual fixed
+	* cache() method introduced, which is normally used
+          by library drivers to cache certain value within the single process
+	* Apache::Session-like tie interface supported (EXPERIMENTAL!)
+	* trace() and tracemsg() methods added for debugging purposes
 
 What is new in 3.8?
 
@@ -60,4 +45,11 @@ What is new in 3.x?
 	* Bug in POD documentation is fixed (thanks to Graham Barr)	
 
 
-$Id: Changes,v 3.3.2.4.2.3 2003/07/26 13:49:16 sherzodr Exp $
+
+
+
+
+
+
+
+Changes,v 3.5 2005/02/09 08:30:35 sherzodr Exp

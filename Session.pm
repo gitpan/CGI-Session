@@ -1,6 +1,6 @@
 package CGI::Session;
 
-# $Id: Session.pm,v 3.2.2.4 2002/11/28 06:50:44 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.5 2002/11/28 17:11:11 sherzodr Exp $
 
 use strict;
 #use diagnostics;
@@ -11,8 +11,8 @@ use vars qw($VERSION $REVISION $errstr $IP_MATCH $NAME $API_3);
 
 
 
-($REVISION) = '$Revision: 3.2.2.4 $' =~ m/Revision:\s*(\S+)/;
-$VERSION    = '3.5';
+($REVISION) = '$Revision: 3.2.2.5 $' =~ m/Revision:\s*(\S+)/;
+$VERSION    = '3.6';
 $NAME     = 'CGISESSID';
 
 # import() - we do not import anything into the callers namespace, however,
@@ -432,13 +432,13 @@ sub flush {
 __END__;
 
 
-# $Id: Session.pm,v 3.2.2.4 2002/11/28 06:50:44 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.5 2002/11/28 17:11:11 sherzodr Exp $
 
 =pod
 
 =head1 NAME
 
-CGI-Session - persistent session in CGI applications
+CGI::Session - persistent session in CGI applications
 
 =head1 SYNOPSIS
 
@@ -1114,4 +1114,4 @@ sub cookie {
 
 
 
-# $Id: Session.pm,v 3.2.2.4 2002/11/28 06:50:44 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.5 2002/11/28 17:11:11 sherzodr Exp $

@@ -9,7 +9,7 @@ SYNOPSIS
         $cgi = new CGI;
         $sid = $cgi->cookie("SID") || $cgi->param("sid") || undef;
         $session = new CGI::Session::File($sid,
-                    { LockDirectory => "/tmp",  Directory => "/tmp" });
+                    { Directory => "/tmp"  });
 
         # Let's update the session id:
         $sid = $session->id;
@@ -30,7 +30,7 @@ SYNOPSIS
         $cgi = new CGI;
         $sid = $cgi->cookie("SID") || $cgi->param("sid") || undef;
         tie %session, "CGI::Session::File", $sid,
-                    { LockDirectory => "/tmp", Directory => "/tmp" };
+                    { Directory => "/tmp" };
 
         # Let's update the session id:
         $sid = $session{ _session_id };
@@ -45,6 +45,9 @@ SYNOPSIS
         $f_name = $session{f_name};
 
         # Tricks are endless!
+
+WARNING
+    This is a developer release. Stable release is CGI::Session 2.7.
 
 NOTE
     As of this release there seems to be two completely different
@@ -79,7 +82,7 @@ DISTRIBUTION
 INSTALLATION
     You can download the latest release of the library either from
     http://www.CPAN.org or from http://modules.ultracgis.com/dist. The
-    library is distributed as .tar.gz file, which is a gziped tar-ball. You
+    library is distributed as .tar.gz file, which is a zipped tar-ball. You
     can unzip and unpack the package with the following single command (% is
     your shell prompt):
 
@@ -93,7 +96,7 @@ INSTALLATION
   STANDARD INSTALLATION
 
     The library is installed with just like other Perl libraries, or via
-    CPAN interactive shell (perl -MCPAN -e install CGI::Session).
+    CPAN interactive shell (Perl -MCPAN -e install CGI::Session).
 
     Installation can also be done by following below instructions:
 
@@ -101,7 +104,7 @@ INSTALLATION
 
     2   In your shell type the following commands in the order listed:
 
-        *    perl Makefile.PL
+        *    Perl Makefile.PL
 
         *    make
 
@@ -113,17 +116,17 @@ INSTALLATION
 
   CUSTOM INSTALLATION
 
-    If you do not have access to install libraries in the sytem folders, you
-    should install the library in your own private folder, somewhere in your
-    home directory. For this purpose, first choose/create a folder where you
-    want to keep your Perl libraries. I use "perllib/" under my home folder.
-    Then install the library following the below steps:
+    If you do not have access to install libraries in the system folders,
+    you should install the library in your own private folder, somewhere in
+    your home directory. For this purpose, first choose/create a folder
+    where you want to keep your Perl libraries. I use "perllib/" under my
+    home folder. Then install the library following the below steps:
 
     1   After downloading the distribution, "cd" to the distribution folder
 
     2   In your shell type the following commands in the order listed:
 
-        *    perl Makefile.PL INSTALLDIRS=site
+        *    Perl Makefile.PL INSTALLDIRS=site
              INSTALLSITELIB=/home/your_folder/perllib
 
         *    make
@@ -134,7 +137,7 @@ INSTALLATION
 
         *    make install
 
-    Then in your perl programs do not forget to include the following line
+    Then in your Perl programs do not forget to include the following line
     at the top of your code:
 
         use lib "/home/your_folder/perllib";
@@ -153,7 +156,7 @@ WHAT YOU NEED TO KNOW FIRST
 
         # Creating a new session object:
         $session = new CGI::Session::File(undef,
-                            {LockDirectory=>"/tmp", Directory=>"/tmp"});
+                            { Directory=>"/tmp" });
 
         print "Your session id is ", $session->id();
 
@@ -164,18 +167,18 @@ WHAT YOU NEED TO KNOW FIRST
 
         # Creating a new session object:
         tie %session, "CGI::Session::File", undef, {
-                            { LockDirectory=>"/tmp", Directory=>"/tmp"};
+                            { Directory=>"/tmp" };
 
         print "Your session id is ", $session{_session_id};
 
-    In the examples throughout the manual I will give syntaxes and notes for
+    In the examples throughout the manual I will give syntax and notes for
     both interfaces. Which interface to use is totally up to you. I
     personally prefer Object Oriented Interface, for it is full of features.
 
     Also, somewhere in this manual I will talk about the section on "SPECIAL
-    NAMES" which are not accessiable via "param()" method for neither
-    writing nor reading. But this rule differ in tied hash access method,
-    where all those the section on "SPECIAL NAMES" but few are writable
+    NAMES" which are not accessible via "param()" method for neither writing
+    nor reading. But this rule differ in tied hash access method, where all
+    those the section on "SPECIAL NAMES" but few are writable
 
 REFRESHER ON SESSION MANAGEMENT
     Since HTTP is a stateless protocol, web programs need a way of
@@ -205,27 +208,27 @@ WORKING WITH SESSIONS
 
         # OO interface
         $session = new CGI::Session::File(undef,
-            {
-                LockDirectory=> "/tmp/sessions",
+            {            
                 Directory    => "/tmp/sessions",
         });
 
         # tie() interface
-        tie %session, "CGI::Session::File", undef, {
-                LockDirectory=> "/tmp/sessions",
+        tie %session, "CGI::Session::File", undef, {            
                 Directory    => "/tmp/sessions"  };
 
     We're passing two arguments, the fist one is session id, which is
     undefined in our case, and the second one is the anonymous hash
 
-        {
-            LockDirectory=> "/tmp/sessions",
+        {       
             Directory    => "/tmp/sessions",
         }
 
     which points to the locations where session files and their lock files
     should be created. You might want to choose a more secure location than
     I did in this example.
+
+    Note: second hashref argument is dependant on the driver. Please check
+    with the driver manual.
 
     If the session id is undefined, the library will generate a new id, and
     you can access it's value via id() method: (see methods)
@@ -273,7 +276,6 @@ WORKING WITH SESSIONS
         my $sid = $cgi->param("sid") || undef;
         my $session = new CGI::Session::File($sid,
             {
-                LockDirectory=>"/tmp/sessions",
                 Directory    => "/tmp/sessions"
             });
 
@@ -299,7 +301,7 @@ WORKING WITH SESSIONS
     surprised to find out that his shopping cart is gone! Because when they
     visit the site next time by typing the URL, "sid" parameter will not be
     present in the URL, and our application will not recognize the user
-    resulting in the creaion of a new session id, and all the links in the
+    resulting in the creation of a new session id, and all the links in the
     web site will have that new session id appended to them. Too bad,
     because the client has to start everything over again.
 
@@ -320,8 +322,7 @@ WORKING WITH SESSIONS
         my $cgi = new CGI;
         my $sid = $cgi->cookie(SESSION_COOKIE) || undef;
         my $session = new CGI::Session::File($sid,
-            {
-                LockDirectory=> "/tmp/sessions",
+            {            
                 Directory    => "/tmp/sessions"
             });
 
@@ -354,7 +355,7 @@ WORKING WITH SESSIONS
     users with a session id is appending the session id to the url of the
     script as a "PATH_INFO". "PATH_INFO" is somewhat similar to
     "QUERY_STRING", but unlike "QUERY_STRING" it does not come after the
-    question mark ("?"), but it comes before it, and is seperated from the
+    question mark ("?"), but it comes before it, and is separated from the
     script url with a slash ("/") just like a folder. Suppose our script
     resides in /cgi-bin/session.cgi. And after we append session id to the
     url as a "PATH_INFO" if will look something like:
@@ -373,7 +374,6 @@ WORKING WITH SESSIONS
         my ($sid) = $cgi->path_info =~ /\/([^\?\/]+)/;
 
         my $session = new CGI::Session::File($sid, {
-                                            LockDirectory=> "/tmp",
                                             Directory    => "/tmp"});
 
     CGI.pm's "path_info()" method returns the PATH_INFO environmental
@@ -391,8 +391,7 @@ WORKING WITH SESSIONS
     succeeded:
 
         my $session = new CGI::Session::File($sid,
-            {
-                LockDirectory=>"/tmp/sessions",
+            {            
                 Directory    => "/tmp/sessions"
             }) or die $CGI::Session::errstr;
 
@@ -409,7 +408,7 @@ WORKING WITH SESSIONS
 
             $session->param(-name=>'email', -value=>'sherzodr@cpan.org');
 
-                # tie() intreface
+                # tie() interface
                 $session{email} = 'sherzodr@cpan.org';
 
     2   If you want to store more values in the same session parameter, you
@@ -508,9 +507,9 @@ WORKING WITH SESSIONS
 
     *   "_session_etime" - stores expiration date for the session
 
-    So you shouldn't be using parameter names with leading underscrore,
+    So you shouldn't be using parameter names with leading underscore,
     because "CGI::Session" preserves them for internal use. They are
-    required for the library to funcion properly. Even though you try to do
+    required for the library to function properly. Even though you try to do
     something like:
 
         $session->param(-name=>"_some_param", -value=>"Some value");
@@ -522,7 +521,7 @@ WORKING WITH SESSIONS
         _some_param - illegal name
 
     You cannot access these the section on "SPECIAL NAMES" directly via
-    "param()" either, but you can do so by provided accessor methods,
+    "param()" either, but you can do so by provided accessory methods,
     "id()", "ctime()", "atime()" and "expires()" (see methods).
 
     If you are using tied hash access interface, these rules differ
@@ -532,7 +531,7 @@ WORKING WITH SESSIONS
             printf ("Session last accessed on %s\n", localtime($session{_session_atime}));
 
             # updating last access time. You don't have to do it, it will be done 
-            # automaticly though
+            # automatically though
             $session{_session_atime} = time();
 
             # setting expiration date, setting in 2 months
@@ -605,7 +604,7 @@ WORKING WITH SESSIONS
             # tie() Interface
             delete $session{cart};
 
-    What happens is, it delets the given parameter from the session for
+    What happens is, it deletes the given parameter from the session for
     good. If you do not pass any arguments to "clear()", then all the
     parameters of the session will be deleted. Remember that "clear()"
     method DOES NOT delete the session. Session stays open, only the
@@ -615,7 +614,7 @@ WORKING WITH SESSIONS
 
     If you want to delete the session for good together with all of its
     contents, then delete() method is the way to go. After you call this
-    method, the "CGI::Session" will not have access to the perviou session
+    method, the "CGI::Session" will not have access to the pervious session
     at all, because it was deleted from the disk for good. So it will have
     to generate a new session id instead:
 
@@ -636,10 +635,10 @@ WORKING WITH SESSIONS
     cart. He might even continue his shopping after several hours, or
     several days. So for the comfort of the visitors of our site, we still
     should keep their session data at their fingertips, and only "clear()"
-    unwanted session parameters, for examle, the user's shopping cart, after
-    he checks out. Sessions should be deleted if they haven't been accessed
-    for a certain period of time, in which case we don't want unused session
-    data occupying the storage in our disk.
+    unwanted session parameters, for example, the user's shopping cart,
+    after he checks out. Sessions should be deleted if they haven't been
+    accessed for a certain period of time, in which case we don't want
+    unused session data occupying the storage in our disk.
 
   EXPIRING SESSIONS
 
@@ -678,7 +677,7 @@ WORKING WITH SESSIONS
         tie my %dir, "IO::Dir", "/tmp/sessions", DIR_UNLINK or die $!;
 
         my $session;
-        my $options = {Lockdirectory=>"/tmp/sessions", Directory=>"/tmp/sessions"};
+        my $options = {Directory=>"/tmp/sessions"};
 
         while ( my ($file, $info) = each %db ) {
 
@@ -697,8 +696,8 @@ WORKING WITH SESSIONS
 EXAMPLES
   SESSION PREFERENCES
 
-    This example will show how to remember users' preference/choises for the
-    duration of their session while they are browing the site.
+    This example will show how to remember users' preference/choices for the
+    duration of their session while they are browsing the site.
 
     URL: http://modules.ultracgis.com/cgi-bin/session
     DESCRIPTION
@@ -818,13 +817,13 @@ METHODS
             print $cgi->textfield(-name=>"login_name");
 
         This method is quite handy when you have checkboxes or multiple
-        slection boxes which assign array of values for a single element. To
+        section boxes which assign array of values for a single element. To
         keep those selection the way your visitor chooses throughout his/her
         session is quite challenging task. But CGI.pm's "sticky" behavior
         comes quite handy here.
 
         All you need to do is to load the parameters from the session to
-        your CGI object, then CGI.pm automaticly restores the previous
+        your CGI object, then CGI.pm automatically restores the previous
         selection of checkboxes:
 
                 # load it from the disk to the CGI.pm object
@@ -832,10 +831,10 @@ METHODS
 
                 # now we can just print the checkbox, and previously saved checks
                 # would remain selected:
-                print $cgi->checkbox_group(-name=>"lists", -values=>["CGI-Perl", "Perl5-Porters", "CGI-Sessino"]);
+                print $cgi->checkbox_group(-name=>"lists", -values=>["CGI-Perl", "Perl5-Porters", "CGI-Session"]);
 
         Note: "load_param()" and "save_param()" methods didn't work on
-        parameters that return multipl values. This problem was fixed in
+        parameters that return multiple values. This problem was fixed in
         version 2.6 of the library.
 
     clear()
@@ -962,7 +961,7 @@ DEVELOPER SECTION
 
     "CGI::Session" itself doesn't deal with such things as storing the data
     in the disk (or other device), retrieving the data or deleting it from
-    the persistant storage. These are the issues specific to the storage
+    the persistent storage. These are the issues specific to the storage
     type you want to use and that's what the driver is for. So driver is
     just another Perl library, which uses "CGI::Session" as a base class,
     and provides three additional methods, "store()", "retrieve()" and
@@ -971,31 +970,29 @@ DEVELOPER SECTION
 
   WHAT ARE THE SPECS?
 
-    *   "store()" will recieve four arguments, "$self", which is the object
-        itself, "$sid", which is the session id, "$hashref", which is the
-        session data as the reference to an annonymous hash, and <$options>,
-        which is another hash reference that was passed as the second
-        argument to "new()". "store()"'s task is to store the hashref (which
-        is the session data)in the disk in such a way so that it could be
-        retrived later. It should return true on success, undef otherwise,
-        passing the error message to "$self->error()" method.
+    Specifictions for those methods we a little complex in previous versions
+    of CGI::Session. But as of 2.8 I decided to pick a slightly different
+    approach. Now all the driver methods receive two arguments, $self, and
+    $sid. To give access to driver developers for other undelying data, I
+    added two more methods to the library: <opions()> and "raw_data()".
+    "options()" returns a hashref that contains the options passed to the
+    constructor. For CGI::Session::DB_File driver for example, this has
+    contains:
 
-    *   "retrieve()" will recieve three arguments, "$self", which is the
-        object itself, "$sid", which is the session id and "$options", which
-        is the hash references passed to "new()" as the first argument.
-        "retrieve()"'s task is to access the data which was saved previously
-        by the "store()" method, and re-create the same "$hashref" as
-        "store()" once received, and return it. Method should return the
-        data on success, undef otherwise, passing the error message to
-        "$self->error()" method.
+            $options = {
+                    sid => $sid,
+                    FileName => 'some-file.db',
+                    LockDirectory => '/tmp'
+            };
 
-    *   "tear_down()" is called when "delete()" is called. So its task is to
-        delete the session data and all of its traces from the disk.
-        "tear_down()" will receive three arguments, "$self", which is the
-        object itself, "$sid", which is the session id and "$options", which
-        is the hash reference passed to "new()" as the second argument. The
-        method should return true on success, undef otherwise, passing the
-        error message to "$self->error()".
+    Although it contains session id, DO NOT use that session id from w/in
+    your methods.
+
+    "raw_data()" method on the other hand provides the driver methods with a
+    raw data. Mostly this data is required for the "store()" method, which
+    needs to store the data in the disk. Raw data is an annonymous hash
+    which holds key/value pairs of the session data. As for the session id,
+    it could be acquired via the public "id()" method.
 
     If you open the dev/ folder in the "CGI::Session" distribution, you will
     find a blueprint for the driver, MyDriver.pm, which looks something like
@@ -1010,42 +1007,49 @@ DEVELOPER SECTION
         # all other driver specific libraries go below
 
         sub store {
-            my ($self, $sid, $hashref, $options) = @_;
+            my ($self, $sid) = shift;               
+                
+                    my $options = $self->options();
+                    my $data        = $session->raw_data();         
 
             return 1;
         }
 
         sub retrieve {
-            my ($self, $sid, $options) = @_;
+            my ($self, $sid)        = @_;
+                    my $options = $self->options();
+                    my $sid         = $self->id();
 
             return {};
         }
 
         sub tear_down {
-            my ($self, $sid, $option) = @_;
+            my ($self, $sid) = @_;
+                
+                    my $options = $self->raw_data();
 
             return 1;
         }
 
     It is inheriting from two classes, "CGI::Session" and
     "CGI::Session::MD5". The second library just provides "generate_id()"
-    method that returns a stirng which will be used as a session id. Default
+    method that returns a sting which will be used as a session id. Default
     "generate_id()" uses Digest::MD5 library to generate a unique identifier
     for the session. If you want to implement your own "generate_id()"
     method, you can override it by including one in your module as the
     fourth method.
 
-    *   "generate_id()" recieves only one argument, "$self", which is the
+    *   "generate_id()" receives only one argument, "$self", which is the
         object itself. The method is expected to return a string to be used
         as the session id for new sessions.
 
-    The challenging part might seem to store the "$hashref" and to be able
-    to restore it back. But there are already libraries that you can make
-    use of to do this job very easily. Drivers that come with "CGI::Session"
+    The challenging part might seem to store the "ra_data" and to be able to
+    restore it back. But there are already libraries that you can make use
+    of to do this job very easily. Drivers that come with "CGI::Session"
     depend on Data::Dumper, but you can as well go with the Storable manpage
     or the FreezeThaw manpage libraries which allow you to "freeze()" the
     Perl data and "thaw()" it later, thus you will be able to re-create the
-    the "$hashref". The reason we prefered Data::Dumper is, it comes
+    the "$hashref". The reason we preferred Data::Dumper is, it comes
     standard with Perl.
 
   LOCKING
@@ -1058,25 +1062,27 @@ DEVELOPER SECTION
 
   OTHER NOTES
 
-    Don't forget to include an empty DESTROY() method in your library for
+    Don't forget to include an empty DESTROY() method in your driver for
     CGI::Session's AUTOLOAD would be looking for it thus wasting its
     precious time.
 
 TODO
     I still have lots of features in mind that I want to add and/or fix.
-    Here is a short list for now. Feel free to email me your fantacies and
+    Here is a short list for now. Feel free to email me your fantasies and
     patches.
 
     1   Fix "expires()" and implement expiring sessions in more friendly way
 
-    2   Implement more sophisticated locking mechanim for session data
+    2   Implement more sophisticated locking mechanism for session data.
 
-    3   Customizable session id generator
+    3   Customizable session id generator. It currently uses b64digest().
+        But some people might prefer hexdigest(). So we have to make them
+        happy too.
 
-    4   Combining passive client identification methods
+    4   Making use of some passive client identification methods.
 
 FREQUANTLY ASKED QUESTIONS
-    The following section of the library lists answers to some frequanly
+    The following section of the library lists answers to some frequently
     asked questions:
 
     Q: Can I use CGI::Session in my shell scripts, or is it just for CGI

@@ -5,20 +5,11 @@
 use strict;
 use Test;
 use CGI;
-use CGI::Session::MySQL;
 
-# Checking if DBI is available
-eval "require DBI";
+eval {require DBI; require DBD::mysql; require CGI::Session::MySQL};
 if ( $@ ) {
-	print "skip\n";
-	exit(0);
-}
-
-# Checking if DBI supports MySQL
-eval "require DBD::mysql";
-if ( $@ ) {
-	print "skip\n";
-	exit(0);
+    print "1..0\n";
+    exit;
 }
 
 my $hashref = {
@@ -34,7 +25,6 @@ my $arrayref = [qw(one two three four five six seven eight nine ten)];
 my $scalar = "CGI::Session";
 
 
-ok(1);							# 1: Loaded
 
 my $cgi		= new CGI;
 
@@ -157,6 +147,6 @@ ok($another_new_session->id ne $sid); # 31: should be a differnet ID now
 ok($another_new_session->param, 0); # 32: make sure that it is brand new session
 
 BEGIN {
-	plan tests => 1, todo => [2,32];
+	plan todo => [1,32];
 }
 

@@ -8,16 +8,54 @@ use File::Spec;
 use Data::Dumper;
 use Fcntl qw(:DEFAULT :flock);
 use DB_File;
+use Safe;
 
-$VERSION = "2.5";
+###########################################################################
+######## CGI::Session::DB_File - for storing session data in Berkely DB  ##
+###########################################################################
+#                                                                         #
+# Copyright (c) 2002 Sherzod B. Ruzmetov. All rights reserved.            #
+# This library is free software. You may copy and/or redistribute it      #
+# under the same conditions as Perl itself. But I do request that this    #
+# copyright notice remains attached to the file.                          #
+#                                                                         #
+# In case you modify the code, please document all the changes you have   #
+# made prior to destributing the library                                  #
+###########################################################################
 
 
-# do not use any indentation
-$Data::Dumper::Indent = 0;
+$VERSION = "2.6";
+
+# Configuring Data::Dumper for our needs
+$Data::Dumper::Indent	= 0;
+$Data::Dumper::Purity	= 0;
+$Data::Dumper::Useqq	= 1;
+$Data::Dumper::Deepcopy	= 0;
+
+
+
+# So that CGI::Session's AUTOLOAD doesn't bother looking for it. 
+# Too expensive
+sub DESTROY {
+	my $self = shift;
+	my $options = $self->options;
+	my $sid = $self->id;
+
+	# our job here is to get rid of the lock files. They are nasty!
+	my $lockfile = File::Spec->catfile($options->{LockDirectory}, "CGI-Session-$sid.lck");
+
+	if ( -e $lockfile ) {		
+		unlink $lockfile;
+	}
+}
+
+
 
 sub retrieve {
-    my ($self, $sid, $options) = @_;
+    my ($self, $sid) = @_;
 
+	
+	my $options = $self->options();
     my $file    = $options->{FileName};
     my $lckdir  = $options->{LockDirectory};
 
@@ -27,17 +65,29 @@ sub retrieve {
 	flock (LCK, LOCK_SH) 
 		or $self->error("Couldn't lock $lckfile	, $!"), return;
 
-    tie my %session, "DB_File", $file, O_RDWR|O_CREAT, 0777 
+    tie my %session, "DB_File", $file, O_RDWR|O_CREAT, 0664 
 		or $self->error("Couldn't open $file, $!"), return;
 
     my $tmp = $session{$sid} or $self->error("Session ID '$sid' doesn't exist"), return;
-    
+ 
 	untie %session;
 	close (LCK);
 
-	my $data = {};	eval $tmp;
+	
+	# Following line is to keep -T line happy. In fact it is an evil code,
+	# that's why we'll be compiling $tmp under the restricted eval() later
+	# to ensure it's indeed safe. If you have a better solution, please
+	# take this burden of guilt off my conscious.
+    ($tmp) = $tmp =~ m/^(.+)$/s;
 
-	return $data;
+    my $cpt = Safe->new("CGI::Session::File::CPT");
+    $cpt->reval($tmp);
+
+    if ( $@ ) {
+        $self->error("Couldn't eval() the data, $!"), return undef;
+    }
+    
+    return $CGI::Session::File::CPT::data;
 }
 
 
@@ -45,7 +95,11 @@ sub retrieve {
 
 
 sub store {
-    my ($self, $sid, $hashref, $options) = @_;
+    my ($self, $sid) = @_;
+
+	my $options = $self->options();
+	
+	my $hashref = $self->raw_data();
 
     my $file    = $options->{FileName};
     my $lckdir  = $options->{LockDirectory};
@@ -71,7 +125,9 @@ sub store {
 
 
 sub tear_down {
-	my ($self, $sid, $options) = @_;
+	my ($self, $sid) = @_;
+
+	my $options = $self->options();
 	
 	my $file = $options->{FileName};
 	my $lckdir = $options->{LockDirectory};

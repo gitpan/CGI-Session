@@ -5,38 +5,47 @@ use vars qw($VERSION $TABLE_NAME);
 use base qw(CGI::Session CGI::Session::MD5);
 
 use Data::Dumper;
-use Carp;
-eval "require DBI";
+use Carp 'croak';
+use DBI;
 
-if ( $@ ) {
-	$CGI::Session::errstr = $@;
-}
 
-$VERSION = "2.4";
+###########################################################################
+######## CGI::Session::MySQL - for storing session data in MySQL tables####
+###########################################################################
+#                                                                         #
+# Copyright (c) 2002 Sherzod B. Ruzmetov. All rights reserved.            #
+# This library is free software. You may copy and/or redistribute it      #
+# under the same conditions as Perl itself. But I do request that this    #
+# copyright notice remains attached to the file.                          #
+#                                                                         #
+# In case you modify the code, please document all the changes you have   #
+# made prior to destributing the library                                  #
+###########################################################################
 
-# chose the most compat from of serialization in Data::Dumper
+
+
+# Globla variables
+$VERSION	= "2.6";
+$TABLE_NAME = 'sessions';
 $Data::Dumper::Indent = 0;
 
-# This is the sessions table. Change it if you want to 
-# use some other table for your sessions data
-$TABLE_NAME = 'sessions';
 
-# returns $dbh and $lckh
+# MYSQL_db(): utility function. Returns database and lock handles
 sub MYSQL_dbh {
-	my ($self, $option) = @_;
+	my ($self) = @_;
+
+	my $option = $self->options;
 
 	my $dbh     = $option->{Handle};
-    my $lckh    = $option->{LockHandle};
+    my $lckh    = $option->{LockHandle}		|| $dbh;
     my $dsn     = $option->{DataSource};
     my $username= $option->{UserName};
     my $psswd   = $option->{Password};
     my $lcksn   = $option->{LockDataSource} || $dsn;
-    my $lckuser = $option->{LockUserName} || $username;
-    my $lckpsswd= $option->{LockPassword} || $psswd;
+    my $lckuser = $option->{LockUserName}	|| $username;
+    my $lckpsswd= $option->{LockPassword}	|| $psswd;
 
-	if ( $dbh && $lckh ) {
-		return ($dbh, $lckh);
-	}
+	if ( $dbh && $lckh ) {	return ($dbh, $lckh)	}
 
 	$dbh	= DBI->connect($dsn, $username, $psswd) or $self->error($DBI::errstr), return;
 	$lckh	= DBI->connect($lcksn, $lckuser, $lckpsswd) or $self->error($DBI::errstr), return;
@@ -48,27 +57,43 @@ sub MYSQL_dbh {
 
 
 
+# So that CGI::Session's AUTOLOAD doesn't bother looking for it. 
+# Too expensive
+sub DESTROY {
+	my $self = shift;
+	my $options = $self->options;
+
+}
 
 
 
 
 sub retrieve {
-    my ($self, $sid, $option) = @_;
+    my ($self, $sid) = @_;
 
-    my ($dbh, $lckh) = $self->MYSQL_dbh($option) or return;
-	$lckh->do("LOCK TABLES $TABLE_NAME READ");
-
-    my ($tmp) = $dbh->selectrow_array(qq|SELECT a_session FROM $TABLE_NAME WHERE id=?|, undef, $sid);	
-
-	$lckh->do("UNLOCK TABLES");	
 	
-	my $data = {}; eval $tmp;
+    my ($dbh, $lckh) = $self->MYSQL_dbh() or return;
 
-	if ( $@ ) {
-		$self->error("Couldn't eval() the data, $@"), return;
-	}
+	# I wish row locking were possible in MySQL :-(
+	$lckh->do("LOCK TABLES $TABLE_NAME READ");
+    my ($tmp) = $dbh->selectrow_array(qq|SELECT a_session FROM $TABLE_NAME WHERE id=?|, undef, $sid);	
+	$lckh->do("UNLOCK TABLES");
+	
+	
+	# Following line is to keep -T line happy. In fact it is an evil code,
+	# that's why we'll be compiling $tmp under the restricted eval() later
+	# to ensure it's indeed safe. If you have a better solution, please
+	# take this burden of guilt off my conscious.
+    ($tmp) = $tmp =~ m/^(.+)$/s;
 
-	return $data;
+    my $cpt = Safe->new("CGI::Session::File::CPT");
+    $cpt->reval($tmp);
+
+    if ( $@ ) {
+        $self->error("Couldn't eval() the data, $!"), return undef;
+    }
+    
+    return $CGI::Session::File::CPT::data;
 }
 
 
@@ -81,9 +106,12 @@ sub retrieve {
 
 
 sub store {
-    my ($self, $sid, $hashref, $option) = @_;
+    my ($self, $sid) = @_;
+	
+	
+	my ($dbh, $lckh) = $self->MYSQL_dbh();	
+	my $hashref = $self->raw_data();
 
-	my ($dbh, $lckh) = $self->MYSQL_dbh($option);	
     my $d = Data::Dumper->new([$hashref], ["data"]);
     my $exists = $dbh->selectrow_array(qq|SELECT a_session FROM $TABLE_NAME WHERE id=?|, undef, $sid);
 
@@ -108,9 +136,12 @@ sub store {
 
 
 sub tear_down {
-    my ($self, $sid, $option) = @_;
+    my ($self) = @_;
 
-	my ($dbh, $lckh) = $self->MYSQL_dbh($option);    
+	my $sid = $self->id();
+	my ($dbh, $lckh) = $self->MYSQL_dbh();    
+	my $option = $self->options();
+
 
 	$lckh->do("LOCK TABLES $TABLE_NAME WRITE");
     my $rv =  $dbh->do(qq|DELETE FROM $TABLE_NAME WHERE id=?|, undef, $sid);  
@@ -152,10 +183,11 @@ CGI::Session::MySQL - Driver for CGI::Session class
 =head1 DESCRIPTION
 
 C<CGI::Session::MySQL> is the driver for the L<CGI::Session> class to store 
-and retrieve the session data in and from the MySQL database 
+and retrieve the session data in and from the MySQL database.
 
 To be able to write your own drivers for L<CGI::Session>, please consult 
 L<developer section|CGI::Session/DEVELOPER SECTION> of L<CGI::Session manual|CGI::Session>.
+
 
 Constructor requires two arguments, as all other L<CGI::Session> drivers do.
 The first argument has to be session id to be initialized (or undef to tell
@@ -172,7 +204,7 @@ this has to be a database handler returned from the C<DBI->connect()>
 =item C<LockHandle>
 
 This is also a handler returned from the C<DBI->connect()> for locking the sessions
-table.
+table. If it is not set should default to C<Handle>
 
 =back
 
@@ -216,13 +248,13 @@ suffice for basic use of the library:
 
 C<sessions> is the default name CGI::Session::MySQL would work with. We
 suggest you to stick with this name for consistency. In case for any reason
-you want to use a different name, just update $CGI::Session::MySQL::TABLE
+you want to use a different name, just update $CGI::Session::MySQL::TABLE_NAME
 variable before creating the object:
 
 	use CGI::Session::MySQL;
 	my DBI;
 
-	$CGI::Session::MySQL::TABLE = 'my_sessions';
+	$CGI::Session::MySQL::TABLE_NAME = 'my_sessions';
 	$dbh = DBI->connect("dbi:mysql:dev", "dev", "marley01");
 
 	$session = new CGI::Session::MySQL(undef, {

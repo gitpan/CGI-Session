@@ -23,7 +23,7 @@ my $scalar = "CGI::Session";
 ok(1);							# 1: Loaded
 
 my $cgi		= new CGI;
-my $_options= { LockDirectory=>'t', Directory=>'t'};
+my $_options= { Directory=>'t' };
 my $session = new CGI::Session::File(undef, $_options);
 
 ok($session);					# 2: Object created

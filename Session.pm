@@ -27,7 +27,7 @@ use vars qw($VERSION $errstr);
 
 
 
-$VERSION = "2.7";
+$VERSION = "2.9";
 
 
 
@@ -54,19 +54,27 @@ sub new {
     }
 
     my $self = {
+
         # _options holds all the options passed to new()
         _options => {
             sid     => $_[0],
             %{ $_[1] },
         },
+
+
         # _data holds actual session data as an in-memory
-        # hash table
+        # hash table. It will be filled by _init() method
         _data => { },
+
     };
 
-    bless $self => $class;
+    bless ($self, $class);
 
-    # calling session initializer
+    # now is a very good time to validate the driver
+    $self->_validate_driver() or return;
+
+    # If we are this far, _validate_driver() didn't kill us. So we
+    # can try to initialize the session data safely
     $self->_init() or return;
 
     return $self;
@@ -74,10 +82,31 @@ sub new {
 
 
 
-# I really hope derived class provided a destructor.
-# But if it didn't, let us provide it for them so that
-# AutoLoader doesn't bother looking for it. Too expensive!
-sub DESTORY { }
+# Hopefully derived class will provide it. If it doesn't we will still
+# catch the call without letting the AUTOLOAD look for it. Too expensive!
+sub DESTROY { }
+
+
+
+# _validate_driver(): checks if the derived class is a valid
+# CGI::Session driver.
+sub _validate_driver {
+    my $self = shift;
+    my $class = ref($self);
+
+    # Following methods should be either present in the driver or the 
+	# driver should be able to inherit them from other classes
+    my @required_methods = qw(store retrieve tear_down generate_id);
+	
+    for ( @required_methods ) {
+        unless ( $self->UNIVERSAL::can($_) ) {
+            croak "$class doesn't seem to be a valid CGI::Session driver.\n" .
+                "$_() method is missing.";
+        }
+    }
+    return 1;
+}
+
 
 
 
@@ -92,11 +121,11 @@ sub _init {
 
     my $sid = $self->{_options}->{sid};
 
-    if ( defined $sid ) {
+    if (  $sid ) {
 
         # we are asked to initialize a certain session. So let's see
         # if we can do it.
-        $self->{_data} = $self->retrieve( $self->{_options}->{sid}, $self->{_options} );
+        $self->{_data} = $self->retrieve( $sid );
 
         if ( $self->{_data}->{_session_id} ) {
             # yes, we did it!
@@ -107,14 +136,13 @@ sub _init {
 
         } else {
             # oops, something wrong happened, and we couldn't load the
-            # previously stored session data. So let's ret run a new session
+            # previously stored session data. So let's return a new session
             return $self->_new_session();
         }
 
     } else {
 
-        # No one asked us for a new session, so let's create a new
-        # one then
+        # No one asked us for a session, so let's create a new one
         return $self->_new_session();
 
     }
@@ -129,16 +157,20 @@ sub _init {
 sub _new_session {
     my $self = shift;
 
-    # creating the session meta-table
+    # creating the session meta table
     $self->{_data} = {
         _session_id => $self->generate_id(),
-        _session_ctime => time(),
-        _session_atime => time(),
+        _session_ctime => time,
+        _session_atime => time,
         _session_etime => undef,
+        _session_remote_addr => $ENV{REMOTE_ADDR} || undef,
+        _session_remote_host => undef,
     };
 
+    my $sid = $self->{_data}->{_session_id};
+
     # storing the session
-    return $self->store($self->id(), $self->{_data}, $self->{_options});
+    return $self->store($sid);
 }
 
 
@@ -155,7 +187,8 @@ sub _old_session {
     # If any server side expirations are to be performed,
     # I believe they should be right here.
 
-    return $self->store($self->id(), $self->{_data}, $self->{_options});
+    my $sid = $self->{_data}->{_session_id};
+    return $self->store($sid);
 }
 
 
@@ -175,10 +208,11 @@ sub _assign_param {
     $self->{_data}->{$key} = $value;
 
     # get the session id
-    my $sid = $self->id();
+    my $sid = $self->{_data}->{_session_id};
+
 
     # call derived store() method
-    return $self->store( $sid, $self->{_data}, $self->{_options} );
+    return $self->store( $sid );
 }
 
 
@@ -204,7 +238,10 @@ sub _return_param {
 sub param {
     my $self = shift;
 
-    my $sid = $self->id();
+    # we cannot use $self->{_options}->{sid}! We always have to
+    # use the following syntax to get the session id. id() method is good
+    # too, but it triggers AUTLOAD, so let's stay away from it.
+    my $sid  = $self->{_data}->{_session_id};
     my $data = $self->{_data};
 
     unless ( @_ ) {     # called w/o arguments
@@ -223,16 +260,13 @@ sub param {
     my $args = {-name => undef,  -value => undef, @_ };
     my ($name, $value) = ( $args->{'-name'}, $args->{'-value'} );
 
-    if ( $name && $value) { # called with extended name/value syntax:
-                            # (-name=>'..', -value=>'..')
+    if ( $name && $value) { # called with extended name/value syntax
         return $self->_assign_param($name, $value);
 
     } elsif ( $name ) {     # called with extended name syntax (-name=>'')
-
         return $self->_return_param( $name );
 
-    } elsif ( @_ == 2 ) {   # called with simple name/value syntax:
-                            # (key, value)
+    } elsif ( @_ == 2 ) {   # called with simple name/value syntax
         return $self->_assign_param($_[0], $_[1]);
 
     }
@@ -244,6 +278,19 @@ sub param {
         $class->param("name", "value"), \n
         $class->param(-name=>"name", -value=>"value")~;
 }
+
+
+
+
+# options(): returns the options passed to the constructor. Mostly
+# used by the driver developers
+sub options {   return $_[0]->{_options}    }
+
+
+
+# raw_data(): returns the raw data in hashref form.
+# This method is for the drivers only
+sub raw_data {  return $_[0]->{_data}       }
 
 
 
@@ -273,6 +320,27 @@ sub id {
         croak "Usage: $class->id()";
     }
     return $self->{_data}->{_session_id};
+}
+
+
+
+# remote_addr(): returns the IP address of the user responsible
+# for the new session
+sub remote_addr {
+    my $self = shift;
+
+    return $self->{_data}->{_session_remote_addr};
+}
+
+
+
+# remote_host(): returns the claimed hostname of the requested client.
+# If reverse lookup is not enabled and/or could not be succeeded, it is
+# the same as the remote_addr
+sub remote_host {
+    my $self = shift;
+
+    return $self->{_data}->{_session_remote_host};
 }
 
 
@@ -310,12 +378,12 @@ sub _date_shortcuts {
         M => 2592000,
         y => 31536000
     };
-		
-	my ($d, $l) = $arg =~ m/^(\d+)(\w)$/;
 
-	if ( $d && $l) {
-		return $d * $map->{"$l"};
-	}
+    my ($d, $l) = $arg =~ m/^(\d+)(\w)$/;
+
+    if ( defined ($d) && defined ($l) ) {
+        return $d * $map->{"$l"};
+    }
 
     return $arg;
 }
@@ -336,7 +404,7 @@ sub expires {
     }
 
     my $in_seconds = _date_shortcuts($date);
-	
+
     $self->{_data}->{_session_etime} = time() + $in_seconds;
 }
 
@@ -395,7 +463,7 @@ sub save_param {
     my $cgi  = shift;
     my $class = ref($self) || $self;
 
-    unless ( $cgi->isa("CGI") ) {
+    unless ( $cgi->UNIVERSAL::isa("CGI") ) {
         # We didn't receive a CGI object as the first argument
         croak "Usage: $class->save_param(\$cgi [,\@array]). Where \$cgi is the CGI.pm object";
     }
@@ -458,7 +526,7 @@ sub load_param {
     my $class = ref($self) || $self;
 
 
-    unless ( $cgi->isa("CGI") ) {
+    unless ( $cgi->UNIVERSAL::isa("CGI") ) {
         # We didn't receive a CGI object as the first argument
         croak "Usage: $class->load_param(\$cgi [,\@array]). Where \$cgi is the CGI.pm object";
     }
@@ -507,7 +575,7 @@ sub load_param {
 
 
 
-# Clears all the data from the session
+# clear(): clears data from the session
 # Usage: CLASS->clear([\@array])
 sub clear {
     my $self = shift;
@@ -538,15 +606,15 @@ sub clear {
 
 
     # getting session id
-    my $sid = $self->id();
+    my $sid = $self->{_data}->{_session_id};
 
     # let's synchronize data in disk with the in-memory session data
-    $self->store($sid, $self->{_data}, $self->{_options});
+    $self->store( $sid );
 }
 
 
 
-# sets/gets the error message to/from $CGI::Session::errstr
+# error(): sets/gets the error message to/from $CGI::Session::errstr
 # Usage: CLASS->error([$msg]);
 sub error {
     my ($self, $msg) = @_;
@@ -565,7 +633,7 @@ sub delete {
 
     my $sid = $self->id();
 
-    $self->tear_down($sid, $self->{_options});
+    $self->tear_down($sid);
 }
 
 
@@ -591,7 +659,6 @@ sub dump {
     my $d = Data::Dumper->new([$self], ["session"]);
 
     if ( $file ) {
-        # I am sure this line is subject to race conditions.
 
         unless ( open (DUMP, '<' . $file) ) {
             open (DUMP, '>' . $file) or croak "Couldn't' dump the object, $!\n";
@@ -631,6 +698,11 @@ sub TIEHASH {
 # RETURN VALUE: any Perl data stored in the session
 sub FETCH {
     my ($self, $key) = @_;
+
+    # First I thought calling param() would be a good a idea.
+    # But in that case user will not have access to SPECIAL NAMES.
+    # So I decided to give the user read access to those keys bu
+    # not calling param().
     return $self->{_data}->{$key};
 }
 
@@ -643,19 +715,19 @@ sub FETCH {
 sub STORE {
     my ($self, $key, $value) = @_;
 
-	# Map of the function related to the private data.
-	# If user tries to set these values, we'll do it for them.
-	# For everything else we'll call param() method which will return undef
-	# on Special Names (see manual)
-	my %ok_map = (
-		_session_etime => \&expires,
-		_session_atime => \&atime,
-	);
+    # Map of the function related to the private data.
+    # If user tries to set these values, we call respective methods
+    # But for anything else we call param(), which will be ignoring
+    # special names
+    my %ok_map = (
+        _session_etime => \&expires,
+        _session_atime => \&atime,
+    );
 
-	if ( exists $ok_map{$key} ) {
-		return $ok_map{$key}->($self, $value);
-		
-	}
+    if ( exists $ok_map{$key} ) {
+        return $ok_map{$key}->($self, $value);
+
+    }
 
     return $self->param($key, $value);
 }
@@ -776,6 +848,10 @@ CGI::Session - Perl extension for persistent session management
 
     # Tricks are endless!
 
+
+=head1 WARNING
+
+This is a developer release.
 
 =head1 NOTE
 
@@ -959,8 +1035,8 @@ for both interfaces. Which interface to use is totally up to you.
 I personally prefer Object Oriented Interface, for it is full of
 features.
 
-Also, somewhere in this manual I will talk about L<"SPECIAL NAMES"> which 
-are not accessible via C<param()> method for neither writing nor reading. 
+Also, somewhere in this manual I will talk about L<"SPECIAL NAMES"> which
+are not accessible via C<param()> method for neither writing nor reading.
 But this rule differ in tied hash access method, where all those
 L<"SPECIAL NAMES"> but few are writable
 
@@ -992,19 +1068,19 @@ expression as the first argument:
 
     # OO interface
     $session = new CGI::Session::File(undef,
-        {            
+        {
             Directory    => "/tmp/sessions",
     });
 
 
     # tie() interface
-    tie %session, "CGI::Session::File", undef, {            
+    tie %session, "CGI::Session::File", undef, {
             Directory    => "/tmp/sessions"  };
 
 We're passing two arguments, the fist one is session id, which is undefined
 in our case, and the second one is the anonymous hash
 
-    {       
+    {
         Directory    => "/tmp/sessions",
     }
 
@@ -1107,7 +1183,7 @@ minor changes:
     my $cgi = new CGI;
     my $sid = $cgi->cookie(SESSION_COOKIE) || undef;
     my $session = new CGI::Session::File($sid,
-        {            
+        {
             Directory    => "/tmp/sessions"
         });
 
@@ -1177,7 +1253,7 @@ will be set to an error message in case something goes wrong. So you should
 always check the return value of the methods to see if they succeeded:
 
     my $session = new CGI::Session::File($sid,
-        {            
+        {
             Directory    => "/tmp/sessions"
         }) or die $CGI::Session::errstr;
 
@@ -1189,7 +1265,7 @@ always check the return value of the methods to see if they succeeded:
 
 After you create a session id or initialize existing one you can now save
 data in the session using C<param()> method: (see L<methods|"METHODS">)
-	
+
     $session->param('email', 'sherzodr@cpan.org');
 
 This will save the email address sherzodr@cpan.org in the C<email> session
@@ -1197,8 +1273,8 @@ parameter. A little different syntax that also allows you to do this is:
 
     $session->param(-name=>'email', -value=>'sherzodr@cpan.org');
 
-	# tie() interface
-	$session{email} = 'sherzodr@cpan.org';
+    # tie() interface
+    $session{email} = 'sherzodr@cpan.org';
 
 =item 2
 
@@ -1212,17 +1288,17 @@ and their values indicating the number of items in the cart.
 item names here to make the things clearer for the reader):
 
     # OO Interface
-	$session->param(-name=>'cart', -value=>{
+    $session->param(-name=>'cart', -value=>{
                                     "She Bang Hat"    => 1,
                                     "The Came T-shirt"=> 1,
                                     "Perl Mug"        => 2
                                    });
 
-	# tie() Interface
-	$session{cart} = {	"She Bang Hat"		=> 1,
-                         "The Came T-shirt"	=> 1,
-                         "Perl Mug"			=> 2 };
-								
+    # tie() Interface
+    $session{cart} = {  "She Bang Hat"      => 1,
+                         "The Came T-shirt" => 1,
+                         "Perl Mug"         => 2 };
+
 the same assignment could be performed in the following two steps as well:
 
     my $cart = {
@@ -1231,11 +1307,11 @@ the same assignment could be performed in the following two steps as well:
         "Perl Mug"        => 2
     };
 
-	# OO Interface
+    # OO Interface
     $session->param(-name=>'cart', -value=>$cart);
 
-	# tie() Interface
-	$session{cart} = $cart;
+    # tie() Interface
+    $session{cart} = $cart;
 
 =item 3
 
@@ -1258,7 +1334,7 @@ form:
     }
 
 
-	# tie() Interface: n/a
+    # tie() Interface: n/a
 
 It means, if the search form had a text field with the name "keyword":
 
@@ -1328,19 +1404,19 @@ You cannot access these L<"SPECIAL NAMES"> directly via C<param()> either, but
 you can do so by provided accessory methods, C<id()>, C<ctime()>, C<atime()> and
 C<expires()> (see L<methods|"METHODS">).
 
-If you are using tied hash access interface, these rules differ slightly, 
+If you are using tied hash access interface, these rules differ slightly,
 where you can read all these name from the hash, but you can set only
 _session_etime and _session_atime names:
 
-	printf ("Session last accessed on %s\n", localtime($session{_session_atime}));
+    printf ("Session last accessed on %s\n", localtime($session{_session_atime}));
 
-	# updating last access time. You don't have to do it, it will be done 
-	# automatically though
-	$session{_session_atime} = time();
+    # updating last access time. You don't have to do it, it will be done
+    # automatically though
+    $session{_session_atime} = time();
 
 
-	# setting expiration date, setting in 2 months
-	$session{_session_etime} = "2M";
+    # setting expiration date, setting in 2 months
+    $session{_session_etime} = "2M";
 
 =head2 ACCESSING SESSION DATA
 
@@ -1409,11 +1485,11 @@ When the user click on the "clear the cart" button or purchases the contents
 of the shopping cart, that's a clue that we have to clear the cart.
 C<CGI::Session>'s L<clear()|"METHODS"> method deals with clearing the session data:
 
-	# OO Interface
+    # OO Interface
     $session->clear("cart");
-    
-	# tie() Interface
-	delete $session{cart};
+
+    # tie() Interface
+    delete $session{cart};
 
 What happens is, it deletes the given parameter from the session for good.
 If you do not pass any arguments to C<clear()>, then all the parameters
@@ -1429,12 +1505,12 @@ the C<CGI::Session> will not have access to the pervious session at all,
 because it was deleted from the disk for good. So it will have to generate
 a new session id instead:
 
-	# OO Interface
-	$session->delete();
+    # OO Interface
+    $session->delete();
 
-	# tie() Interface:
-	tied(%session)->delete();
-	
+    # tie() Interface:
+    tied(%session)->delete();
+
 
 =head2 CLEAR OR DELETE?
 
@@ -1657,15 +1733,15 @@ quite challenging  task. But CGI.pm's "sticky" behavior comes quite handy here.
 All you need to do is to load the parameters from the session to your CGI
 object, then CGI.pm automatically restores the previous selection of checkboxes:
 
-	# load it from the disk to the CGI.pm object
-	$session->load_param($cgi, "lists");
+    # load it from the disk to the CGI.pm object
+    $session->load_param($cgi, "lists");
 
-	# now we can just print the checkbox, and previously saved checks
-	# would remain selected:
-	print $cgi->checkbox_group(-name=>"lists", -values=>["CGI-Perl", "Perl5-Porters", "CGI-Session"]);
+    # now we can just print the checkbox, and previously saved checks
+    # would remain selected:
+    print $cgi->checkbox_group(-name=>"lists", -values=>["CGI-Perl", "Perl5-Porters", "CGI-Session"]);
 
 
-Note: C<load_param()> and C<save_param()> methods didn't work on parameters that 
+Note: C<load_param()> and C<save_param()> methods didn't work on parameters that
 return multiple values. This problem was fixed in version 2.6 of the library.
 
 =item clear()
@@ -1680,18 +1756,18 @@ shopping cart when he/she click on the 'clear the cart' link:
 
     $session->clear(["SHOPPING_CART"]);
 
-	# tie() Interface
-	delete $session{"SHOPPING_CART"};
-	
+    # tie() Interface
+    delete $session{"SHOPPING_CART"};
+
 
 I could as well use C<clear()> with no arguments, in which case it would
 delete all the data from the session, not only the SHOPPING_CART:
 
-	# OO Interface
-	$session->clear();
+    # OO Interface
+    $session->clear();
 
-	# tie() Interface
-	%session = ();
+    # tie() Interface
+    %session = ();
 
 =item expires()
 
@@ -1732,10 +1808,10 @@ as a number of seconds, or a special shortcut for date values. For example:
 For tie() interface you will need to update one of the L<"SPECIAL NAMES">
 C<_session_etime>:
 
-	$session{_session_etime} = "2d";
+    $session{_session_etime} = "2d";
 
-	printf("Your session will expires in %d seconds\n", 
-		$session{_session_etime} - time);
+    printf("Your session will expires in %d seconds\n",
+        $session{_session_etime} - time);
 
 Here is the table of the shortcuts available for C<expires()>:
 
@@ -1759,32 +1835,32 @@ see L<expiring sessions|"EXPIRING SESSIONS"> for more on this.
 Returns the time() value of the date when the session was created:
 
     # OO Interface
-	printf("Session was created on %s\n", localtime($session->ctime));
+    printf("Session was created on %s\n", localtime($session->ctime));
 
-	# tie() Interface
-	printf("Session was created on %s\n", localtime($session{_session_ctime});
+    # tie() Interface
+    printf("Session was created on %s\n", localtime($session{_session_ctime});
 
 =item atime()
 
 Returns the time() value of the date when the session was last accessed:
 
-	# OO Interface
+    # OO Interface
     printf("Session was last accessed on %s\n", localtime($session->atime));
     printf("Session was last accessed %d seconds ago\n", time() - $session->atime);
 
-	# tie() Interface
-	printf("Session was last accessed on %s\n", localtime($session{_session_atime}));
+    # tie() Interface
+    printf("Session was last accessed on %s\n", localtime($session{_session_atime}));
     printf("Session was last accessed %d seconds ago\n", time() - $session{_session_atime});
 
 =item delete()
 
 deletes the session data from the disk permantly:
 
-	# OO Interface
-	$session->delete();
+    # OO Interface
+    $session->delete();
 
-	# tie() Interface
-	tied(%session)->delete();
+    # tie() Interface
+    tied(%session)->delete();
 
 =back
 
@@ -1810,40 +1886,29 @@ other part.
 
 =head2 WHAT ARE THE SPECS?
 
-=over 4
+Specifictions for those methods we a little complex in previous versions
+of CGI::Session. But as of 2.8 I decided to pick a slightly different approach.
+Now all the driver methods receive two arguments, $self, and $sid. To give
+access to driver developers for other undelying data, I added two more
+methods to the library: <opions()> and C<raw_data()>. C<options()> returns
+a hashref that contains the options passed to the  constructor. For
+CGI::Session::DB_File driver for example, this has contains:
 
-=item *
-
-C<store()> will receive four arguments, C<$self>, which is the object itself,
-C<$sid>, which is the session id, C<$hashref>, which is the session data as
-the reference to an antonymous hash, and <$options>, which is another hash
-reference that was passed as the second argument to C<new()>. C<store()>'s
-task is to store the hashref (which is the session data)in the disk in such
-a way so that it could be retrieved later. It should return true on success,
-undef otherwise, passing the error message to C<$self-E<gt>error()> method.
-
-
-=item *
-
-C<retrieve()> will receive three arguments, C<$self>, which is the object
-itself, C<$sid>, which is the session id and C<$options>, which is the
-hash references passed  to C<new()> as the first argument. C<retrieve()>'s
-task is to access the data which was saved previously by the C<store()>
-method, and re-create the same C<$hashref> as C<store()> once received, and
-return it. Method should return the data on success, undef otherwise,
-passing the error message to C<$self-E<gt>error()> method.
+    $options = {
+        sid => $sid,
+        FileName => 'some-file.db',
+        LockDirectory => '/tmp'
+    };
 
 
-=item *
+Although it contains session id, DO NOT use that session id from w/in your
+methods.
 
-C<tear_down()> is called when C<delete()> is called. So its task is to
-delete the session data and all of its traces from the disk. C<tear_down()>
-will receive three arguments, C<$self>, which is the object itself, C<$sid>,
-which is the session id and C<$options>, which is the hash reference passed
-to C<new()> as the second argument. The method should return true on
-success, undef otherwise, passing the error message to C<$self-E<gt>error()>.
-
-=back
+C<raw_data()> method on the other hand provides the driver methods with a
+raw data. Mostly this data is required for the C<store()> method, which needs to
+store the data in the disk. Raw data is an annonymous hash which holds key/value
+pairs of the session data. As for the session id, it could be acquired via
+the public C<id()> method.
 
 If you open the B<dev/> folder in the C<CGI::Session> distribution, you will
 find a blueprint for the driver, B<MyDriver.pm>, which looks something like
@@ -1857,25 +1922,29 @@ this:
 
     # all other driver specific libraries go below
 
-
     sub store {
-        my ($self, $sid, $hashref, $options) = @_;
+        my ($self, $sid) = shift;
 
+        my $options = $self->options();
+        my $data    = $session->raw_data();
 
         return 1;
     }
 
 
     sub retrieve {
-        my ($self, $sid, $options) = @_;
+        my ($self, $sid)    = @_;
+        my $options = $self->options();
+        my $sid     = $self->id();
 
         return {};
     }
 
 
     sub tear_down {
-        my ($self, $sid, $option) = @_;
+        my ($self, $sid) = @_;
 
+        my $options = $self->raw_data();
 
         return 1;
     }
@@ -1897,7 +1966,7 @@ id for new sessions.
 
 =back
 
-The challenging part might seem to store the C<$hashref> and to be able
+The challenging part might seem to store the C<ra_data> and to be able
 to restore it back. But there are already libraries that you can make use of
 to do this job very easily. Drivers that come with C<CGI::Session> depend on
 L<Data::Dumper||Data::Dumper>, but you can as well go with L<Storable> or L<FreezeThaw>
@@ -1914,7 +1983,7 @@ please refer to the driver manuals distributed with the L<package|"DISTRIBUTION"
 
 =head2 OTHER NOTES
 
-Don't forget to include an empty DESTROY() method in your library for
+Don't forget to include an empty DESTROY() method in your driver for
 CGI::Session's AUTOLOAD would be looking for it thus wasting its precious time.
 
 =head1 TODO
@@ -1930,15 +1999,16 @@ Fix C<expires()> and implement expiring sessions in more friendly way
 
 =item 2
 
-Implement more sophisticated locking mechanism for session data
+Implement more sophisticated locking mechanism for session data.
 
 =item 3
 
-Customizable session id generator
+Customizable session id generator. It currently uses b64digest(). But
+some people might prefer hexdigest(). So we have to make them happy too.
 
 =item 4
 
-Combining passive client identification methods
+Making use of some passive client identification methods.
 
 =back
 

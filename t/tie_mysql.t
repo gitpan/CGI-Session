@@ -1,25 +1,15 @@
-#!/usr/bin/perl
-
 # file.t - CGI::Session::MySQL test suite
 
 use strict;
 use Test;
 use CGI;
-use CGI::Session::MySQL;
 
-# Checking if DBI is available
-eval "require DBI";
+eval {require DBI; require DBD::mysql; require CGI::Session::MySQL};
 if ( $@ ) {
-	print "skip\n";
-	exit(0);
+    print "1..0\n";
+    exit;
 }
 
-# Checking if DBI supports MySQL
-eval "require DBD::mysql";
-if ( $@ ) {
-	print "skip\n";
-	exit(0);
-}
 
 my $hashref = {
 	f_name	=> "Sherzod",
@@ -34,7 +24,6 @@ my $arrayref = [qw(one two three four five six seven eight nine ten)];
 my $scalar = "CGI::Session";
 
 
-ok(1);							# 1: Loaded
 
 my $cgi		= new CGI;
 
@@ -45,12 +34,12 @@ $dbh = DBI->connect("dbi:mysql:test", $ENV{USER} || 'test', undef,
 
 unless ( $dbh ) {
 	print "skip\n";
-	exit(0);
+	exit;
 }
 
 $dbh->do(qq|DROP TABLE IF EXISTS sessions|);
 $dbh->do(qq|CREATE TABLE sessions ( id CHAR(32) NOT NULL PRIMARY KEY, a_session TEXT )|)
-		or print "skip\n", exit(0);
+		or print "skip\n", exit;
 
 
 my $_options= { LockHandle=>$dbh, Handle=>$dbh};
@@ -173,5 +162,5 @@ ok($session{_session_etime} > time());	# 34: Checking if we could set it
 
 
 BEGIN {
-    plan tests => 1, todo=>[2,34];
+    plan todo=>[1,34];
 }

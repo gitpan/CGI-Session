@@ -3,10 +3,11 @@ package CGI::Session::File;
 use strict;
 use vars qw($VERSION);
 use base qw(CGI::Session CGI::Session::MD5);
-use Carp 'croak';
+
 use File::Spec;
 use Fcntl qw(:DEFAULT :flock);
 use Data::Dumper;
+use Safe;
 
 
 ###########################################################################
@@ -23,68 +24,73 @@ use Data::Dumper;
 ###########################################################################
 
 
-
-$Data::Dumper::Indent = 0;
-$VERSION = "2.5";
+$VERSION = "2.6";
 
 
-# So that CGI::Session's AUTOLOAD doesn't bother looking for it. 
+# Configuring Data::Dumper for our needs
+$Data::Dumper::Indent	= 0;
+$Data::Dumper::Purity	= 0;
+$Data::Dumper::Useqq	= 1;
+$Data::Dumper::Deepcopy	= 0;
+
+
+
+# So that CGI::Session's AUTOLOAD doesn't bother looking for it.
 # Too expensive
-sub DESTROY { }
+sub DESTROY {
+    my $self = shift;
+    my $options = $self->options;
 
+}
 
 
 # Constructor is inherited from base class
 
 
-
 sub retrieve {
-    my ($self, $sid, $options) = @_;
+    my ($self, $sid) = @_;
 
+    my $options = $self->options();
     # getting the options passed to the constructor
     my $dir     = $options->{Directory};
 
-	unless ( $dir ) {
-		my $class = ref($self);
-		croak "Usage: $class->new(\$sid, {Directory=>'/some/dir'})";
-	}
-
     # creating an OS independant path to the session file and the lockfile
-    my $file    = File::Spec->catfile($dir, "CGI-Session-$sid.dat");    
-    
-    sysopen(LCK, $file, O_RDWR|O_CREAT, 0644) or $self->error("Could not open $file: $!"), return;
-    flock(LCK, LOCK_SH) or $self->error("Couldn't acquite lock on $file: $!"), return;
-	
-    # getting the data from the session file
+    my $file    = File::Spec->catfile($dir, "CGI-Session-$sid.dat");
+
     local ( $/, *FH );
     sysopen(FH, $file, O_RDONLY) or $self->error("Couldn't open data file ($file), $!"), return;
     my $tmp = <FH>;
     close (FH);
 
-    # intializing the hashref
-    my $data = {}; eval $tmp;
+	# Following line is to keep -T line happy. In fact it is an evil code,
+	# that's why we'll be compiling $tmp under the restricted eval() later
+	# to ensure it's indeed safe. If you have a better solution, please
+	# take this burden of guilt off my conscious.
+    ($tmp) = $tmp =~ m/^(.+)$/s;
 
-    # did something go wrong?
-    if ( $@ ) { $self->error("Couldn't eval() the data, $!"), return }
+    my $cpt = Safe->new("CGI::Session::File::CPT");
+    $cpt->reval($tmp);
 
-    # returning the eval()ed data
-    return $data;
+    if ( $@ ) {
+        $self->error("Couldn't eval() the data, $!"), return undef;
+    }
+    
+    return $CGI::Session::File::CPT::data;
 }
 
 
 
 sub store {
-    my ($self, $sid, $hashref, $options) = @_;
+    my ($self, $sid) = @_;
+
+    my $hashref = $self->raw_data();
+    my $options = $self->options();
 
     # getting the options passed to the constructor
     my $dir     = $options->{Directory};
 
     # creating an OS independant path
     my $file    = File::Spec->catfile($dir, "CGI-Session-$sid.dat");
-	
-    # opening the lockfile
-    sysopen (LCK, $file, O_RDWR|O_CREAT, 0664) or $self->error("Couldn't open $file: $!"), return;
-    flock(LCK, LOCK_EX) or $self->error("Couldn't acquire lock on $file, $!"), return;
 
     # storing the data in the session file
     local (*FH);
@@ -103,12 +109,14 @@ sub store {
 
 
 sub tear_down {
-    my ($self, $sid, $options) = @_;
-   
-    my $dir = $options->{Directory};    
+    my ($self, $sid) = @_;
+
+    my $options = $self->options();
+
+    my $dir = $options->{Directory};
     my $file = File::Spec->catfile($dir, "CGI-Session-$sid.dat");
-    
-	unlink $file or $self->error("Couldn't delete the session data $file: $!"), return;
+
+    unlink $file or $self->error("Couldn't delete the session data $file: $!"), return;
     return 1;
 }
 
@@ -126,29 +134,23 @@ CGI::Session::File - For stroing session data in plain files.
 
 =head1 SYNOPSIS
 
-	use constant COOKIE => "TEST_SID";	# cookie to store the session id
+    use CGI::Session::File;
+    $session = new CGI::Session::File(undef, {Directory => '/tmp/sessions'});
 
-	use CGI::Session::File;
-	
-	$session = new CGI::Session::File(undef,
-		{			
-			Directory		=>'/tmp/sessions'
-		});
+    # for more examples see CGI::Session manual
 
-	# for more examples see CGI::Session manual
-	
 =head1 DESCRIPTION
 
-C<CGI::Session::File> is the driver for the L<CGI::Session|CGI::Session> 
-to store and retrieve the session data in and from plain text files. To be 
-able to write your own drivers for the L<CGI::Session|CGI::Session>, please
-consult L<developer section|CGI::Session/DEVELOPER SECTION> of the 
-L<manual|CGI::Session>
+C<CGI::Session::File> is the driver for the L<CGI::Session|CGI::Session>
+to store and retrieve the session data in and from plain text files.
+
+To be able to write your own drivers for L<CGI::Session>, please consult
+L<developer section|CGI::Session/DEVELOPER SECTION> of L<CGI::Session manual|CGI::Session>.
 
 Constructor requires two arguments, as all other L<CGI::Session> drivers do.
 The first argument has to be session id to be initialized (or undef to tell
 the CGI::Session  to create a new session id). The second argument has to be
-a reference to a hash with two following require key/value pairs:
+a reference to a hash with the two following required key/value pairs:
 
 =over 4
 
@@ -158,7 +160,7 @@ path in the file system where all the session data will be stored
 
 =back
 
-In versions prior to 2.6 one also had to indicate the LockDirectory, but
+In versions prior to 2.6 one also had to indicate the C<LockDirectory>, but
 it is no longer required.
 
 C<CGI::Session::File> serializes session data using  L<Data::Dumper|Data::Dumper>
@@ -170,8 +172,8 @@ Sherzod B. Ruzmetov <sherzodr@cpan.org>
 
 =head1 COPYRIGHT
 
-	This library is free software and can be redistributed under the same
-	conditions as Perl itself.
+    This library is free software and can be redistributed under the same
+    conditions as Perl itself.
 
 =head1 SEE ALSO
 

@@ -1,0 +1,118 @@
+.::CGI::Session::. version 0.01
+===================
+
+.:DESCRIPTION:.
+Front end utility for Apache::Session by Jeffrey Baker and set of modules it comes with.
+The interface is pretty similar to that of CGI.pm with some additional methods.
+So it shouldn't take users long to get used to it.
+
+.:Example:.
+
+    #!/usr/bin/perl -w
+
+    use strict;
+    use CGI;
+    use CGI::Session::DB_File;
+
+    my ($cgi, $Session, $sid);
+
+    $cgi = new CGI;
+
+    $sid = $cgi->cookie("Example2_SID");
+
+    $Session = new CGI::Session::DB_File($sid, {FileName=>'sessions.db', LockDirectory=>'.'});
+
+    if ($sid) {
+        $Session->load_param($cgi);
+
+    }
+
+    my $cookie = $cgi->cookie(-name=>'Example2_SID', -value=>$Session->id, -expires=>"+1d");
+
+    print $cgi->header(-cookie=>$cookie),
+        $cgi->start_html("CGI::Session / Example 2"),
+        $cgi->h2("Example 2");
+
+
+    if ($cgi->param('_cmd') eq 'save') {
+
+        $Session->save_param($cgi);
+        print $cgi->div("Thanks, for your registration. Just hope that we're not one of those bastards who keep sending you all kinds of spam.");
+
+        # now you could do smt more with that email, but we won't.
+
+    } else {
+
+        $Session->param('name') and
+            print $cgi->div("Wellcome back" . $Session->param('name') );
+
+        print $cgi->h2("Please, subscribe to our magazine");
+        print $cgi->start_form,
+            $cgi->hidden(-name=>'_cmd', -value=>'save'),
+            $cgi->div("Your name:"),
+            $cgi->textfield(-name=>'name', -size=>40),
+            $cgi->div("Your email address:"),
+            $cgi->textfield(-name=>'email', -size=>40),$cgi->br,
+            $cgi->submit(-value=>'Subscribe'),
+            $cgi->end_form;
+
+    }
+
+
+    print $cgi->end_html;
+
+
+
+.:INSTALLATION:.
+
+After downloading the destribution, you need to uncompress and unpack it.
+In windows you could use WinZip. In *.nix you can use gzip to uncompress
+the file and use 'tar' to unpack it. You can combine the two steps into
+one command like:
+
+   % gzip -dc CGI-Session-0.01.tar.gz | tar -xof -
+
+Then cd into the folder:
+
+   % cd CGI-Session-0.01
+
+And perform the following commands:
+
+   perl Makefile.PL
+   make
+   make install
+   make realclean
+
+If you are going to do a standard installation, just 
+run the 'install' script found in the distribution folder like
+
+   % ./install
+
+
+
+.:DEPENDENCIES:.
+
+Perl 5 or later is required to install this module.
+Also following Perl modules are required
+
+Apache::Session
+Storable
+
+If your distribution of Perl doesn't provide this module, please
+install it from http://www.cpan.org. Or use your local copy of CPAN
+module like:
+
+% perl -MCPAN -e shell
+cpan> install module_name
+
+
+.:COPYRIGHT AND LICENCE:.
+
+This library is a free software. You can modify and destribute this
+under the same condition as Perl itself.
+
+
+.:AUTHOR:.
+
+Sherzod B. Ruzmetov, sherzodr@cpan.org
+

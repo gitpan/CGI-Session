@@ -1,4 +1,4 @@
-# $Id: Tutorial.pm,v 3.8 2005/02/09 08:30:38 sherzodr Exp $
+# Tutorial.pm,v 3.8 2005/02/09 08:30:38 sherzodr Exp
 
 package CGI::Session::Tutorial;
 $CGI::Session::Tutorial::VERSION = '3.8';

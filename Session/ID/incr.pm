@@ -1,6 +1,6 @@
 package CGI::Session::ID::incr;
 
-# $Id: incr.pm,v 1.5 2005/02/17 03:20:34 sherzodr Exp $
+# incr.pm,v 1.5 2005/02/17 03:20:34 sherzodr Exp
 
 use strict;
 #use diagnostics;

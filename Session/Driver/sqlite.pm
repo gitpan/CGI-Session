@@ -1,6 +1,6 @@
 package CGI::Session::Driver::sqlite;
 
-# $Id: sqlite.pm,v 1.3 2005/02/09 08:30:42 sherzodr Exp $
+# sqlite.pm,v 1.3 2005/02/09 08:30:42 sherzodr Exp
 
 use strict;
 #use diagnostics;

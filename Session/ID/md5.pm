@@ -1,6 +1,6 @@
 package CGI::Session::ID::md5;
 
-# $Id: md5.pm,v 1.5 2005/02/17 03:20:34 sherzodr Exp $
+# md5.pm,v 1.5 2005/02/17 03:20:34 sherzodr Exp
 
 use strict;
 #use diagnostics;

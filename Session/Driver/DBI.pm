@@ -1,6 +1,6 @@
 package CGI::Session::Driver::DBI;
 
-# $Id: DBI.pm,v 1.8 2005/02/11 08:18:27 sherzodr Exp $
+# DBI.pm,v 1.8 2005/02/11 08:18:27 sherzodr Exp
 
 use strict;
 #use diagnostics;

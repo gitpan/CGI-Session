@@ -1,6 +1,6 @@
 package CGI::Session::Driver::mysql;
 
-# $Id: mysql.pm,v 1.6 2005/02/11 08:13:31 sherzodr Exp $
+# mysql.pm,v 1.6 2005/02/11 08:13:31 sherzodr Exp
 
 use strict;
 #use diagnostics;

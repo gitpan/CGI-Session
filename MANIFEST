@@ -1,5 +1,3 @@
-.#Changes.3.10
-.#Session.pm.3.33
 Changes
 docs/rfc2965.txt
 examples/purge.pl
@@ -25,7 +23,6 @@ Session/ID/static.pm
 Session/Serialize/default.pm
 Session/Serialize/freezethaw.pm
 Session/Serialize/storable.pm
-Session/Test/.#Default.pm.1.8
 Session/Test/Default.pm
 Session/Tutorial.pm
 t/g4.t

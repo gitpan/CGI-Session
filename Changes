@@ -1,6 +1,10 @@
 CGI::Session Change Log
 =====================================================================
 
+4.00_08 - Tuesday, March 15, 2005
+
+    * FIX: Changes made in 4.00_07 rolled back
+
 4.00_07 - Sunday, March 13, 2005
 
     * FIX: overloaded objects are now stored properly
@@ -73,4 +77,4 @@ CGI::Session Change Log
 	* Bug in POD documentation is fixed (thanks to Graham Barr)	
 
 
-$Id: Changes,v 3.11 2005/03/13 19:16:21 sherzodr Exp $
+Changes,v 3.12 2005/03/15 16:43:45 sherzodr Exp

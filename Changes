@@ -1,3 +1,7 @@
+What is new in 4.00_05 - Tuesday, February 22, 2005
+
+    * FIX: case insesitivity was not enforced properly in CGI::Session::parse_dsn()
+
 What is new in 4.00_04 - Wednesday, February 16, 2005
 
     * FIX: Minor fix in tests suits and error-checking routines of
@@ -67,4 +71,4 @@ What is new in 3.x?
 
 
 
-Changes,v 3.8 2005/02/17 03:20:34 sherzodr Exp
+Changes,v 3.9 2005/02/22 17:52:23 sherzodr Exp

@@ -1,6 +1,6 @@
 package CGI::Session::DB_File;
 
-# $Id: DB_File.pm,v 3.1 2002/11/27 02:17:02 sherzodr Exp $
+# $Id: DB_File.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $
 
 use strict;
 use base qw(
@@ -40,12 +40,12 @@ sub store {
 sub retrieve {
     my ($self, $sid, $options) = @_;
 
-    # you will need to retrieve the stored data, and 
+    # you will need to retrieve the stored data, and
     # deserialize it using $self->thaw() method
 
     my $args = $options->[1];
     my $file = File::Spec->catfile($args->{Directory}, $args->{FileName} || $FILE_NAME);
-    
+
     tie my %db, "DB_File", $file, O_RDWR|O_CREAT, 0644 or die $!;
     my $data = $self->thaw($db{$sid});
     untie(%db);
@@ -58,7 +58,7 @@ sub retrieve {
 sub remove {
     my ($self, $sid, $options) = @_;
 
-    # you simply need to remove the data associated 
+    # you simply need to remove the data associated
     # with the id
 
     my $args = $options->[1];
@@ -68,8 +68,8 @@ sub remove {
     untie(%db) or die $!;
 
     return 1;
-    
-    
+
+
 }
 
 
@@ -83,9 +83,9 @@ sub teardown {
 
 
 
-# $Id: DB_File.pm,v 3.1 2002/11/27 02:17:02 sherzodr Exp $
+# $Id: DB_File.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $
 
-1;       
+1;
 
 =pod
 
@@ -117,14 +117,14 @@ the session object:
 The only driver option required, as in the above examples, is "Directory", which tells the
 driver where the session file and lock files should be created.
 
-"FileName" option is also available, but not required. 
+"FileName" option is also available, but not required.
 
 =head1 COPYRIGHT
 
 Copyright (C) 2001-2002 Sherzod Ruzmetov. All rights reserved.
 
 This library is free software and can be modified and distributed under the same
-terms as Perl itself. 
+terms as Perl itself.
 
 Bug reports should be directed to sherzodr@cpan.org, or posted to Cgi-session@ultracgis.com
 mailing list.
@@ -165,4 +165,4 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 
 =cut
 
-# $Id: DB_File.pm,v 3.1 2002/11/27 02:17:02 sherzodr Exp $
+# $Id: DB_File.pm,v 3.2 2002/11/27 12:26:03 sherzodr Exp $

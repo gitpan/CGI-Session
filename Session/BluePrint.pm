@@ -1,6 +1,6 @@
 package CGI::Session::BluePrint;
 
-# $Id: BluePrint.pm,v 3.0 2002/11/27 01:48:28 sherzodr Exp $
+# $Id: BluePrint.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
 
 use strict;
 use base qw(
@@ -55,7 +55,7 @@ sub teardown {
 
 
 
-# $Id: BluePrint.pm,v 3.0 2002/11/27 01:48:28 sherzodr Exp $
+# $Id: BluePrint.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
 
 1;       
 
@@ -121,4 +121,4 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 =cut
 
 
-# $Id: BluePrint.pm,v 3.0 2002/11/27 01:48:28 sherzodr Exp $
+# $Id: BluePrint.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $

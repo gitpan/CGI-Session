@@ -1,13 +1,13 @@
 package CGI::Session::Serialize::Default;
 
-# $Id: Default.pm,v 1.4 2002/11/22 22:58:04 sherzodr Exp $ 
+# $Id: Default.pm,v 1.5 2002/11/27 12:26:08 sherzodr Exp $ 
 use strict;
 use Safe;
 use Data::Dumper;
 
 use vars qw($VERSION);
 
-($VERSION) = '$Revision: 1.4 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 1.5 $' =~ m/Revision:\s*(\S+)/;
 
 
 sub freeze {

@@ -1,11 +1,11 @@
 package CGI::Session::Serialize::Storable;
 
-# $Id: Storable.pm,v 1.3 2002/11/11 00:44:29 sherzodr Exp $ 
+# $Id: Storable.pm,v 1.4 2002/11/27 12:26:08 sherzodr Exp $ 
 use strict;
 use Storable;
 use vars qw($VERSION);
 
-($VERSION) = '$Revision: 1.3 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 1.4 $' =~ m/Revision:\s*(\S+)/;
 
 
 sub freeze {
@@ -21,7 +21,7 @@ sub thaw {
     return Storable::thaw($string);
 }
 
-# $Id: Storable.pm,v 1.3 2002/11/11 00:44:29 sherzodr Exp $
+# $Id: Storable.pm,v 1.4 2002/11/27 12:26:08 sherzodr Exp $
 
 1;
 
@@ -98,4 +98,4 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 
 =cut
 
-# $Id: Storable.pm,v 1.3 2002/11/11 00:44:29 sherzodr Exp $
+# $Id: Storable.pm,v 1.4 2002/11/27 12:26:08 sherzodr Exp $

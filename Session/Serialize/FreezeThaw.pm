@@ -1,12 +1,12 @@
 package CGI::Session::Serialize::FreezeThaw;
 
-# $Id: FreezeThaw.pm,v 1.2 2002/11/16 16:33:55 sherzodr Exp $ 
+# $Id: FreezeThaw.pm,v 1.3 2002/11/27 12:26:08 sherzodr Exp $ 
 use strict;
 use FreezeThaw;
 
 use vars qw($VERSION);
 
-($VERSION) = '$Revision: 1.2 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 1.3 $' =~ m/Revision:\s*(\S+)/;
 
 
 sub freeze {

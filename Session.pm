@@ -1,15 +1,18 @@
 package CGI::Session;
 
-# $Id: Session.pm,v 3.2.2.1 2002/11/28 03:16:50 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.2 2002/11/28 03:24:38 sherzodr Exp $
 
 #use strict;
 #use diagnostics;
 use Carp ('confess');
 use AutoLoader 'AUTOLOAD';
 
-use vars qw($VERSION $errstr $IP_MATCH $NAME $API_3);
+use vars qw($VERSION $REVISION $errstr $IP_MATCH $NAME $API_3);
 
-($VERSION)  = '$Revision: 3.2.2.1 $' =~ m/Revision:\s*(\S+)/;
+
+
+($REVISION) = '$Revision: 3.2.2.2 $' =~ m/Revision:\s*(\S+)/;
+$VERSION    = '3.3';
 $NAME     = 'CGISESSID';
 
 # import() - we do not import anything into the callers namespace, however,
@@ -429,7 +432,7 @@ sub flush {
 __END__;
 
 
-# $Id: Session.pm,v 3.2.2.1 2002/11/28 03:16:50 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.2 2002/11/28 03:24:38 sherzodr Exp $
 
 =pod
 
@@ -1111,4 +1114,4 @@ sub cookie {
 
 
 
-# $Id: Session.pm,v 3.2.2.1 2002/11/28 03:16:50 sherzodr Exp $
+# $Id: Session.pm,v 3.2.2.2 2002/11/28 03:24:38 sherzodr Exp $

@@ -1,7 +1,7 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
-# $Id: file.t,v 1.5 2002/11/22 22:54:41 sherzodr Exp $
+# $Id: file.t,v 1.5.4.1 2002/12/04 07:35:09 sherzodr Exp $
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
@@ -42,9 +42,9 @@ $s->param(-name=>'email', -value=>'sherzodr@cpan.org');
 
 ok($s->param(-name=>'email'));
 
-ok(!$s->expire() );
+ok(!$s->expires() );
 
-$s->expire("+10m");
+$s->expires("+10m");
 
 ok($s->expire());
 

@@ -1,6 +1,6 @@
 package CGI::Session;
 
-# $Id: Session.pm,v 3.12.2.5 2003/03/09 11:25:28 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.6 2003/03/10 02:39:35 sherzodr Exp $
 # $Name:  $
 
 use strict;
@@ -10,8 +10,8 @@ use AutoLoader 'AUTOLOAD';
 
 use vars qw($VERSION $REVISION $errstr $IP_MATCH $NAME $API_3 $FROZEN);
 
-($REVISION) = '$Revision: 3.12.2.5 $' =~ m/Revision:\s*(\S+)/;
-$VERSION    = '3.91';
+($REVISION) = '$Revision: 3.12.2.6 $' =~ m/Revision:\s*(\S+)/;
+$VERSION    = '3.92';
 $NAME       = 'CGISESSID';
 
 # import() - we do not import anything into the callers namespace, however,
@@ -444,7 +444,7 @@ sub flush {
 __END__;
 
 
-# $Id: Session.pm,v 3.12.2.5 2003/03/09 11:25:28 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.6 2003/03/10 02:39:35 sherzodr Exp $
 
 =pod
 
@@ -1251,4 +1251,4 @@ sub sync_param {
 
 
 
-# $Id: Session.pm,v 3.12.2.5 2003/03/09 11:25:28 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.6 2003/03/10 02:39:35 sherzodr Exp $

@@ -1,5 +1,10 @@
 Change log for CGI::Session
-  $Date: 2003/03/09 11:25:28 $
+  $Date: 2003/03/10 02:39:35 $
+
+What is new in 3.92
+
+  * Minor fix in Makefile.PL (finally!)
+  * PostgreSQL re-added to the package
 
 What is new in 3.91?
 
@@ -36,4 +41,4 @@ What is new in 3.x?
 	* Bug in POD documentation is fixed (thanks to Graham Barr)	
 
 
-$Id: Changes,v 3.3.2.2 2003/03/09 11:25:28 sherzodr Exp $
+$Id: Changes,v 3.3.2.3 2003/03/10 02:39:35 sherzodr Exp $

@@ -12,6 +12,7 @@ Session/File.pm
 Session/ID/Incr.pm
 Session/ID/MD5.pm
 Session/MySQL.pm
+Session/PostgreSQL.pm
 Session/Serialize/Default.pm
 Session/Serialize/FreezeThaw.pm
 Session/Serialize/Storable.pm

@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use vars qw($VERSION $errstr);
 
-$VERSION = "2.0";
+$VERSION = "2.1";
 
 # constructor
 # Usage: CLASS->new($sid, {Key1 => Value1, Key2 => Value2})
@@ -355,7 +355,7 @@ applications
     use CGI::Session::DB_File;
     use CGI;
 
-    my $cgi = new File;
+    my $cgi = new CGI;
 
     # get the user's session id either from the cookie, or from the query_string.
     # If it is  not present, create a new session for the visitor
@@ -363,7 +363,7 @@ applications
     {
         my $sid = $cgi->cookie("SITE_SID") || $cgi->param("sid") || undef;
 
-        $session  = new CGI::Session::File($sid, { FileName=>'sessions.db',
+        $session  = new CGI::Session::DB_File($sid, { FileName=>'sessions.db',
                                                      LockDirectory=>'/tmp'});
     }
 

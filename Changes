@@ -1,7 +1,7 @@
 
 RCS file: /home/sherzodr/CVS/modules/CGI-Session/Session.pm,v
 Working file: Session.pm
-head: 2.2
+head: 2.4
 branch:
 locks: strict
 access list:
@@ -9,8 +9,16 @@ symbolic names:
 	start: 1.1.1.1
 	UltraCgis: 1.1.1
 keyword substitution: kv
-total revisions: 8;	selected revisions: 8
+total revisions: 10;	selected revisions: 10
 description:
+----------------------------
+revision 2.4
+date: 2002/05/17 17:51:05;  author: sherzodr;  state: Exp;  lines: +4 -4
+Cosmetic touches
+----------------------------
+revision 2.3
+date: 2002/05/17 16:47:08;  author: sherzodr;  state: Exp;  lines: +80 -15
+Bug was fixed thanks to Andy Lester <alester@flr.follett.com> in CGI::Session::File::store() method, which kept failing in Solaris
 ----------------------------
 revision 2.2
 date: 2002/05/14 18:11:10;  author: sherzodr;  state: Exp;  lines: +241 -15

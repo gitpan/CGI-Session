@@ -9,7 +9,7 @@ use Data::Dumper;
 use Fcntl qw(:DEFAULT :flock);
 use DB_File;
 
-$VERSION = "2.0";
+$VERSION = "2.4";
 
 
 # do not use any indentation
@@ -51,8 +51,7 @@ sub store {
     my $lckdir  = $options->{LockDirectory};
 
 	my $lckfile = File::Spec->catfile($lckdir, "CGI-Session-$sid.lck");
-	sysopen (LCK, $lckfile, O_RDWR|O_CREAT, 0664) 
-		or $self->error("Couldn't create lockfile $lckfile, $!"), return;
+	sysopen (LCK, $lckfile, O_RDWR|O_CREAT, 0664) or $self->error("Couldn't create lockfile $lckfile, $!"), return;
 	flock (LCK, LOCK_EX) 
 		or $self->error("Couldn't lock $lckfile, $!"), return;
 	

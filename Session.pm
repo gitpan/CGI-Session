@@ -5,7 +5,7 @@ use strict;
 use Carp;
 use vars qw($VERSION $errstr $AUTOLOAD);
 
-$VERSION = "2.2";
+$VERSION = "2.4";
 
 
 
@@ -352,8 +352,7 @@ __END__;
 
 =head1 NAME
 
-CGI::Session - Perl extension for persistent session management in CGI
-applications
+Session - Perl extension for persistent session management in CGI applications
 
 =head1 SYNOPSIS
 
@@ -361,13 +360,11 @@ applications
     use CGI;
 
     my $cgi = new CGI;
-
     # get the user's session id either from the cookie, or from the query_string.
     # If it is  not present, create a new session for the visitor
     my $session;
     {
         my $sid = $cgi->cookie("SITE_SID") || $cgi->param("sid") || undef;
-
         $session  = new CGI::Session::DB_File($sid, { FileName=>'sessions.db',
                                                      LockDirectory=>'/tmp'});
     }
@@ -378,12 +375,10 @@ applications
         print $cgi->header(-cookie=>$cookie);
     }
 
-
     # now, if the user submitted his first name in a form, we can save it
     # in our session
     my $first_name  = $cgi->param("first_name");
     $session->param("first_name", $first_name);
-
 
     # if it is an old session, we can recognize the user and greet him
     # with his first name:
@@ -406,6 +401,23 @@ as a tutorial on session management. But if you are already familiar with
 C<CGI::Session> please go to the L<methods|"METHODS"> section for the list
 of all the methods available.
 
+=head1 PLATFORMS
+
+The library is compatible with the following platforms:
+
+=over 4
+
+=item * Linux
+
+=item * MSWin32 4.0
+
+=item * MacOS X
+
+=back
+
+Visit http://testers.cpan.org/search?request=dist&dist=CGI-Session for more
+information on tested platforms
+
 =head1 DISTRIBUTION
 
 Latest distribution includes the following libraries:
@@ -418,7 +430,7 @@ L<CGI::Session|CGI::Session> - base class. Heart of the distribution
 
 =item *
 
-L<CGI::Session::File|CGI::Session::File> - driver for storing session data in the plain files
+L<CGI::Session::File|CGI::Session::File> - driver for storing session data in plain files
 
 =item *
 
@@ -432,19 +444,19 @@ L<CGI::Session::MySQL|CGI::Session::MySQL> - driver for storing session data in 
 
 =head1 INSTALLATION
 
-You can download the latest release of the library either from 
+You can download the latest release of the library either from
 http://www.CPAN.org or from http://modules.ultracgis.com. The library
-is distributed as .tar.gz file, which is a gziped tar-ball. You can 
+is distributed as .tar.gz file, which is a gziped tar-ball. You can
 unzip and unpack the package with the following single command (% is your shell
-prompt): 
+prompt):
 
-	% gzip -dc CGI-Session-2.2.tar.gz | tar -xof -
+    % gzip -dc CGI-Session-2.4.tar.gz | tar -xof -
 
 It should create a folder named the same as the distribution name except the
-C<.tar.gz> extension. If you have access to system's @INC folders 
-( usually if you are a super user in the system ) you should go with 
-L<standard installation|"STANDARD INSTALLATION">. Otherwise 
-L<custom installation|"CUSTOM INSTALLATION"> is the way to go. 
+C<.tar.gz> extension. If you have access to system's @INC folders
+( usually if you are a super user in the system ) you should go with
+L<standard installation|"STANDARD INSTALLATION">. Otherwise
+L<custom installation|"CUSTOM INSTALLATION"> is the way to go.
 
 =head2 STANDARD INSTALLATION
 
@@ -1351,8 +1363,34 @@ prefered L<Data::Dumper|Data::Dumper> is, it comes standard with Perl.
 
 Writing and reading from the disk requires a locking mechanism to prevent
 corrupted data. Since CGI::Session itself does not deal with disk access,
-it's the drivers' task to implement their own locking. For more information 
+it's the drivers' task to implement their own locking. For more information
 please refer to the driver manuals distributed with the L<package|"DISTRIBUTION">.
+
+
+=head1 TODO
+
+I still have lots of features in mind that I want to add and/or fix. Here is
+a short list for now. Feel free to email me your fantacies and patches.
+
+=over 4
+
+=item 1
+
+Fix C<expires()> and implement expiring sessions in more friendly way
+
+=item 2
+
+Implement more sophisticated locking mechanim for session data
+
+=item 3
+
+Customizable session id generator
+
+=item 4
+
+Combining passive client identification methods
+
+=back
 
 =head1 FREQUANTLY ASKED QUESTIONS
 
@@ -1380,6 +1418,28 @@ Previous version of CGI::Session had a bug, and returned no id for the session
 if the session didn't exist in the disk. But latest version of the library
 should create a new session if the session data cannot be initialized!
 
+=item Q: Is it safe to store sensitive information in the session?
+
+=item A: Yes, it is safe, but read on
+
+If you noticed in the manual, we were sending on the session id to the client
+either in the form of cookie or a URL parameter. And all other session data
+is stored in the server side. So if you want to store sensitive information
+in your session, I advise you to pick a very safe location for your C<Directory>
+so that no one will be able to access session files to find out the users' passwords,
+etc.
+
+But there are alternative ways of user authentication, which I will try to
+cover in my C<cgiauth||CGI::Session::auth> tutorial soon
+
+=item Q:  Where can I get detailed information on managing user sessions
+in web applications?
+
+=item A: I myself did a lot of research on this, and the only article
+on session management in CGI/Perl was the CGI::Session manual
+at http://modules.ultracgis.com/CGI/Session.html (same as the current
+manual). You can also check out L<Apache::Session>
+
 =back
 
 =head1 HISTORY
@@ -1399,6 +1459,11 @@ module to "freeze" and "thaw" the data.
 =head1 CREDITS
 
 =over 4
+
+=item Andy Lester <alester@flr.follett.com>
+
+Thanks for his patience for helping me to fix the bug in L<CGI::Session::File|CGI::Session::File>,
+which kept failing in Solaris.
 
 =item Brian King <mrbbking@mac.com>
 

@@ -12,7 +12,7 @@ if ( $@ ) {
 	$CGI::Session::errstr = $@;
 }
 
-$VERSION = "2.1";
+$VERSION = "2.3";
 
 # chose the most compat from of serialization in Data::Dumper
 $Data::Dumper::Indent = 0;
@@ -58,12 +58,15 @@ sub retrieve {
     my ($dbh, $lckh) = $self->MYSQL_dbh($option) or return;
 	$lckh->do("LOCK TABLES $TABLE_NAME READ");
 
-    my $tmp = $dbh->selectrow_array(qq|SELECT a_session FROM $TABLE_NAME WHERE id=?|, undef, $sid);	
+    my ($tmp) = $dbh->selectrow_array(qq|SELECT a_session FROM $TABLE_NAME WHERE id=?|, undef, $sid);	
 
 	$lckh->do("UNLOCK TABLES");	
 	
-	my $data = {};
-	eval $tmp;
+	my $data = {}; eval $tmp;
+
+	if ( $@ ) {
+		$self->error("Couldn't eval() the data, $@"), return;
+	}
 
 	return $data;
 }
@@ -245,6 +248,17 @@ suffice for basic use of the library:
 
 For more extensive examples of the L<CGI::Session> usage, please refer to 
 the L<manual|CGI::Session>
+
+=head1 BUGS
+
+Currently no bugs have been detected, but eval() in retrive() method
+produces the following error:
+
+	Use of uninitialized value in string at blib/lib/CGI/Session/MySQL.pm line 65.
+
+Of which I am quite embarrased. Coulld not figure out how to get rid of it.
+So if you can think of any solution, please take this guilt off my conscious
+ASAP.
 
 =head1 AUTHOR
 

@@ -11,7 +11,7 @@ use Data::Dumper;
 
 # do not use any indentation
 $Data::Dumper::Indent = 0;
-$VERSION = "2.2";
+$VERSION = "2.4";
 
 
 # constructor is inherited from CGI::Session
@@ -32,9 +32,10 @@ sub retrieve {
     my $lckfile =File::Spec->catfile($lckdir, "CGI-Session-$sid.lck");
 
     # opening the lockfile
-    sysopen(LCK, $lckfile, O_RDONLY|O_CREAT, 0644) or $self->error("Couldn't create lockfile, $!"), return;
+    sysopen(LCK, $lckfile, O_RDWR|O_CREAT, 0644) or $self->error("Couldn't create lockfile, $!"), return;
     flock(LCK, LOCK_SH) or $self->error("Couldn't acquire lock on $lckfile, $!"), return;
 
+	
     # getting the data from the session file
     local ( $/, *FH );
     sysopen(FH, $file, O_RDONLY) or $self->error("Couldn't open data file ($file), $!"), return;
@@ -62,9 +63,10 @@ sub store {
     # creating an OS independant path
     my $file    = File::Spec->catfile($dir, "CGI-Session-$sid.dat");
     my $lckfile = File::Spec->catfile($lckdir, "CGI-Session-$sid.lck");
+	
 
     # opening the lockfile
-    sysopen (LCK, $lckfile, O_RDONLY|O_CREAT, 0664) or $self->error("Couldn't open $lckfile, $!"), return;
+    sysopen (LCK, $lckfile, O_RDWR|O_CREAT, 0664) or $self->error("Couldn't open $lckfile, $!"), return;
     flock(LCK, LOCK_EX) or $self->error("Couldn't acquire lock on $lckfile, $!"), return;
 
     # storing the data in the session file

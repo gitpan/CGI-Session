@@ -10,6 +10,7 @@ use Test;
 use File::Spec;
 use CGI::Session::File;
 use CGI;
+use Cwd;
 
 BEGIN { 
 	plan tests => 26
@@ -21,7 +22,8 @@ my $cgi = new CGI;
 my $lockdir = "t"; # File::Spec->catfile('t', 'lockdir');
 my $dir     = "t"; # File::Spec->catfile('t', 'sessions');
 
-my $session = new CGI::Session::File(undef, {LockDirectory=>$lockdir, Directory=>$dir});
+my $session = new CGI::Session::File(undef, {LockDirectory=>$lockdir, Directory=>$dir})
+	or die $CGI::Session::errstr;
 
 ok($session);
 ok($session->id);
@@ -32,7 +34,7 @@ $session->param("brothers", BROTHERS);
 $session->param("parents", PARENTS);
 
 ok($session->param("fname"), F_NAME);
-ok($session->param("lname"), L_NAME);
+ok($session->param("lname"), L_NAME); # test 5
 
 my $brothers = $session->param("brothers");
 
@@ -44,7 +46,7 @@ my $parents = $session->param("parents");
 ok($parents->{mom}, "Faroghat");
 ok($parents->{dad}, "Bahodir");
 
-ok($session->param(), 4);
+ok($session->param(), 4); # test 10
 
 $session->clear(["brothers"]);
 
@@ -61,7 +63,7 @@ ok($worked);
 
 $session->save_param($cgi);
 
-ok($session->param, 2);
+ok($session->param, 2); # test 15
 
 $worked = ( $session->param("_session_id") ) ? 0 : 1;
 ok($worked);
@@ -81,7 +83,7 @@ ok($worked);
 ok( $session->atime(), $session->ctime() );
 
 # in the new session, expiration date has to be undef
-ok($session->expires() ? 0 : 1);
+ok($session->expires() ? 0 : 1);  # test 20
 
 # let's set the exp date, and see if expires() works this time
 $session->expires("1M");
@@ -90,18 +92,24 @@ ok($session->expires() ? 1 : 0);
 
 $sid = $session->id();
 #now let's reopen the session with the new SID
+
+undef $session;
+
 $session = new CGI::Session::File($sid, {LockDirectory=>$lockdir, Directory=>$dir});
 
 ok($session);
 ok($session->id(), $sid);
+#warn "atime: ", $session->atime(), "ctime: ", $session->ctime(), "\n";
 ok($session->atime, $session->ctime);
+
+
 
 $session->param("Author", "Sherzod B. Ruzmetov");
 $session->param("Name", "CGI::Session::File");
 $session->param("Version", CGI::Session::File->VERSION);
 $session->param("email", 'sherzodr@cpan.org');
 
-ok($session->param('Version'), $CGI::Session::File::VERSION);
+ok($session->param('Version'), $CGI::Session::File::VERSION);  # 25
 ok($session->param("Name"), "CGI::Session::File");
 
 

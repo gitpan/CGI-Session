@@ -1,4 +1,4 @@
-# $Id: Makefile.PL,v 3.3.2.2 2002/11/28 03:07:40 sherzodr Exp $
+# $Id: Makefile.PL,v 3.3.2.3 2002/11/28 06:49:16 sherzodr Exp $
 
 use strict;
 use ExtUtils::MakeMaker;
@@ -49,7 +49,7 @@ WriteMakefile(
     NAME            => 'CGI::Session',
     VERSION_FROM    => 'Session.pm',
     PREREQ_PM       => {
-                    Digest::MD5 => undef,
+                    'Digest::MD5' => undef,
     },
     ABSTRACT        => 'Persistent session in CGI applications',
     AUTHOR          => 'Sherzod Ruzmetov <sherzodr@cpan.org>',

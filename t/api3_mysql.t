@@ -1,14 +1,13 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
-# $Id: mysql.t,v 1.3 2002/11/22 22:54:41 sherzodr Exp $
+# $Id: api3_mysql.t,v 1.1 2002/11/22 22:54:41 sherzodr Exp $
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
 BEGIN { 
-    # Skip the test all together
-    
+
     # If you want to run MySQL tests, uncomment the following two
     # lines, create a table called "sessions" according to the
     # CGI::Session::MySQL table in the test database. 
@@ -34,7 +33,9 @@ BEGIN {
     
     plan(tests => 14); 
 };
-use CGI::Session::MySQL;
+
+
+use CGI::Session qw/-api3/;
 ok(1); # If we made it this far, we're ok.
 
 #########################
@@ -48,8 +49,7 @@ my %options = (
     Password    => "marley01"
 );
 
-my $s = new CGI::Session::MySQL(undef, \%options) 
-    or die $CGI::Session::errstr;
+my $s = new CGI::Session("driver:MySQL", undef, \%options );
 
 ok($s);
     
@@ -78,7 +78,7 @@ my $sid = $s->id();
 
 $s->flush();
 
-my $s2 = new CGI::Session::MySQL($sid, \%options);
+my $s2 = new CGI::Session("driver:MySQL", $sid, \%options);
 ok($s2);
 
 ok($s2->id() eq $sid);

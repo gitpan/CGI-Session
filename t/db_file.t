@@ -1,136 +1,69 @@
-#!/usr/bin/perl
+# Before `make install' is performed this script should be runnable with
+# `make test'. After `make install' it should work as `perl test.pl'
 
-# db_file.t - CGI::Session::DB_File test suite
+# $Id: db_file.t,v 1.4 2002/11/22 22:54:41 sherzodr Exp $
+#########################
 
-use strict;
-use Test;
-use CGI;
-use CGI::Session::DB_File;
-use File::Spec;
+# change 'tests => 1' to 'tests => last_test_to_print';
 
-my $hashref = {
-	f_name	=> "Sherzod",
-	l_name  => "Ruzmetov",
-	emails	=> ['sherzodr@cpan.org', 'sherzodr@hotmail.com', 'sherzodr@ultracgis.com'],
-	parents => {
-		dad => "Bahodir",
-		mom => "Faroghat"
-	},
+BEGIN { 
+    # Check if DB_File is avaialble. Otherwise, skip this test
+    eval 'require DB_File';    
+    if ( $@ ) {
+        print "1..0\n";
+        exit(0);
+    }
+
+    require Test;
+    Test->import();
+    
+    plan(tests => 14); 
 };
-my $arrayref = [qw(one two three four five six seven eight nine ten)];
-my $scalar = "CGI::Session";
+use CGI::Session::DB_File;
+ok(1); # If we made it this far, we're ok.
 
+#########################
 
-ok(1);							# 1: Loaded
+# Insert your test code below, the Test module is use()ed here so read
+# its man page ( perldoc Test ) for help writing this test script.
 
-my $cgi		= new CGI;
+my $s = new CGI::Session::DB_File(undef, {Directory=>"t"}) 
+    or die $CGI::Session::errstr;
 
-my $filename = File::Spec->catfile("t", "sessions.db");
+ok($s);
+    
+ok($s->id);
 
-my $_options= { LockDirectory=>'t', FileName=>$filename};
-my $session = new CGI::Session::DB_File(undef, $_options);
+$s->param(author=>'Sherzod Ruzmetov', name => 'CGI::Session', version=>'1'   );
 
-ok($session);					# 2: Object created
+ok($s->param('author'));
 
-ok($session->id);				# 3: Session id exists
+ok($s->param('name'));
 
-ok($session->ctime);			# 4: Created time exists
+ok($s->param('version'));
 
-ok($session->atime);			# 5: Last access time set
+$s->param(-name=>'email', -value=>'sherzodr@cpan.org');
 
-ok($session->expires ? 0 : 1);	# 6: Expires time should be undef
+ok($s->param(-name=>'email'));
 
-ok($session->param, 0);			# 7: There should be no parameters yet
+ok(!$s->expire() );
 
-ok($session->param("_session_id") ?0 : 1);
-								# 8: special  names shouldn't be getable
+$s->expire("+10m");
 
-ok($session->param("_session_id", "abcde") ? 0 : 1);
-								# 9: special names shouldnt be setable
+ok($s->expire());
 
-ok($session->param("libname", $scalar));
-								# 10: should return true
+my $sid = $s->id();
 
-ok($session->param("libname"), $scalar);
-								# 11: should return the value assigned
+$s->flush();
 
-ok($session->param, 1);			# 12: Should return 1 since just one assignment done
+my $s2 = new CGI::Session::DB_File($sid, {Directory=>'t'});
+ok($s2);
 
-ok($session->param('bio', $hashref));
-								# 13: Another, but more complex assignment
+ok($s2->id() eq $sid);
 
-ok($session->param, 2);			# 14: Should indicate presence of 2 params
+ok($s2->param('email'));
+ok($s2->param('author'));
+ok($s2->expire());
 
-ok($session->param("numbers", $arrayref));
-								# 15: Third assignment
-
-ok($session->param, 3);			# 16: Third indeed
-
-
-# Let's save the SID and time attributes of the session
-my $sid = $session->id();
-my $ctime = $session->ctime();
-my $atime = $session->atime();
-
-# Now sleep a while to make sure that some time passes
-sleep(1);
-
-my $new_session = new CGI::Session::DB_File($sid, $_options);
-
-ok($new_session);					# 17: Seccond object was created
-
-ok($new_session->id, $sid);			# 18: Both IDs are the same
-
-ok($new_session->ctime(), $ctime);  # 19: Creatiion time should be the same
-
-ok($new_session->atime > $atime);   # 20: Check if access times were updated
-
-ok($new_session->param, 3);			# 21: Three params should still be present
-
-ok($new_session->param("libname"), "CGI::Session");
-									# 22: Is libname still the same?
-
-ok(ref($new_session->param("bio")), "HASH");
-									# 23: bio was supposed to be a hashref
-
-
-# re-creating the bio as a hashref
-my $bio = $new_session->param("bio");
-
-ok($bio->{f_name}, "Sherzod");		# 24: Checking the first name
-
-ok(scalar(@{$bio->{emails}}), 3);	# 25: Should be 3 emails
-
-ok($bio->{parents}->{dad}, "Bahodir");
-									# 26: What's my Dad's name
-
-
-ok($new_session->clear(["libname"]));
-									# 27: Clear a param and synchronize
-
-ok($new_session->param, 2);			# 28: Now we should have just 2 params
-
-# make it expire in two days
-$new_session->expires("2d");
-
-ok($new_session->expires);			# 29: was expiration date set properly
-
-
-# Deleting the session 
-$new_session->delete;
-
-
-
-# now let's try load the same session after delete() was called
-my $another_new_session = new CGI::Session::DB_File( $sid, $_options );
-
-ok($another_new_session);			# 30: was it created?
-
-ok($another_new_session->id ne $sid); # 31: should be a differnet ID now
-
-ok($another_new_session->param, 0); # 32: make sure that it is brand new session
-
-BEGIN {
-	plan tests => 32;
-}
+$s2->delete();
 

@@ -1,192 +1,190 @@
 package CGI::Session::File;
 
+# $Id: File.pm,v 3.0 2002/11/27 01:48:28 sherzodr Exp $
+
 use strict;
-
-@CGI::Session::File::ISA = ("CGI::Session", "CGI::Session::MD5");
-
-foreach my $mod (@CGI::Session::File::ISA) {
-	eval "require $mod";
-}
-
 use File::Spec;
-use Fcntl ":DEFAULT", ":flock";
-use Data::Dumper;
-use Carp 'croak';
-use Safe;
+use Fcntl (':DEFAULT', ':flock');
+use base qw(
+    CGI::Session
+    CGI::Session::ID::MD5
+    CGI::Session::Serialize::Default
+);
 
+use vars qw($FileName $VERSION);
 
-###########################################################################
-######## CGI::Session::File - for storing session data in plain files #####
-###########################################################################
-#                                                                         #
-# Copyright (c) 2002 Sherzod B. Ruzmetov. All rights reserved.            #
-# This library is free software. You may copy and/or redistribute it      #
-# under the same conditions as Perl itself. But I do request that this    #
-# copyright notice remains attached to the file.                          #
-#                                                                         #
-# In case you modify the code, please document all the changes you have   #
-# made prior to destributing the library                                  #
-###########################################################################
+($VERSION) = '$Revision: 3.0 $' =~ m/Revision:\s*(\S+)/;
+$FileName = 'cgisess_%s';
 
+sub store {
+    my ($self, $sid, $options, $data) = @_;
 
-$CGI::Session::File::VERSION = "2.61";
-
-
-# Configuring Data::Dumper for our needs
-$Data::Dumper::Indent   = 0;
-$Data::Dumper::Purity   = 0;
-$Data::Dumper::Useqq    = 1;
-$Data::Dumper::Deepcopy = 0;
-
-
-
-# So that CGI::Session's AUTOLOAD doesn't bother looking for it.
-# Too expensive
-sub DESTROY {
-    my $self = shift;
-    my $options = $self->options;
-
+    $self->File_init($sid, $options);
+    unless ( sysopen (FH, $self->{_file_path}, O_RDWR|O_CREAT|O_TRUNC, 0644) ) {
+        $self->error("Couldn't store $sid into $self->{_file_path}: $!");
+        return undef;
+    }
+    unless (flock(FH, LOCK_EX) ) {
+        $self->error("Couldn't get LOCK_EX: $!");
+        return undef;
+    }
+    print FH $self->freeze($data);    
+    unless ( close(FH) ) {
+        $self->error("Couldn't close $self->{_file_path}: $!");
+        return undef;
+    }
+    return 1;
 }
-
-
-# Constructor is inherited from base class
 
 
 sub retrieve {
-    my ($self, $sid) = @_;
+    my ($self, $sid, $options) = @_;
 
-    my $options = $self->options();
-    # getting the options passed to the constructor
-    my $dir     = $options->{Directory};
+    $self->File_init($sid, $options);
 
-    # creating an OS independant path to the session file and the lockfile
-    my $file    = File::Spec->catfile($dir, "CGI-Session-$sid.dat");
-
-    local ( $/, *FH );
-    sysopen(FH, $file, O_RDONLY) or $self->error("Couldn't open data file ($file), $!"), return;
-    flock (FH, LOCK_SH) or $self->error("Couldn't lock the session file: $!"), return;
-    my $tmp = <FH>;
-    close (FH);
-
-    # Following line is to keep -T line happy. In fact it is an evil code,
-    # that's why we'll be compiling $tmp under the restricted eval() later
-    # to ensure it's indeed safe. If you have a better solution, please
-    # take this burden of guilt off my conscious.
-    ($tmp) = $tmp =~ m/^(.+)$/s;
-
-	local $@;
-    my $cpt = Safe->new("CGI::Session::File::CPT");
-    $cpt->reval("$tmp");
-
-    if ( $@ ) {
-        die "Could not eval() the session file, $@";
+    # If the session data does not exist, return.
+    unless ( -e $self->{_file_path} ) {
+        return undef;
     }
-
-    return $CGI::Session::File::CPT::data;
+    
+    unless ( sysopen(FH, $self->{_file_path}, O_RDONLY) ) {
+        $self->error("Couldn't open $self->{_file_path}: $!");
+        return undef;
+    }
+    unless (flock(FH, LOCK_SH) ) {
+        $self->error("Couldn't lock the file: $!");
+        return undef;
+    }
+    my $data = undef;
+    $data .= $_ while <FH>;
+    
+    close(FH);
+    return $self->thaw($data);
 }
 
 
 
-sub store {
-    my ($self, $sid) = @_;
+sub remove {
+    my ($self, $sid, $options) = @_;
+    
+    $self->File_init($sid, $options);
+    unless ( unlink ( $self->{_file_path} ) ) {
+        $self->error("Couldn't unlink $self->{_file_path}: $!");
+        return undef;
+    }
+    return 1;
+}
 
-    my $hashref = $self->raw_data();
-    my $options = $self->options();
 
-    # getting the options passed to the constructor
-    my $dir     = $options->{Directory};
 
-    # creating an OS independant path
-    my $file    = File::Spec->catfile($dir, "CGI-Session-$sid.dat");
-
-    # storing the data in the session file
-    local (*FH);
-    sysopen (FH, $file, O_RDWR|O_CREAT|O_TRUNC, 0664) or $self->error("Couldn't create $file, $!"), return;
-    flock (FH, LOCK_EX) or $self->error("Couldn't lock the session file: $!");
-
-    # creating a Data::Dumper object of $hashref
-    my $d = Data::Dumper->new([$hashref], ["data"]);
-
-    # dumping the $hashref into a session file
-    print FH $d->Dump();
-    close (FH);
+sub teardown {
+    my ($self, $sid, $options) = @_;
 
     return 1;
 }
 
 
 
-sub tear_down {
-    my ($self, $sid) = @_;
 
-    my $options = $self->options();
+sub File_init {
+    my ($self, $sid, $options) = @_;
 
-    my $dir = $options->{Directory};
-    my $file = File::Spec->catfile($dir, "CGI-Session-$sid.dat");
-
-    unlink $file or $self->error("Couldn't delete the session data $file: $!"), return;
-    return 1;
+    my $dir = $options->[1]->{Directory};
+    my $path = File::Spec->catfile($dir, sprintf("$FileName", $sid));
+    $self->{_file_path} = $path;    
 }
 
 
 
-1;
 
 
+
+# $Id: File.pm,v 3.0 2002/11/27 01:48:28 sherzodr Exp $
+
+1;       
 
 =pod
 
 =head1 NAME
 
-CGI::Session::File - For stroing session data in plain files.
+CGI::Session::File - Default CGI::Session driver
+
+=head1 REVISION
+
+This manual refers to $Revision: 3.0 $
 
 =head1 SYNOPSIS
+    
+    use CGI::Session qw/-api3/ 
+    $session = new CGI::Session("driver:File", undef, {Directory=>'/tmp'});
 
-    use CGI::Session::File;
-    $session = new CGI::Session::File(undef, {Directory => '/tmp/sessions'});
-
-    # for more examples see CGI::Session manual
+For more examples, consult L<CGI::Session> manual
 
 =head1 DESCRIPTION
 
-C<CGI::Session::File> is the driver for the L<CGI::Session|CGI::Session>
-to store and retrieve the session data in and from plain text files.
+CGI::Session::File is a default CGI::Session driver. Stores the session data
+in plain files. For the list of available methods, consult L<CGI::Session> manual.
 
-To be able to write your own drivers for L<CGI::Session>, please consult
-L<developer section|CGI::Session/DEVELOPER SECTION> of L<CGI::Session manual|CGI::Session>.
+Each session is stored in a seperate file. File name is by default formatted as "cgisess_%s",
+where '%s' is replaced with the effective session id. To change file name formatting,
+update $CGI::Session::File::NAME variable. Examples:
 
-Constructor requires two arguments, as all other L<CGI::Session> drivers do.
-The first argument has to be session id to be initialized (or undef to tell
-the CGI::Session  to create a new session id). The second argument has to be
-a reference to a hash with the two following required key/value pairs:
+    $CGI::Session::File::FileName = 'cgisess_%s.dat';       # with .dat extention
+    $CGI::Session::File::FileName = '%s.session';
+    $CGI::Session::File::FileName = '%CGI-Session-%s.dat';  # old style
 
-=over 4
+The only driver option required is 'Directory', which denotes the location 
+session files are stored in.
 
-=item C<Directory>
+Example:
 
-path in the file system where all the session data will be stored
-
-=back
-
-In versions prior to 2.6 one also had to indicate the C<LockDirectory>, but
-it is no longer required.
-
-C<CGI::Session::File> serializes session data using  L<Data::Dumper|Data::Dumper>
-before storing it in the session file.
-
-=head1 AUTHOR
-
-Sherzod B. Ruzmetov <sherzodr@cpan.org>
+    $session = new CGI::Session("driver:File", undef, {Directory=>'some/directory'});
 
 =head1 COPYRIGHT
 
-    This library is free software and can be redistributed under the same
-    conditions as Perl itself.
+Copyright (C) 2001-2002 Sherzod Ruzmetov. All rights reserved.
+
+This library is free software and can be modified and distributed under the same
+terms as Perl itself. 
+
+Bug reports should be directed to sherzodr@cpan.org, or posted to Cgi-session@ultracgis.com
+mailing list.
+
+=head1 AUTHOR
+
+CGI::Session::File is written and maintained by Sherzod Ruzmetov <sherzodr@cpan.org>
 
 =head1 SEE ALSO
 
-L<CGI::Session>, L<CGI::Session::File>, L<CGI::Session::DB_File>,
-L<CGI::Session::MySQL>, L<Apache::Session>
+=over 4
+
+=item *
+
+L<CGI::Session|CGI::Session> - CGI::Session manual
+
+=item *
+
+L<CGI::Session::Tutorial|CGI::Session::Tutorial> - extended CGI::Session manual
+
+=item *
+
+L<CGI::Session::CookBook|CGI::Session::CookBook> - practical solutions for real life problems
+
+=item *
+
+B<RFC 2965> - "HTTP State Management Mechanism" found at ftp://ftp.isi.edu/in-notes/rfc2965.txt
+
+=item *
+
+L<CGI|CGI> - standard CGI library
+
+=item *
+
+L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
+
+=back
 
 =cut
 
+
+# $Id: File.pm,v 3.0 2002/11/27 01:48:28 sherzodr Exp $

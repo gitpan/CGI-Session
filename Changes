@@ -1,42 +1,5 @@
+.::What is new in CGI::Session 3.0-alpha?::.
 
-RCS file: /home/sherzodr/CVS/CGI-Session/Session.pm,v
-Working file: Session.pm
-head: 2.94
-branch:
-locks: strict
-access list:
-symbolic names:
-	rel-2_9x: 2.93
-	start: 1.1.1.2
-	UltraCgis: 1.1.1
-keyword substitution: kv
-total revisions: 6;	selected revisions: 6
-description:
-----------------------------
-revision 2.94
-date: 2002/08/26 08:01:33;  author: sherzodr;  state: Exp;  lines: +2 -2
-*** empty log message ***
-----------------------------
-revision 2.93
-date: 2002/08/26 06:44:53;  author: sherzodr;  state: Exp;  lines: +19 -2
-Final release of CGI::Session 2.x.
-Some fixes to the documentation made.
-Thanks to Oliver Dragon who noticed a missing store() in the expire() method
-----------------------------
-revision 1.2
-date: 2002/08/21 01:37:18;  author: sherzodr;  state: Exp;  lines: +0 -4
-*** empty log message ***
-----------------------------
-revision 1.1
-date: 2002/06/30 12:28:39;  author: sherzodr;  state: Exp;
-branches:  1.1.1;
-Initial revision
-----------------------------
-revision 1.1.1.2
-date: 2002/07/20 23:50:38;  author: sherzodr;  state: Exp;  lines: +1335 -0
-Intial Import of version 2.9 api
-----------------------------
-revision 1.1.1.1
-date: 2002/06/30 12:28:39;  author: sherzodr;  state: Exp;  lines: +0 -0
-2.9 imported to new CVS rep. after previous ones were lost :-(
-=============================================================================
+
+under construction
+

@@ -1,6 +1,6 @@
 package CGI::Session::File;
 
-# $Id: File.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: File.pm,v 3.2 2002/12/06 01:42:49 sherzodr Exp $
 
 use strict;
 use File::Spec;
@@ -13,14 +13,14 @@ use base qw(
 
 use vars qw($FileName $VERSION);
 
-($VERSION) = '$Revision: 3.1 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 3.2 $' =~ m/Revision:\s*(\S+)/;
 $FileName = 'cgisess_%s';
 
 sub store {
     my ($self, $sid, $options, $data) = @_;
 
     $self->File_init($sid, $options);
-    unless ( sysopen (FH, $self->{_file_path}, O_RDWR|O_CREAT|O_TRUNC, 0644) ) {
+    unless ( sysopen (FH, $self->{_file_path}, O_RDWR|O_CREAT|O_TRUNC, 0600) ) {
         $self->error("Couldn't store $sid into $self->{_file_path}: $!");
         return undef;
     }
@@ -99,7 +99,7 @@ sub File_init {
 
 
 
-# $Id: File.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: File.pm,v 3.2 2002/12/06 01:42:49 sherzodr Exp $
 
 1;       
 
@@ -111,7 +111,7 @@ CGI::Session::File - Default CGI::Session driver
 
 =head1 REVISION
 
-This manual refers to $Revision: 3.1 $
+This manual refers to $Revision: 3.2 $
 
 =head1 SYNOPSIS
     
@@ -187,4 +187,4 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 =cut
 
 
-# $Id: File.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: File.pm,v 3.2 2002/12/06 01:42:49 sherzodr Exp $

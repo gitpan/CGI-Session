@@ -1,6 +1,5 @@
-# $Id: Makefile.PL,v 3.5 2002/12/03 16:22:09 sherzodr Exp $
+# $Id: Makefile.PL,v 3.8 2002/12/09 20:05:14 sherzodr Exp $
 
-use strict;
 use ExtUtils::MakeMaker;
 
 #print "-" x 35, "\n";
@@ -13,7 +12,7 @@ sub MY::postamble {
     return <<'TAG';
 realclean::
 	$(RM_RF) blib/
-	$(RM_F) Makefile Makefile.old t/cgisess.*
+	$(RM_F) Makefile Makefile.old t/cgisess*
 
 upload: dist
 	cpan-upload $(DISTVNAME).tar$(SUFFIX)
@@ -53,7 +52,7 @@ WriteMakefile(
     NAME            => 'CGI::Session',
     VERSION_FROM    => 'Session.pm',
     PREREQ_PM       => {
-                    Digest::MD5 => undef,
+                    'Digest::MD5' => undef,
     },
     ABSTRACT        => 'Persistent session in CGI applications',
     AUTHOR          => 'Sherzod Ruzmetov <sherzodr@cpan.org>',

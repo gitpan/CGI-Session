@@ -1,17 +1,17 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
-# $Id: mysql.t,v 1.3 2002/11/22 22:54:41 sherzodr Exp $
+# $Id: mysql.t,v 1.5 2002/12/09 16:23:07 sherzodr Exp $
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-BEGIN { 
+BEGIN {
     # Skip the test all together
     
     # If you want to run MySQL tests, uncomment the following two
     # lines, create a table called "sessions" according to the
-    # CGI::Session::MySQL table in the test database. 
+    # CGI::Session::MySQL and modify %options hash
     print "1..0\n";
     exit();
 
@@ -70,7 +70,7 @@ ok($s->param(-name=>'email'));
 
 ok(!$s->expire() );
 
-$s->expire("+10m");
+$s->expire("+10s");
 
 ok($s->expire());
 

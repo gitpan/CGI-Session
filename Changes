@@ -1,8 +1,3 @@
-What is new in 3.10?
-
-	* use of close() from within dump() method used to produce warnings
-	 if -w switch is enabled. Should've been replaced with CORE::close()
-
 What is new in 3.8?
 
 	* Abbreviations in DSN parameters are supported via Text::Abbrev.
@@ -39,4 +34,4 @@ What is new in 3.x?
 
 
 
-$Id: Changes,v 3.3.2.1 2002/12/09 08:59:56 sherzodr Exp $
+$Id: Changes,v 3.3 2002/12/03 16:16:39 sherzodr Exp $

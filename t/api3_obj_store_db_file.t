@@ -1,14 +1,20 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
-# $Id: api3_obj_store_db_file.t,v 1.3 2002/11/22 22:54:41 sherzodr Exp $
+# $Id: api3_obj_store_db_file.t,v 1.3.6.1 2003/07/26 13:37:36 sherzodr Exp $
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
 
 use CGI;
-use CGI::Session qw/-api3/;
+use CGI::Session;
+
+eval "require DB_File";
+if ( $@ ) {
+    print "1..0 #Skipped: DB_File is not available\n";
+    exit(0)
+}
 
 my @mods = qw(Storable FreezeThaw);
 
@@ -22,7 +28,7 @@ for ( @mods ) {
 }
 
 unless ( $ser ) {
-    print "1..0"; # Neither Storable nor FreezeThaw avaialble
+    print "1..0 #Skipped: Neither Storable nor FreezeThaw avaialble\n";
     exit(0);
 }
 

@@ -1,6 +1,6 @@
 package CGI::Session;
 
-# $Id: Session.pm,v 3.12.2.7.2.2 2003/05/02 20:10:48 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.7.2.4 2003/07/26 13:49:16 sherzodr Exp $
 
 
 use strict;
@@ -10,8 +10,8 @@ use AutoLoader 'AUTOLOAD';
 
 use vars qw($VERSION $REVISION $errstr $IP_MATCH $NAME $API_3 $FROZEN);
 
-($REVISION) = '$Revision: 3.12.2.7.2.2 $' =~ m/Revision:\s*(\S+)/;
-$VERSION    = '3.94';
+($REVISION) = '$Revision: 3.12.2.7.2.4 $' =~ m/Revision:\s*(\S+)/;
+$VERSION    = '3.95';
 $NAME       = 'CGISESSID';
 
 # import() - we do not import anything into the callers namespace, however,
@@ -428,10 +428,10 @@ sub flush {
 
   if ( $status == MODIFIED ) {
       $self->store($self->id, $self->{_OPTIONS}, $self->{_DATA}) or return;
-      $self->{_STATUS} = SYNCED;      
   } elsif ( $status == DELETED ) {
       $self->remove($self->id, $self->{_OPTIONS}) or return;
   }
+  $self->{_STATUS} = SYNCED;
   return 1;
 }
 
@@ -446,7 +446,7 @@ sub flush {
 __END__;
 
 
-# $Id: Session.pm,v 3.12.2.7.2.2 2003/05/02 20:10:48 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.7.2.4 2003/07/26 13:49:16 sherzodr Exp $
 
 =pod
 
@@ -951,13 +951,15 @@ sub delete {
 sub clear {
     my $self = shift;
     $class   = ref($self);
+    
+    my @params = ();
 
-    my @params = $self->param();
-    if ( defined $_[0] ) {
-        unless ( ref($_[0]) eq 'ARRAY' ) {
-            confess "Usage: $class->clear([\@array])";
-        }
-        @params = @{ $_[0] };
+    # if there was at least one argument, we take it as a list
+    # of params to delete
+    if ( @_ ) {
+	@params = ref($_[0]) ? @{ $_[0] } : ($_[0]);
+    } else {
+	@params = $self->param();
     }
 
     my $n = 0;
@@ -1140,6 +1142,7 @@ sub expire {
 
     if ( $etime eq '-1' ) {
         delete $self->{_DATA}->{_SESSION_EXPIRE_LIST}->{$param};
+	$self->{_STATUS} = MODIFIED;
         return;
     }
 
@@ -1257,4 +1260,4 @@ sub is_new {
 	return $self->{_IS_NEW};
 }
 
-# $Id: Session.pm,v 3.12.2.7.2.2 2003/05/02 20:10:48 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.7.2.4 2003/07/26 13:49:16 sherzodr Exp $

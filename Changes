@@ -1,8 +1,19 @@
 Change log for CGI::Session
-  $Date: 2003/05/02 20:09:08 $
+  $Date: 2003/07/26 13:49:16 $
+
+What is new in 3.95
+  NOTE: 3.95 is a maintainance release, with only certain bug fixes.
+
+	* clear() used to delete all the params if passed any arguments. 
+	* clear() now accepts either an arrayref, or a single scalar
+	  variable. Thanks to MARKSTOS [AT] cpan.org
+	* flush() - internal data status handling fixed. 
+	           Thanks to MARKSTOS [AT] cpan.org
+	* t/api3_dbfile_obj_store.t now checks for DB_File as well. 
+
 
 What is new in 3.94
-  * flush() method kept returning true regardless of the succsess or failure
+        * flush() method kept returning true regardless of the succsess or failure
   
 What is new in 3.93
 
@@ -49,4 +60,4 @@ What is new in 3.x?
 	* Bug in POD documentation is fixed (thanks to Graham Barr)	
 
 
-$Id: Changes,v 3.3.2.4.2.1 2003/05/02 20:09:08 sherzodr Exp $
+$Id: Changes,v 3.3.2.4.2.3 2003/07/26 13:49:16 sherzodr Exp $

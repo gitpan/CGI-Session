@@ -1,7 +1,7 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
-# $Id: file.t,v 1.5.4.1 2002/12/04 07:35:09 sherzodr Exp $
+# $Id: file.t,v 1.5.4.1.2.1 2003/07/26 13:37:36 sherzodr Exp $
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
@@ -12,7 +12,7 @@ BEGIN {
     require Test;
     Test->import();
     
-    plan(tests => 14); 
+    plan(tests => 16); 
 };
 use CGI::Session::File;
 ok(1); # If we made it this far, we're ok.
@@ -61,6 +61,10 @@ ok($s2->param('email'));
 ok($s2->param('author'));
 ok($s2->expire());
 
+
+$s2->clear('email');
+ok($s2->param('email') ? 0 : 1);
+ok($s2->param('author'));
 
 $s2->delete();
 

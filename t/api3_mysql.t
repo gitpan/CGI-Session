@@ -1,7 +1,7 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
-# $Id: api3_mysql.t,v 1.1 2002/11/22 22:54:41 sherzodr Exp $
+# $Id: api3_mysql.t,v 1.1.6.1 2003/07/26 13:37:36 sherzodr Exp $
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
@@ -13,7 +13,6 @@ BEGIN {
     # CGI::Session::MySQL table in the test database. 
     print "1..0\n";
     exit();
-
 
     # Check if DB_File is avaialble. Otherwise, skip this test
     eval 'require DBI';    
@@ -35,7 +34,7 @@ BEGIN {
 };
 
 
-use CGI::Session qw/-api3/;
+use CGI::Session;
 ok(1); # If we made it this far, we're ok.
 
 #########################

@@ -27,7 +27,7 @@ use vars qw($VERSION $errstr);
 
 
 
-$VERSION = "2.91";
+$VERSION = "2.92";
 
 
 
@@ -294,20 +294,6 @@ sub raw_data {  return $_[0]->{_data}       }
 
 
 
-1;
-
-
-
-__END__;
-
-
-
-###########################################################################
-################ FOLLOWING METHODS ARE LOADED ON DEMAND ###################
-###########################################################################
-
-
-
 # id(): returns the session id for the current session
 # Usage: CLASS->id();
 #
@@ -321,6 +307,36 @@ sub id {
     }
     return $self->{_data}->{_session_id};
 }
+
+
+# close(): closes the session
+# Usage: CLASS->close()
+#
+# RETURN VALUE: whatever DESTROY() returns
+sub close {
+    my $self = shift;
+
+    if ( @_ ) {
+        my $class = ref($self);
+        croak   "Usage: $class->close()";
+    }
+
+    $self->DESTROY();
+}
+
+
+
+1;
+
+
+
+__END__;
+
+
+
+###########################################################################
+################ FOLLOWING METHODS ARE LOADED ON DEMAND ###################
+###########################################################################
 
 
 

@@ -3,11 +3,9 @@ package CGI::Session::MD5;
 use strict;
 use Carp;
 use vars qw($VERSION);
+use Digest::MD5;
 
-eval "require Digest::MD5";
-if ( $@ ) {
-    croak "Dependency detected: Digest::MD5 module needs to be installed in the system";
-}
+$VERSION = "1.2";
 
 srand( time ^ ($$ + ($$ << 15)) );
 
@@ -16,7 +14,6 @@ sub generate_id {
 
 	my $digest = new Digest::MD5;
 	$digest->add(rand(9999), time(), $$);
-
     my $id = $digest->b64digest();
 
 	$id =~ s/\W/-/g;

@@ -9,7 +9,7 @@ WriteMakefile(
             "Data::Dumper" => undef
     },
     ($] >= 5.005 ?
-    (ABSTRACT => 'Perl extension for Session management in  Web Applications',
+    (ABSTRACT => 'Simple Session management library in CGI applications',
     AUTHOR     => 'Sherzod B. Ruzmetov <sherzodr@cpan.org>') : ()),
 );
 

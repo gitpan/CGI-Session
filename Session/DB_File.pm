@@ -1,12 +1,17 @@
 package CGI::Session::DB_File;
 
 use strict;
-use vars qw($VERSION);
-use base qw(CGI::Session CGI::Session::MD5);
+
+
+@CGI::Session::DB_File::ISA = ("CGI::Session", "CGI::Session::MD5");
+
+foreach my $mod( @CGI::Session::DB_File::ISA ) {
+	eval "require $mod";
+}
 
 use File::Spec;
 use Data::Dumper;
-use Fcntl qw(:DEFAULT :flock);
+use Fcntl ":DEFAULT", ":flock";
 use DB_File;
 use Safe;
 
@@ -24,7 +29,7 @@ use Safe;
 ###########################################################################
 
 
-$VERSION = "2.6";
+$CGI::Session::DB_File::VERSION = "2.61";
 
 # Configuring Data::Dumper for our needs
 $Data::Dumper::Indent   = 0;

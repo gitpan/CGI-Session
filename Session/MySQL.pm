@@ -1,8 +1,12 @@
 package CGI::Session::MySQL;
 
 use strict;
-use vars qw($VERSION $TABLE_NAME);
-use base qw(CGI::Session CGI::Session::MD5);
+
+@CGI::Session::MySQL::ISA = ("CGI::Session", "CGI::Session::MD5");
+
+foreach my $mod ( @CGI::Session::MySQL::ISA ) {
+    eval "require $mod";
+}
 
 use Data::Dumper;
 use Carp 'croak';
@@ -26,8 +30,8 @@ use Safe;
 
 
 # Globla variables
-$VERSION    = "2.6";
-$TABLE_NAME = 'sessions';
+$CGI::Session::MySQL::VERSION    = "2.6";
+$CGI::Session::MySQL::TABLE_NAME = 'sessions';
 
 # Configuring Data::Dumper for our needs
 $Data::Dumper::Indent   = 0;
@@ -41,7 +45,14 @@ $Data::Dumper::Deepcopy = 0;
 sub MYSQL_dbh {
     my ($self) = @_;
 
-    my $option = $self->options;
+    # if we already have database handles, return them
+    if ( $self->{_mysql_dbh} && $self->{_mysql_lckh} ) {
+        return ( $self->{_mysql_dbh}, $self->{_mysql_lckh} );
+
+    }
+
+    # getting the options passed to the constructor
+    my $option  = $self->options;
 
     my $dbh     = $option->{Handle};
     my $lckh    = $option->{LockHandle}     || $dbh;
@@ -52,12 +63,29 @@ sub MYSQL_dbh {
     my $lckuser = $option->{LockUserName}   || $username;
     my $lckpsswd= $option->{LockPassword}   || $psswd;
 
-    if ( $dbh && $lckh ) {  return ($dbh, $lckh)    }
+    # If we recieved already created handlers save and return them
+    if ( $dbh && $lckh ) {
+        $self->{_mysql_dbh}     = $dbh;
+        $self->{_mysql_lckh}    = $lckh;
+        return ($dbh, $lckh);
 
-    $dbh    = DBI->connect($dsn, $username, $psswd) or $self->error($DBI::errstr), return;
-    $lckh   = DBI->connect($lcksn, $lckuser, $lckpsswd) or $self->error($DBI::errstr), return;
+    }
 
-    return ($dbh, $lckh);
+    ($dsn && $username && $psswd) or croak "Refer to the CGI::Session::MySQL manual for the usage";
+
+    # If we came this far, we're asked to create handlers
+
+    $self->{_mysql_dbh}  = DBI->connect($dsn, $username, $psswd, {RaiseError=>0, PrintError=>0})
+        or $self->error($DBI::errstr), return;
+
+    $self->{_mysql_lckh} = DBI->connect($lcksn, $lckuser, $lckpsswd, {RaiseError=>0, PrintError=>0})
+        or $self->error($DBI::errstr), return;
+
+    # Let's set a flag that indicates that we need to disconnect
+    # after we're done
+    $self->{_mysql_disconnect} = 1;
+
+    return ( $self->{_mysql_dbh}, $self->{_mysql_lckh} );
 }
 
 
@@ -82,8 +110,8 @@ sub retrieve {
     my ($dbh, $lckh) = $self->MYSQL_dbh() or return;
 
     # I wish row locking were possible in MySQL :-(
-    $lckh->do("LOCK TABLES $TABLE_NAME READ");
-    my ($tmp) = $dbh->selectrow_array(qq|SELECT a_session FROM $TABLE_NAME WHERE id=?|, undef, $sid);
+    $lckh->do("LOCK TABLES $CGI::Session::MySQL::TABLE_NAME READ");
+    my ($tmp) = $dbh->selectrow_array("SELECT a_session FROM $CGI::Session::MySQL::TABLE_NAME WHERE id=?", undef, $sid);
     $lckh->do("UNLOCK TABLES");
 
 
@@ -120,17 +148,17 @@ sub store {
     my $hashref = $self->raw_data();
 
     my $d = Data::Dumper->new([$hashref], ["data"]);
-    my $exists = $dbh->selectrow_array(qq|SELECT a_session FROM $TABLE_NAME WHERE id=?|, undef, $sid);
+    my $exists = $dbh->selectrow_array("SELECT a_session FROM $CGI::Session::MySQL::TABLE_NAME WHERE id=?", undef, $sid);
 
-    $lckh->do("LOCK TABLES $TABLE_NAME WRITE");
+    $lckh->do("LOCK TABLES $CGI::Session::MySQL::TABLE_NAME WRITE");
 
     if ( $exists ) {
-        my $rv = $dbh->do(qq|UPDATE $TABLE_NAME SET a_session=? WHERE id=?|, undef, $d->Dump(), $sid);
+        my $rv = $dbh->do("UPDATE $CGI::Session::MySQL::TABLE_NAME SET a_session=? WHERE id=?", undef, $d->Dump(), $sid);
         $lckh->do("UNLOCK TABLES");
         return $rv;
     }
 
-    my $rv =  $dbh->do(qq|INSERT INTO $TABLE_NAME SET id=?, a_session=?|, undef, $sid, $d->Dump());
+    my $rv =  $dbh->do("INSERT INTO $CGI::Session::MySQL::TABLE_NAME SET id=?, a_session=?", undef, $sid, $d->Dump());
     $lckh->do("UNLOCK TABLES");
     return $rv;
 }
@@ -150,8 +178,8 @@ sub tear_down {
     my $option = $self->options();
 
 
-    $lckh->do("LOCK TABLES $TABLE_NAME WRITE");
-    my $rv =  $dbh->do(qq|DELETE FROM $TABLE_NAME WHERE id=?|, undef, $sid);
+    $lckh->do("LOCK TABLES $CGI::Session::MySQL::TABLE_NAME WRITE");
+    my $rv =  $dbh->do("DELETE FROM $CGI::Session::MySQL::TABLE_NAME WHERE id=?", undef, $sid);
     $lckh->do("UNLOCK TABLES");
     return $rv;
 }

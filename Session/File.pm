@@ -1,12 +1,17 @@
 package CGI::Session::File;
 
 use strict;
-use vars qw($VERSION);
-use base qw(CGI::Session CGI::Session::MD5);
+
+@CGI::Session::File::ISA = ("CGI::Session", "CGI::Session::MD5");
+
+foreach my $mod (@CGI::Session::File::ISA) {
+	eval "require $mod";
+}
 
 use File::Spec;
-use Fcntl qw(:DEFAULT :flock);
+use Fcntl ":DEFAULT", ":flock";
 use Data::Dumper;
+use Carp 'croak';
 use Safe;
 
 
@@ -24,7 +29,7 @@ use Safe;
 ###########################################################################
 
 
-$VERSION = "2.6";
+$CGI::Session::File::VERSION = "2.61";
 
 
 # Configuring Data::Dumper for our needs
@@ -69,11 +74,12 @@ sub retrieve {
     # take this burden of guilt off my conscious.
     ($tmp) = $tmp =~ m/^(.+)$/s;
 
+	local $@;
     my $cpt = Safe->new("CGI::Session::File::CPT");
-    $cpt->reval($tmp);
+    $cpt->reval("$tmp");
 
     if ( $@ ) {
-        $self->error("Couldn't eval() the data, $!"), return undef;
+        die "Could not eval() the session file, $@";
     }
 
     return $CGI::Session::File::CPT::data;

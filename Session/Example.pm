@@ -1,9 +1,9 @@
 package CGI::Session::Example;
 
-# $Id: Example.pm,v 1.1.2.1 2003/03/09 11:20:34 sherzodr Exp $
+# $Id: Example.pm,v 1.1.2.2 2003/03/14 13:17:38 sherzodr Exp $
 
 use strict;
-use diagnostics;
+#use diagnostics;
 use File::Spec;
 use base 'CGI::Application';
 
@@ -14,7 +14,10 @@ sub setup {
 
   $self->mode_param(\&parsePathInfo);  
   $self->run_modes(
-    start => \&default,
+    start => 'default',
+    default => 'default',
+	'dump-session' => \&dump_session,
+	'params'  => \&display_params,
   );
 
   # setting up default HTTP header. See the details of query() and
@@ -28,6 +31,7 @@ sub setup {
 
 
 
+
 # this method simply returns CGI::Session object.
 sub session {
   my $self = shift;
@@ -37,7 +41,7 @@ sub session {
   }
   require CGI::Session;
   my $dsn = $self->param("_SESSION_DSN") || undef;
-  my $options = $self->param("_SESSION_OPTIONS") || {Directory=>File::Spec->tmpdir};
+  my $options = $self->param("_SESSION_OPTIONS") || {Directory=>File::Spec->tmpdir	};
   my $session = CGI::Session->new($dsn, $self->query, $options);  
   unless ( defined $session ) {
     die CGI::Session->error();
@@ -87,6 +91,9 @@ sub load_tmpl {
   map { $args->{$_} = $ENV{$_} } keys %ENV;  
   # making session  id available for all the templates
   $args->{ $session->name() } = $session->id;
+  # making library's version available for all the templates
+  $args->{ VERSION } = $session->version();
+
   # loading the template
   require HTML::Template;
   my $t = new HTML::Template(filename                    => $filename,
@@ -98,12 +105,25 @@ sub load_tmpl {
 
 
 
+sub urlf {
+  my ($self, $cmd) = @_;
+
+  my $sid = $self->session()->id;
+  my $name = $self->session()->name;
+
+  return sprintf("$ENV{SCRIPT_NAME}/cmd/-/%s?%s=%s", $cmd, $name, $sid);
+}
+
+
 
 sub page {
   my ($self, $body) = @_;
 
   my %params = (
-    body => $body
+    body        => $body,
+    url_default => $self->urlf('default'),
+    url_dump    => $self->urlf('dump-session'),
+	url_params  => $self->urlf('params'),
   );
   return $self->load_tmpl('page.html', \%params);
 }
@@ -116,9 +136,49 @@ sub default {
   my $self = shift;
 
   my $session = $self->session();
-  my $body =  sprintf("Hello <b>%s</b>", $session->id);
+
+  my $body = $self->load_tmpl('welcome.html');
+  
   return $self->page($body);
 }
+
+
+sub dump_session {
+	my $self = shift;
+
+	my $dmp = $self->session()->dump(undef, 1);
+	return $self->page(sprintf "<pre>%s</pre>", $dmp );
+}
+
+
+sub delete_session {
+	my $self = shift;
+
+	$self->session()->delete();
+	$self->header_type('redirect');
+	$self->header_props(-uri=>$ENV{HTTP_REFERER});
+}
+
+
+sub display_params {
+	my $self = shift;
+
+	my $session = $self->session();
+	my @list = ();
+	for my $name ( $session->param() ) {
+		$name =~ /^_SESSION_/ and next;
+		my $value = $session->param($_);
+		push @list, {name => $name, value=>$value};
+	}
+	my %params = (
+		list => \@list,
+	);
+	my $body = $self->load_tmpl('display-params.html', \%params);
+	return $self->page($body);
+}
+		
+
+
 
 
 
@@ -133,54 +193,11 @@ __END__
 
 =head1 NAME
 
-Some::Module - Perl extension for blah blah blah
-
-=head1 SYNOPSIS
-
-  use Some::Module;
-  blah blah blah
-
-=head1 ABSTRACT
-
-  This should be the abstract for Some::Module.
-  The abstract is used when making PPD (Perl Package Description) files.
-  If you don't want an ABSTRACT you should also edit Makefile.PL to
-  remove the ABSTRACT_FROM option.
+CGI::Session::Example - Example on using CGI::Session
 
 =head1 DESCRIPTION
 
-Stub documentation for Some::Module, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
+STILL NOT COMPLETED. CHECK BACK FOR THE NEXT RELEASE OF CGI::Session.
 
 
 
-=head1 SEE ALSO
-
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
-
-=head1 AUTHOR
-
-A. U. Thor, E<lt>sherzodr@cpan.orgE<gt>
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright 2003 by Sherzod B. Ruzmetov.
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
-
-=cut

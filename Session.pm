@@ -1,6 +1,6 @@
 package CGI::Session;
 
-# $Id: Session.pm,v 3.12.2.6 2003/03/10 02:39:35 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.7 2003/03/14 13:17:38 sherzodr Exp $
 # $Name:  $
 
 use strict;
@@ -10,8 +10,8 @@ use AutoLoader 'AUTOLOAD';
 
 use vars qw($VERSION $REVISION $errstr $IP_MATCH $NAME $API_3 $FROZEN);
 
-($REVISION) = '$Revision: 3.12.2.6 $' =~ m/Revision:\s*(\S+)/;
-$VERSION    = '3.92';
+($REVISION) = '$Revision: 3.12.2.7 $' =~ m/Revision:\s*(\S+)/;
+$VERSION    = '3.93';
 $NAME       = 'CGISESSID';
 
 # import() - we do not import anything into the callers namespace, however,
@@ -44,6 +44,7 @@ sub new {
         _DATA       => undef,
         _STATUS     => MODIFIED,
         _API3       => { },
+		_IS_NEW		=> 0, # to Chris Dolan's request
     };
 
     if ( $API_3 || (@_ == 3 ) ) {
@@ -76,7 +77,8 @@ sub api_3 {
             DRIVER      => 'File',
             SERIALIZER  => 'Default',
             ID          => 'MD5',
-        }
+        },
+	    _IS_NEW	    => 0, # to Chris Dolan's request
     };
 
     # supporting DSN namme abbreviations:
@@ -291,14 +293,20 @@ sub _expire_params {
 sub _init_new_session {
     my $self = shift;
 
+	my $currtime = time();
     $self->{_DATA} = {
         _SESSION_ID => $self->generate_id($self->{_OPTIONS}),
-        _SESSION_CTIME => time(),
-        _SESSION_ATIME => time(),
+        _SESSION_CTIME => $currtime,
+        _SESSION_ATIME => $currtime,
         _SESSION_ETIME => undef,
         _SESSION_REMOTE_ADDR => $ENV{REMOTE_ADDR} || undef,
-        _SESSION_EXPIRE_LIST => { },
+        _SESSION_EXPIRE_LIST => { },		
     };
+
+    # to Chris Dolan's request:
+	# I'm not sure if this information should be serialized (placed under _DATA),
+	# but I don't see any desperate need for it. So let it be part of the object
+	$self->{_IS_NEW} = 1;
 
     $self->{_STATUS} = MODIFIED;
 
@@ -444,7 +452,7 @@ sub flush {
 __END__;
 
 
-# $Id: Session.pm,v 3.12.2.6 2003/03/10 02:39:35 sherzodr Exp $
+# $Id: Session.pm,v 3.12.2.7 2003/03/14 13:17:38 sherzodr Exp $
 
 =pod
 
@@ -900,14 +908,12 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 # dump() - dumps the session object using Data::Dumper.
 # during development it defines global dump().
 sub dump {
-    my ($self, $file, $data_only) = @_;
+    my ($self, $file, $indent) = @_;
 
     require Data::Dumper;
-    local $Data::Dumper::Indent = 2;
+    local $Data::Dumper::Indent = $indent || 2;    
 
-    my $ds = $data_only ? $self->{_DATA} : $self;
-
-    my $d = new Data::Dumper([$ds], ["cgisession"]);
+    my $d = new Data::Dumper([$self], [ref $self]);
 
     if ( defined $file ) {
         unless ( open(FH, '<' . $file) ) {
@@ -927,7 +933,7 @@ sub dump {
 
 
 
-sub version {   return $VERSION()   }
+sub version {   return $VERSION   }
 
 
 # delete() - sets the '_STATUS' session flag to DELETED,
@@ -1110,7 +1116,7 @@ sub atime {
 sub ctime {
     my $self = shift;
 
-    if ( defined @_ ) {
+    if ( @_ ) {
         confess "_SESSION_ATIME - read-only value";
     }
 
@@ -1250,5 +1256,11 @@ sub sync_param {
 }
 
 
+# to Chris Dolan's request
+sub is_new {
+	my $self = shift;
 
-# $Id: Session.pm,v 3.12.2.6 2003/03/10 02:39:35 sherzodr Exp $
+	return $self->{_IS_NEW};
+}
+
+# $Id: Session.pm,v 3.12.2.7 2003/03/14 13:17:38 sherzodr Exp $

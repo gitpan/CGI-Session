@@ -1,9 +1,9 @@
 NAME
-    CGI-Session - persistent session in CGI applications
+    CGI::Session - persistent session data in CGI applications
 
 SYNOPSIS
         # Object initialization:
-        use CGI::Session qw/-api3/;
+        use CGI::Session;
 
         my $session = new CGI::Session("driver:File", undef, {Directory=>'/tmp'});
 
@@ -49,6 +49,10 @@ TO LEARN MORE
 
     *   CGI::Session::CookBook - practical solutions for real life problems
 
+    *   We also provide mailing lists for CGI::Session users. To subscribe
+        to the list or browse the archives visit
+        https://lists.sourceforge.net/lists/listinfo/cgi-session-user
+
     *   RFC 2965 - "HTTP State Management Mechanism" found at
         ftp://ftp.isi.edu/in-notes/rfc2965.txt
 
@@ -89,6 +93,11 @@ METHODS
         *   "id" - ID generator to use when new session is to be created.
             Available ID generators are "MD5" and "Incr". Default is "MD5".
 
+        Note: you can also use unambiguous abbreviations of the DSN
+        parameters. Examples:
+
+            new CGI::Session("dr:File;ser:Storable", undef, {Diretory=>'/tmp'});
+
     "id()"
         Returns effective ID for a session. Since effective ID and claimed
         ID can differ, valid session id should always be retrieved using
@@ -125,6 +134,12 @@ METHODS
         reference to an array, only the parameters found in that array will
         be loaded to CGI object.
 
+    "sync_param($cgi)"
+    "sync_param($cgi, $arrayref)"
+        experimental feature. Synchronizes CGI and session objects. In other
+        words, it's the same as calling respective syntaxes of save_param()
+        and load_param().
+
     "clear()"
     "clear([@list])"
         clears parameters from the session object. If passed an argument as
@@ -149,9 +164,9 @@ METHODS
     "ctime()"
         returns the time when the session was first created.
 
-    "expires()"
-    "expires($time)"
-    "expires($param, $time)"
+    "expire()"
+    "expire($time)"
+    "expire($param, $time)"
         Sets expiration date relative to atime(). If used with no arguments,
         returns the expiration date if it was ever set. If no expiration was
         ever set, returns undef.
@@ -212,6 +227,89 @@ METHODS
         interpreted as the name of the file object should be dumped in. Used
         mostly for debugging.
 
+    "header()"
+        header() is simply a replacement for CGI.pm's header() method.
+        Without this method, you usually need to create a CGI::Cookie object
+        and send it as part of the HTTP header:
+
+            $cookie = new CGI::Cookie(-name=>'CGISESSID', -value=>$session->id);
+            print $cgi->header(-cookie=>$cookie);
+
+        You can minimize the above into:
+
+            $session->header()
+
+        It will retrieve the name of the session cookie from
+        $CGI::Session::NAME variable, which can also be accessed via
+        CGI::Session->name() method. If you want to use a different name for
+        your session cookie, do something like following before creating
+        session object:
+
+            CGI::Session->name("MY_SID");
+            $session = new CGI::Session(undef, $cgi, \%attrs);
+
+        Now, $session->header() uses "MY_SID" as a name for the session
+        cookie.
+
+DATA TABLE
+    Session data is stored in the form of hash table, in key value pairs.
+    All the parameter names you assign through param() method become keys in
+    the table, and whatever value you assign become a value associated with
+    that key. Every key/value pair is also called a record.
+
+    All the data you save through param() method are called public records.
+    There are several read-only private records as well. Normally, you don't
+    have to know anything about them to make the best use of the library.
+    But knowing wouldn't hurt either. Here are the list of the private
+    records and some description of what they hold:
+
+    _SESSION_ID
+        Session id of that data. Accessible through id() method.
+
+    _SESSION_CTIME
+        Session creation time. Accessible through ctime() method.
+
+    _SESSION_ATIME
+        Session last access time. Accessible through atime() method.
+
+    _SESSION_ETIME
+        Session's expiration time, if any. Accessible through expire()
+        method.
+
+    _SESSION_REMOTE_ADDR
+        IP address of the user who create that session. Accessible through
+        remote_addr() method
+
+    _SESSION_EXPIRE_LIST
+        Another internal hash table that holds the expiration information
+        for each expirable public record, if any. This table is updated with
+        the two-argument-syntax of expires() method.
+
+    These private methods are essential for the proper operation of the
+    library while working with session data. For this purpose, CGI::Session
+    doesn't allow overriding any of these methods through the use of param()
+    method. In addition, it doesn't allow any parameter names that start
+    with string _SESSION_ either to prevent future collisions.
+
+    So the following attempt will have no effect on the session data
+    whatsoever
+
+        $session->param(_SESSION_XYZ => 'xyz');
+
+    Although private methods are not writable, the library allows reading
+    them using param() method:
+
+        my $sid = $session->param(_SESSION_ID);
+
+    The above is the same as:
+
+        my $sid = $session->id();
+
+    But we discourage people from accessing private records using param()
+    method. In the future we are planning to store private records in their
+    own namespace to avoid name collisions and remove restrictions on
+    session parameter names.
+
 DISTRIBUTION
     CGI::Session consists of several modular components such as drivers,
     serializers and id generators. This section lists what is available.
@@ -252,6 +350,9 @@ DISTRIBUTION
         CGI::Session::ID::Incr
 
 COPYRIGHT
+    Copyright (C) 2001-2002 Sherzod Ruzmetov <sherzodr@cpan.org>. All rights
+    reserved.
+
     This library is free software. You can modify and or distribute it under
     the same terms as Perl itself.
 

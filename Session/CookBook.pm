@@ -1,10 +1,10 @@
-# $Id: CookBook.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: CookBook.pm,v 3.1.4.1 2003/03/14 13:17:38 sherzodr Exp $
 
 package CGI::Session::CookBook;
 
 use vars ('$VERSION');
 
-($VERSION) = '$Revision: 3.1 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 3.1.4.1 $' =~ m/Revision:\s*(\S+)/;
 
 1;
 
@@ -33,7 +33,7 @@ and it's syntax.
 To avoid unnecessary redundancy, in all the examples that follow we assume
 the following session and cgi objects:
 
-	use CGI::Session qw/-api3/;
+	use CGI::Session;
 	use CGI;
 
 	my $cgi = new CGI;	

@@ -1,6 +1,6 @@
 package CGI::Session::MySQL;
 
-# $Id: MySQL.pm,v 3.2.4.1 2003/03/09 11:25:28 sherzodr Exp $
+# $Id: MySQL.pm,v 3.2.4.2 2003/03/14 13:17:38 sherzodr Exp $
 
 use strict;
 # Inheriting necessary functionalities from the 
@@ -17,7 +17,7 @@ use base qw(
 
 use vars qw($VERSION $TABLE_NAME);
 
-($VERSION) = '$Revision: 3.2.4.1 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 3.2.4.2 $' =~ m/Revision:\s*(\S+)/;
 
 $TABLE_NAME = 'sessions';
 
@@ -144,7 +144,7 @@ sub MySQL_dbh {
 
 
 
-# $Id: MySQL.pm,v 3.2.4.1 2003/03/09 11:25:28 sherzodr Exp $
+# $Id: MySQL.pm,v 3.2.4.2 2003/03/14 13:17:38 sherzodr Exp $
 
 1;       
 =pod
@@ -155,7 +155,7 @@ CGI::Session::MySQL - MySQL driver for  CGI::Session
 
 =head1 SYNOPSIS
     
-    use CGI::Session qw/-api3/;
+    use CGI::Session;
     $session = new CGI::Session("driver:MySQL", undef, {Handle=>$dbh});
 
 For more examples, consult L<CGI::Session> manual
@@ -236,4 +236,4 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 
 
 
-# $Id: MySQL.pm,v 3.2.4.1 2003/03/09 11:25:28 sherzodr Exp $
+# $Id: MySQL.pm,v 3.2.4.2 2003/03/14 13:17:38 sherzodr Exp $

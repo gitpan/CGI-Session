@@ -1,6 +1,6 @@
 package CGI::Session::File;
 
-# $Id: File.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: File.pm,v 3.1.4.1 2003/03/14 13:17:38 sherzodr Exp $
 
 use strict;
 use File::Spec;
@@ -13,7 +13,7 @@ use base qw(
 
 use vars qw($FileName $VERSION);
 
-($VERSION) = '$Revision: 3.1 $' =~ m/Revision:\s*(\S+)/;
+($VERSION) = '$Revision: 3.1.4.1 $' =~ m/Revision:\s*(\S+)/;
 $FileName = 'cgisess_%s';
 
 sub store {
@@ -99,7 +99,7 @@ sub File_init {
 
 
 
-# $Id: File.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: File.pm,v 3.1.4.1 2003/03/14 13:17:38 sherzodr Exp $
 
 1;       
 
@@ -111,11 +111,11 @@ CGI::Session::File - Default CGI::Session driver
 
 =head1 REVISION
 
-This manual refers to $Revision: 3.1 $
+This manual refers to $Revision: 3.1.4.1 $
 
 =head1 SYNOPSIS
     
-    use CGI::Session qw/-api3/ 
+    use CGI::Session;
     $session = new CGI::Session("driver:File", undef, {Directory=>'/tmp'});
 
 For more examples, consult L<CGI::Session> manual
@@ -187,4 +187,4 @@ L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
 =cut
 
 
-# $Id: File.pm,v 3.1 2002/11/27 12:26:03 sherzodr Exp $
+# $Id: File.pm,v 3.1.4.1 2003/03/14 13:17:38 sherzodr Exp $

@@ -1,5 +1,5 @@
 Changes
-MANIFEST			This list of files
+MANIFEST
 MANIFEST.SKIP
 Makefile.PL
 README
@@ -11,6 +11,7 @@ Session/Example.pm
 Session/File.pm
 Session/ID/Incr.pm
 Session/ID/MD5.pm
+Session/ID/SHA1.pm
 Session/MySQL.pm
 Session/PostgreSQL.pm
 Session/Serialize/Default.pm

@@ -1,10 +1,10 @@
-# $Id: Tutorial.pm,v 3.4 2002/11/29 22:55:40 sherzodr Exp $
+# $Id: Tutorial.pm,v 3.4.2.1 2003/03/14 13:17:38 sherzodr Exp $
 
 package CGI::Session::Tutorial;
 
 use vars ('$VERSION');
 
-($VERSION) = '$Revision: 3.4 $' =~ m/Revision:\s*(\S+)/
+($VERSION) = '$Revision: 3.4.2.1 $' =~ m/Revision:\s*(\S+)/
 
 1;
 
@@ -78,26 +78,26 @@ Server side session management system might be seeming awfully convoluted if you
 
 =head1 WHAT YOU NEED TO KNOW FIRST
 
-The syntax of the CGI::Session 3.x has changed from previous releases. But we still keep supporting the old syntax for backward compatibility. To help us do this, in the initial releases of 3.x interface we introduced an '-api3' switch:
-
-    use CGI::Session qw/-api3/;
-
-It tells the library that you will be using the new syntax. But in latest releases of the library, it will detect and turn it out automaticly. So no "-api3" switch is necessary any longer. Please don't ask us anything about the old, 2.x api if you have never used it. We won't tell you!
-
-But before you start using the library, you will need to decide where and how you want the session data to be stored in disk. In other words, you will need to tell what driver to use. You can choose either of "File", "DB_File" and "MySQL" drivers, which are shipped with the distribution by default. Examples in this document will be using "File" driver exclusively to make sure the examples are accessible in all machines with the least requirements. To do this, we create the session object like so:
+Before you start using the library, you will need to decide where and how you want the session data to be stored in disk. In other words, you will need to tell what driver to use. You can choose either of "File", "DB_File" and "MySQL" drivers, which are shipped with the distribution by default. Examples in this document will be using "File" driver exclusively to make sure the examples are accessible in all machines with the least requirements. To do this, we create the session object like so:
 
     use CGI::Session;
-    $session = new CGI::Session("driver:File", undef, {Directory=>'/tmp'});
+    $session = new CGI::Session("driver:File", $cgi, {Directory=>'/tmp'});
 
 The first argument is called Data Source Name (DSN in short). If it's undef, the library will use the default driver, which is "File". So instead of being explicit about the driver as in the above example, we could simply say:
 
-    $session = new CGI::Session(undef, undef, {Directory=>'/tmp'});
+    $session = new CGI::Session(undef, $cgi, {Directory=>'/tmp'});
 
 and we're guaranteed it will fall back to default settings.
 
 The second argument is session id to be initialized. If it's undef, it will force CGI::Session to create a new session. Instead of passing a session id, you can also pass a CGI.pm object, or any other object that can implement either of cookie() or param() methods. In this case, the library will try to retrieve the session id from either B<CGISESSID> cookie or B<CGISESSID> CGI parameter (query string)
 
-The third argument should be in the form of hashref. This will be used by specific CGI::Session driver only. For the list of all the available attributes, consult respective CGI::Session driver:
+The third argument should be in the form of hashref. This will be used by specific CGI::Session driver only. For the list of all the available attributes, consult respective CGI::Session driver. If you want to write a code
+which is expected to run in various operating systems, and want to reference that particular system's
+temporary folder, use tmpdir() method documented in File::Spec:
+
+	$session = new CGI::Session(undef, $cgi, {Directory=>File::Spec->tmpdir});
+
+Following drivers are available:
 
 =over 4
 

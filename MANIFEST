@@ -1,4 +1,3 @@
-.Makefile.PL.swp
 Changes
 MANIFEST
 MANIFEST.SKIP
@@ -10,9 +9,10 @@ Session/File.pm
 Session/MD5.pm
 Session/MySQL.pm
 dev/MyDriver.pm
-doc/AS_vs_CS-1.txt
-doc/AS_vs_CS-2.txt
-doc/Members-Area.txt
+doc/Install.pod
+doc/Session.pod
+doc/cgisessioncook.pod
+t/cgi_queries.t
 t/db_file.t
 t/file.t
 t/mysql.t

@@ -47,12 +47,13 @@ SYNOPSIS
         # Tricks are endless!
 
 WARNING
-    This is a developer release. Stable release is CGI::Session 2.7.
+    If you have a version prior to 2.91 please upgrade it to the latest
+    release ASAP!
 
 NOTE
-    As of this release there seems to be two completely different
-    CGI::Session libraries on CPAN. This manual refers to CGI::Session by
-    Sherzod Ruzmetov
+    As of this release there seems to be two different CGI::Session
+    libraries on CPAN. This manual refers to CGI::Session by Sherzod
+    Ruzmetov
 
 DESCRIPTION
     "CGI::Session" is Perl5 library that provides an easy persistent session
@@ -65,94 +66,12 @@ DESCRIPTION
     already familiar with "CGI::Session" go to the methods section for the
     list of all the methods available.
 
-DISTRIBUTION
-    Latest distribution includes:
-
-    *   CGI::Session - base class. Heart of the distribution.
-
-    *   CGI::Session::File - driver for storing session data in plain files.
-
-    *   CGI::Session::DB_File - driver for storing session data in Berkeley
-        DB files. This is for Berkeley Database 1.x and 2.x version. For
-        versions higher than 2.x see CGI::Session::BerkeleyDB
-
-    *   CGI::Session::MySQL - driver for storing session data in MySQL
-        tables.
-
-INSTALLATION
-    You can download the latest release of the library either from
-    http://www.CPAN.org or from http://modules.ultracgis.com/dist. The
-    library is distributed as .tar.gz file, which is a zipped tar-ball. You
-    can unzip and unpack the package with the following single command (% is
-    your shell prompt):
-
-        % gzip -dc CGI-Session-2.6.tar.gz | tar -xof -
-
-    It should create a folder named the same as the distribution name except
-    the ".tar.gz" extension. If you have access to system's @INC folders (
-    usually if you are a super user in the system ) you should go with
-    standard installation. Otherwise custom installation is the way to go.
-
-  STANDARD INSTALLATION
-
-    The library is installed with just like other Perl libraries, or via
-    CPAN interactive shell (Perl -MCPAN -e install CGI::Session).
-
-    Installation can also be done by following below instructions:
-
-    1   After downloading the distribution, "cd" to the distribution folder
-
-    2   In your shell type the following commands in the order listed:
-
-        *    Perl Makefile.PL
-
-        *    make
-
-        *    make test
-
-             If the tests show positive results, type:
-
-        *    make install
-
-  CUSTOM INSTALLATION
-
-    If you do not have access to install libraries in the system folders,
-    you should install the library in your own private folder, somewhere in
-    your home directory. For this purpose, first choose/create a folder
-    where you want to keep your Perl libraries. I use "perllib/" under my
-    home folder. Then install the library following the below steps:
-
-    1   After downloading the distribution, "cd" to the distribution folder
-
-    2   In your shell type the following commands in the order listed:
-
-        *    Perl Makefile.PL INSTALLDIRS=site
-             INSTALLSITELIB=/home/your_folder/perllib
-
-        *    make
-
-        *    make test
-
-             If the tests show positive results, type:
-
-        *    make install
-
-    Then in your Perl programs do not forget to include the following line
-    at the top of your code:
-
-        use lib "/home/your_folder/perllib";
-
-    or the following a little longer alternative works as well:
-
-        BEGIN {
-            unshift @INC, "/home/your_folder/perllib";
-        }
-
-WHAT YOU NEED TO KNOW FIRST
+INTERFACE
     As of version 2.6 CGI::Session offers two distinct interfaces: 1) Object
     Oriented and 2) tied hash access. In Object Oriented Interface you will
     first create an object of CGI::Session's derived class (driver) and
-    manipulate session data by calling special methods. Example:
+    manipulate session data by calling special methods. Usage of the library
+    if similar to that of CGI.pm. Example:
 
         # Creating a new session object:
         $session = new CGI::Session::File(undef,
@@ -162,8 +81,8 @@ WHAT YOU NEED TO KNOW FIRST
 
     In tied hash method, you will tie() a regular hash variable to the
     CGI::Session's derived class and from that point on you will be treating
-    a session just hash variable. And Perl will do all other job for you
-    transparently:
+    a session just as a hash variable. And Perl will do all other job for
+    you transparently:
 
         # Creating a new session object:
         tie %session, "CGI::Session::File", undef, {
@@ -172,12 +91,13 @@ WHAT YOU NEED TO KNOW FIRST
         print "Your session id is ", $session{_session_id};
 
     In the examples throughout the manual I will give syntax and notes for
-    both interfaces. Which interface to use is totally up to you. I
-    personally prefer Object Oriented Interface, for it is full of features.
+    both interfaces wherever applicable. Which interface to use is totally
+    up to you. I personally prefer Object Oriented Interface for it is full
+    of features.
 
     Also, somewhere in this manual I will talk about the section on "SPECIAL
     NAMES" which are not accessible via "param()" method for neither writing
-    nor reading. But this rule differ in tied hash access method, where all
+    nor reading. But this rule differs in tied hash access method, where all
     those the section on "SPECIAL NAMES" but few are writable
 
 REFRESHER ON SESSION MANAGEMENT
@@ -208,18 +128,18 @@ WORKING WITH SESSIONS
 
         # OO interface
         $session = new CGI::Session::File(undef,
-            {            
+            {
                 Directory    => "/tmp/sessions",
         });
 
         # tie() interface
-        tie %session, "CGI::Session::File", undef, {            
+        tie %session, "CGI::Session::File", undef, {
                 Directory    => "/tmp/sessions"  };
 
     We're passing two arguments, the fist one is session id, which is
     undefined in our case, and the second one is the anonymous hash
 
-        {       
+        {
             Directory    => "/tmp/sessions",
         }
 
@@ -305,7 +225,7 @@ WORKING WITH SESSIONS
     web site will have that new session id appended to them. Too bad,
     because the client has to start everything over again.
 
-   INDENTIFYING THE USER VIA COOKIES
+   IDENTIFYING THE USER VIA COOKIES
 
     We can deal with the above problem by sending the client a cookie. This
     cookie will hold the session id only! Thus if the client visits some
@@ -322,13 +242,13 @@ WORKING WITH SESSIONS
         my $cgi = new CGI;
         my $sid = $cgi->cookie(SESSION_COOKIE) || undef;
         my $session = new CGI::Session::File($sid,
-            {            
+            {
                 Directory    => "/tmp/sessions"
             });
 
         # now, do not forget to send the cookie back to the client:
         {
-            my $cookie = $cgi->param(-name   => SESSION_COOKIE,
+            my $cookie = $cgi->cookie(-name   => SESSION_COOKIE,
                                      -value  => $session->id,
                                      -expires=> "+1M");
             print $cgi->header(-cookie=>$cookie);
@@ -391,7 +311,7 @@ WORKING WITH SESSIONS
     succeeded:
 
         my $session = new CGI::Session::File($sid,
-            {            
+            {
                 Directory    => "/tmp/sessions"
             }) or die $CGI::Session::errstr;
 
@@ -408,8 +328,8 @@ WORKING WITH SESSIONS
 
             $session->param(-name=>'email', -value=>'sherzodr@cpan.org');
 
-                # tie() interface
-                $session{email} = 'sherzodr@cpan.org';
+            # tie() interface
+            $session{email} = 'sherzodr@cpan.org';
 
     2   If you want to store more values in the same session parameter, you
         can pass a reference to an array or a hash. This is the most
@@ -422,17 +342,17 @@ WORKING WITH SESSIONS
         reader):
 
             # OO Interface
-                $session->param(-name=>'cart', -value=>{
+            $session->param(-name=>'cart', -value=>{
                                             "She Bang Hat"    => 1,
                                             "The Came T-shirt"=> 1,
                                             "Perl Mug"        => 2
                                            });
 
-                # tie() Interface
-                $session{cart} = {      "She Bang Hat"          => 1,
-                                 "The Came T-shirt"     => 1,
-                                 "Perl Mug"                     => 2 };
-                                                                
+            # tie() Interface
+            $session{cart} = {  "She Bang Hat"      => 1,
+                                 "The Came T-shirt" => 1,
+                                 "Perl Mug"         => 2 };
+
         the same assignment could be performed in the following two steps as
         well:
 
@@ -442,11 +362,11 @@ WORKING WITH SESSIONS
                 "Perl Mug"        => 2
             };
 
-                # OO Interface
+            # OO Interface
             $session->param(-name=>'cart', -value=>$cart);
 
-                # tie() Interface
-                $session{cart} = $cart;
+            # tie() Interface
+            $session{cart} = $cart;
 
     3   Sometimes, you want to store the contents of a form the user
         submitted, or want to copy the contents of the CGI query into the
@@ -467,7 +387,7 @@ WORKING WITH SESSIONS
                 $session->save_param($cgi);
             }
 
-                # tie() Interface: n/a
+            # tie() Interface: n/a
 
         It means, if the search form had a text field with the name
         "keyword":
@@ -528,14 +448,14 @@ WORKING WITH SESSIONS
     slightly, where you can read all these name from the hash, but you can
     set only _session_etime and _session_atime names:
 
-            printf ("Session last accessed on %s\n", localtime($session{_session_atime}));
+        printf ("Session last accessed on %s\n", localtime($session{_session_atime}));
 
-            # updating last access time. You don't have to do it, it will be done 
-            # automatically though
-            $session{_session_atime} = time();
+        # updating last access time. You don't have to do it, it will be done
+        # automatically though
+        $session{_session_atime} = time();
 
-            # setting expiration date, setting in 2 months
-            $session{_session_etime} = "2M";
+        # setting expiration date, setting in 2 months
+        $session{_session_etime} = "2M";
 
   ACCESSING SESSION DATA
 
@@ -598,11 +518,11 @@ WORKING WITH SESSIONS
     cart. "CGI::Session"'s clear() method deals with clearing the session
     data:
 
-            # OO Interface
+        # OO Interface
         $session->clear("cart");
-    
-            # tie() Interface
-            delete $session{cart};
+
+        # tie() Interface
+        delete $session{cart};
 
     What happens is, it deletes the given parameter from the session for
     good. If you do not pass any arguments to "clear()", then all the
@@ -618,12 +538,12 @@ WORKING WITH SESSIONS
     at all, because it was deleted from the disk for good. So it will have
     to generate a new session id instead:
 
-            # OO Interface
-            $session->delete();
+        # OO Interface
+        $session->delete();
 
-            # tie() Interface:
-            tied(%session)->delete();
-        
+        # tie() Interface:
+        tied(%session)->delete();
+
   CLEAR OR DELETE?
 
     So, should we delete() the session when the user finishes browsing the
@@ -826,12 +746,12 @@ METHODS
         your CGI object, then CGI.pm automatically restores the previous
         selection of checkboxes:
 
-                # load it from the disk to the CGI.pm object
-                $session->load_param($cgi, "lists");
+            # load it from the disk to the CGI.pm object
+            $session->load_param($cgi, "lists");
 
-                # now we can just print the checkbox, and previously saved checks
-                # would remain selected:
-                print $cgi->checkbox_group(-name=>"lists", -values=>["CGI-Perl", "Perl5-Porters", "CGI-Session"]);
+            # now we can just print the checkbox, and previously saved checks
+            # would remain selected:
+            print $cgi->checkbox_group(-name=>"lists", -values=>["CGI-Perl", "Perl5-Porters", "CGI-Session"]);
 
         Note: "load_param()" and "save_param()" methods didn't work on
         parameters that return multiple values. This problem was fixed in
@@ -849,18 +769,18 @@ METHODS
 
             $session->clear(["SHOPPING_CART"]);
 
-                # tie() Interface
-                delete $session{"SHOPPING_CART"};
-        
+            # tie() Interface
+            delete $session{"SHOPPING_CART"};
+
         I could as well use "clear()" with no arguments, in which case it
         would delete all the data from the session, not only the
         SHOPPING_CART:
 
-                # OO Interface
-                $session->clear();
+            # OO Interface
+            $session->clear();
 
-                # tie() Interface
-                %session = ();
+            # tie() Interface
+            %session = ();
 
     expires()
         When a session is created, it's expiration date is undefined, which
@@ -899,10 +819,10 @@ METHODS
         For tie() interface you will need to update one of the the section
         on "SPECIAL NAMES" "_session_etime":
 
-                $session{_session_etime} = "2d";
+            $session{_session_etime} = "2d";
 
-                printf("Your session will expires in %d seconds\n", 
-                        $session{_session_etime} - time);
+            printf("Your session will expires in %d seconds\n",
+                $session{_session_etime} - time);
 
         Here is the table of the shortcuts available for "expires()":
 
@@ -923,31 +843,31 @@ METHODS
         Returns the time() value of the date when the session was created:
 
             # OO Interface
-                printf("Session was created on %s\n", localtime($session->ctime));
+            printf("Session was created on %s\n", localtime($session->ctime));
 
-                # tie() Interface
-                printf("Session was created on %s\n", localtime($session{_session_ctime});
+            # tie() Interface
+            printf("Session was created on %s\n", localtime($session{_session_ctime});
 
     atime()
         Returns the time() value of the date when the session was last
         accessed:
 
-                # OO Interface
+            # OO Interface
             printf("Session was last accessed on %s\n", localtime($session->atime));
             printf("Session was last accessed %d seconds ago\n", time() - $session->atime);
 
-                # tie() Interface
-                printf("Session was last accessed on %s\n", localtime($session{_session_atime}));
+            # tie() Interface
+            printf("Session was last accessed on %s\n", localtime($session{_session_atime}));
             printf("Session was last accessed %d seconds ago\n", time() - $session{_session_atime});
 
     delete()
-        deletes the session data from the disk permantly:
+        deletes the session data from the disk permanantly:
 
-                # OO Interface
-                $session->delete();
+            # OO Interface
+            $session->delete();
 
-                # tie() Interface
-                tied(%session)->delete();
+            # tie() Interface
+            tied(%session)->delete();
 
 DEVELOPER SECTION
     If you noticed, "CGI::Session" has never been accessed directly, but we
@@ -970,27 +890,27 @@ DEVELOPER SECTION
 
   WHAT ARE THE SPECS?
 
-    Specifictions for those methods we a little complex in previous versions
-    of CGI::Session. But as of 2.8 I decided to pick a slightly different
-    approach. Now all the driver methods receive two arguments, $self, and
-    $sid. To give access to driver developers for other undelying data, I
-    added two more methods to the library: <opions()> and "raw_data()".
-    "options()" returns a hashref that contains the options passed to the
-    constructor. For CGI::Session::DB_File driver for example, this has
-    contains:
+    Specifications for those methods we a little complex in previous
+    versions of CGI::Session. But as of 2.8 I decided to pick a slightly
+    different approach. Now all the driver methods receive two arguments,
+    $self, and $sid. To give access to driver developers for other
+    underlying data, I added two more methods to the library: <opions()> and
+    "raw_data()". "options()" returns a hashref that contains the options
+    passed to the constructor. For CGI::Session::DB_File driver for example,
+    this has contains:
 
-            $options = {
-                    sid => $sid,
-                    FileName => 'some-file.db',
-                    LockDirectory => '/tmp'
-            };
+        $options = {
+            sid => $sid,
+            FileName => 'some-file.db',
+            LockDirectory => '/tmp'
+        };
 
     Although it contains session id, DO NOT use that session id from w/in
     your methods.
 
     "raw_data()" method on the other hand provides the driver methods with a
     raw data. Mostly this data is required for the "store()" method, which
-    needs to store the data in the disk. Raw data is an annonymous hash
+    needs to store the data in the disk. Raw data is an antonymous hash
     which holds key/value pairs of the session data. As for the session id,
     it could be acquired via the public "id()" method.
 
@@ -1007,26 +927,26 @@ DEVELOPER SECTION
         # all other driver specific libraries go below
 
         sub store {
-            my ($self, $sid) = shift;               
-                
-                    my $options = $self->options();
-                    my $data        = $session->raw_data();         
+            my ($self, $sid) = shift;
+
+            my $options = $self->options();
+            my $data    = $session->raw_data();
 
             return 1;
         }
 
         sub retrieve {
-            my ($self, $sid)        = @_;
-                    my $options = $self->options();
-                    my $sid         = $self->id();
+            my ($self, $sid)    = @_;
+            my $options = $self->options();
+            my $sid     = $self->id();
 
             return {};
         }
 
         sub tear_down {
             my ($self, $sid) = @_;
-                
-                    my $options = $self->raw_data();
+
+            my $options = $self->raw_data();
 
             return 1;
         }
@@ -1108,15 +1028,6 @@ FREQUANTLY ASKED QUESTIONS
         very safe location for your "Directory" so that no one will be able
         to access session files to find out the users' passwords, etc.
 
-        But there are alternative ways of user authentication, which I will
-        try to cover in my "cgiauth||CGI::Session::auth" tutorial soon
-
-    Q: Where can I get detailed information on managing user sessions in web
-    applications?
-    A: I myself did a lot of research on this, and the only article on
-    session management in CGI/Perl was the CGI::Session manual at
-    http://modules.ultracgis.com/CGI/Session.html (same as the current
-    manual). You can also check out the Apache::Session manpage
 SUPPORT
     I might not be able to answer all of your questions regarding
     "CGI::Session", so please subscribe to CGI::Session mailing list. Visit
@@ -1139,6 +1050,9 @@ HISTORY
     relies on standard Data::Dumper module to "freeze" and "thaw" the data.
 
 CREDITS
+    Following people contributed with their patches and/or ideas to the
+    development of this library. List is in ascending chronological order.
+
     Andy Lester <alester@flr.follett.com>
         Thanks for his patience for helping me to fix the bug in
         CGI::Session::File, which kept failing in Solaris.
@@ -1146,11 +1060,10 @@ CREDITS
     Brian King <mrbbking@mac.com>
         Helped to fix the t/mysql.t test suite that was failing on MacOS X
 
-BUGS
-    Currently the only know bug is in the "load_param()" and "save_param()"
-    methods. They cannot deal with the parameters that return other than
-    strings ( for example, arrays ).
+    Olivier Dragon <dragon@shadnet.shad.ca>
+        Fixed "expires()" method.
 
+BUGS
 AUTHOR
     Sherzod B. Ruzmetov <sherzodr@cpan.org>
 

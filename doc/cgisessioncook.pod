@@ -1,0 +1,398 @@
+# $Id: cgisessioncook.pod,v 1.4 2002/08/26 07:58:56 sherzodr Exp $
+
+=pod
+
+=head1 NAME
+
+cgisessioncook - tutorial on session management in cgi applications ( $Revision: 1.4 $ )
+
+=head1 DESCRIPTION
+
+C<cgisessioncook> is a tutorial that accompanies B<CGI::Session> distribution. It shows the usage of the library in web applications and shows practical solutions for certain problems. We do not recommend you to read this tutorial unless you're familiar with L<CGI::Session|CGI::Session> and it's syntax.
+
+=head1 REFRESHER ON SESSION MANAGEMENT
+
+Since HTTP is a stateless protocol, web programs need a way of recognizing clients across different HTTP requests. Each click to a site by the same user is considered a brand new request for your web application, and all the state information from the previous requests are lost. These constraints make it difficult to write web applications such as shopping carts, users' browsing history, login/authentication routines, users' preferences among many others.
+
+CGI::Session helps you to overcome this barrier.
+
+=head1 WHAT IS SESSION MANAGEMENT
+
+Session management in web applications is the method of treating each user personally by remembering their clicks, form data, pages visited or the items they "added" to their shopping carts. Why is this needed? Well, without the session management there're no such things as shopping carts, session preferences and privacy. I'm sure the list is not comprehensive; just to give you an idea.
+
+Programmers have been inventing their own way of managing sessions in their applications; from intimidating to the most absurd. CGI::Session is an attempt to solve this problem in a more elegant and reliable way.
+
+=head1 TRAP EVERYONE TENDS TO FALL INTO
+
+Suppose a visitor to your site filled in his name and email address in one of the forms and your challenge is to remember the submitted values. Well, this problem could be solved in several different ways such as:
+
+=over 4
+
+=item *
+
+Saving the submitted form input into cookies
+
+=item *
+
+Storing the submitted form input in the query_string (url) and/or hidden fields.
+
+=item *
+
+Ignore them all together! :-P
+
+=back
+
+
+There's nothing wrong with storing data in the cookies, but if it's a heavy site with lots of applications, all sending their own cookies, later or sooner you'll figure out that browsers don't except more than 20 cookies for domain and the size of each cookie cannot exceed 4KB. Let's see how far you can go.
+
+As for storing data in the query_string and/or hidden fields, they will be lost when the visitor either accidentally closes his/her browser or revisits the site.
+
+CGI::Session approaches all these constraints in a very elegant way by storing the session data on the server side and the session identifier ( SessionID ) on the client side ( as a cookie ).
+
+=head1 SESSION IDENTIFIER
+
+The library will generate a unique identifier for each unique user and associates the data stored on the server side with that SessionID. SessionID is an md5 digested string (hex or base64). It's your obligation to keep the generated session id on the client side so that you can pass it to the library's constructor in subsequent invocations of the application. This is mostly done by sending the SessionID to the client as a cookie and/or keeping it in the query_string and including the SessionID in all the links. We'll be making use of the combination of the two.
+
+=head1 CONVENTIONS
+
+Name of the cookie we'll be using to store the session is B<CGISESSIONID>.
+
+Throughout the tutorial we'll be presenting some examples. Since the object initialization part of the code is identical in most of the times, we decide to give the syntax in this section once, and skip this redundancy in the examples. So whenever you encounter an example, constructor is assumed to have been created using the following exact syntax ( unless otherwise noted ):
+
+    $sid = $cgi->cookie("CGISESSIONID") || undef;
+    $session = new CGI::Session::File($sid, {Directory=>'/tmp'})
+                    or die $CGI::Session::errstr;
+
+In the above example we first retrieve the session identifier from the cookie using CGI.pm's C<cookie()> method and pass it as the first argument to the constructor C<new()>. If it exists, the library initializes the object with existing session data stored on the server side, otherwise creates a new session id.
+
+If the new id was generated, we should remember to store that id in the cookie. Since it's not obvious right away if old session was initialized or new was created, we still store the session back in the cookie:
+
+    $session_cookie = $cgi->cookie(-name=>'CGISESSIONID',
+                                   -value=>$session->id, -expires=>"+1M");
+    print $cgi->header(-cookie=>$session_cookie);
+
+
+The first line is creating a cookie using B<CGI.pm>'s C<cookie()> method. The second line is sending the cookie to the user's browser using B<CGI.pm>'s C<header()> method.
+
+Variables $cgi and $session reperesent B<CGI.pm> and B<CGI::Session> objects respectively.
+
+After the above confessions, we can move to some examples with a less guilty conscious.
+
+=head1 EXAMPLE: STORING THE USER'S NAME
+
+=head2 PROBLEM
+
+We have a form in our site that asks for user's name and email address. We want to store the data so that we can greet the user when he/she visits the site next time ( possibly after several days or even weeks ).
+
+=head2 SOLUTION
+
+Although quite simple and straight forward it seems, variations of this example are used in more robust session managing tricks.
+
+Assuming the name of the form input fields are called "first_name" and "email" respectively, we can first retrieve this information from the cgi parameter. Using B<CGI.pm> this can be achieved in the following way:
+
+    $first_name = $cgi->param("first_name");
+    $email  = $cgi->param("email");
+
+After having the above two values from the form handy, we can now save them in the session like:
+
+    $session->param(first_name, $first_name);
+    $session->param(email, $email);
+
+If the above 4-line solution seems long for you (it does to me), you can achieve it with a single line of code:
+
+    $session->save_param($cgi, ["first_name", "email"]);
+
+The above syntax will get "first_name" and "email" parameters from the B<CGI.pm> and saves them to the B<CGI::Session> object.
+
+Now some other time or even in some other place we can simply say
+
+    print "Hello ", $session->param("first_name"), " how have you been?";
+
+and it does the trick.
+
+=head1 EXAMPLE: REMEMBER THE REFERER
+
+=head2 PROBLEM
+
+You run an outrourcing service, and people get refered to your program from other sites. After finishing the process, which might take several click-throughs, you need to provide them with a link which takes them to a site where they came from. In other words, after 10 clicks through your pages you need to recall the referered link, which take the user to your site.
+
+=head2 SOLUTION
+
+This solution is similar to the previous one, but instead of getting the data from the submitted form, you get it from HTTP_REFERER environmental variable, which holds the link to the refered page. But you should be cautious, because the click on your own page to the same application generates a referal as well, in this case with your own link. So you need to watchout for that by saving the link only if it doesn't already exist. This approach is suitable for the application which ALWAYS get accessed by clicking links and posting forms, but NOT by typing in the url. Good examples would be voting polls, shopping carts among many others.
+
+    $ENV{HTTP_REFERER} or die "Illegal use";
+
+    unless ( $session->param("referer") ) {
+        $session->param("referer", $ENV{HTTP_REFERER});
+    }
+
+In the above snippet of code, we simply save the referer in the session under the "referer" parameter. Note, that we first check if it was previously saved, in which case there would be no need to override it. It also means, if the referer was not saved previously, it's most like the first visit to the page, and the HTTP_REFERER holds the link to the link we're interested in, not our own.
+
+When we need to present the link back to the refered site, we just do:
+
+    $href = $session->param("referer");
+    print qq~<a href="$href">go back</a>~;
+
+=head1 EXAMPLE: BROWSING HISTORY
+
+=head2 PROBLEM
+
+You have an online store with about a dozen categories and thousands of items in each category. When a visitor is surfing the site, you want to display the last 10-20 visited pages/items on the left menu of the site ( for examples of this refer to Amazon.com ). This will make the site more usable and a lot friendlier
+
+=head2 SOLUTION
+
+The solution might vary on the way you implement the application. Here we'll show an example of the user's browsing history, where it shows just visited links and the pages' titles. For obvious reasons we build the array of the link=>title relationship. If you have a dynamicly generated content, you might have a slicker way of doing it. Despite the fact your implementation might be different, this example shows how to store a complex data structure in the session parameter. It's a blast!
+
+    %pages = (
+        "Home"      => "http://www.ultracgis.com",
+        "About us"  => "http://www.ultracgis.com/about",
+        "Contact"   => "http://www.ultracgis.com/contact",
+        "Products"  => "http://www.ultracgis.com/products",
+        "Services"  => "http://www.ultracgis.com/services",
+        "Portfolio" => "http://www.ultracgis.com/pfolio",
+        # ...
+    );
+
+    # Get a url of the page loaded
+    $link = $ENV{REQUEST_URI} or die "Errr. What the hack?!";
+
+    # get the previously saved arrayref from the session parameter
+    # named "HISTORY"
+    $history = $session->param("HISTORY") || [];
+
+    # push()ing a hashref to the arrayref
+    push (@{$history}, {title => $pages{ $link  },
+                        link  => $link          });
+
+    # storing the modified history back in the session
+    $session->param( "HISTORY", $history );
+
+
+In the real site, you will probably be handling the title=>url relationship in a different way, it's totally up to you. What we want you to notice is the $history, which is an arrayref, elements of which consist of hashrefs. This example illustrates that one can safely store complex data structures, including objects, in the session and they can be re-created for you the way they were once stored.
+
+Displaying the browsing history should be even more straight-forward:
+
+    # we first get the history information from the session
+    $history = $session->param("HISTORY") || [];
+
+    print qq~<div>Your recently viewed pages</div>~;
+
+    for $page ( @{ $history } ) {
+        print qq~<a href="$page->{link}">$page->{title}</a><br>~;
+    }
+
+If you use B<HTML::Template>, to access the above history in your templates simply C<associate> the $session object with that of B<HTML::Template>:
+
+    $template = new HTML::Template(filename=>"some.tmpl", associate=>$session );
+
+Now in your "some.tmpl" template you can access the above history like so:
+
+    <!-- left menu starts -->
+    <table width="170">
+        <tr>
+            <th> last visited pages </th>
+        </tr>
+        <TMPL_LOOP NAME=HISTORY>
+        <tr>
+            <td> <a href="<TMPL_VAR NAME=LINK>"> <TMPL_VAR NAME=TITLE> </a>     </td>
+        </tr>
+        </TMPL_LOOP>
+    </table>
+    <!-- left menu ends -->
+
+and this will print the list in nicely formated table. For more information on associating an object with the B<HTML::Template> refer to L<HTML::Template manual|HTML::Template>
+
+=head1 EXAMPLE: SHOPPING CART
+
+=head2 PROBLEM
+
+You have a site that lists the available products off the database. You need an application that would enable users' to "collect" items for checkout, in other words, to put into a virtual shopping cart. When they are done, they can proceed to checkout.
+
+=head2 SOLUTION
+
+Again, the exact implementation of the site will depend on the implementation of this solution. This example is pretty much similar to the way we implemented the browing history in the previous example. But instead of saving the links of the pages, we simply save the ProductID as the arrayref in the session parameter called, say, "CART". In the folloiwng example we tried to represent the imaginary database in the form of a hash.
+
+Each item in the listing will have a url to the shopping cart. The url will be in the following format:
+
+    http://ultracgis.com/cart.cgi?cmd=add;itemID=1001
+
+C<cmd> CGI parameter is a run mode for the application, in this particular example it's "add", which tells the application that an item is about to be added. C<itemID> tells the application which item should be added. You might as well go with the item title, instead of numbers, but most of the time in dynamicly generated sites you prefer itemIDs over their titles, since titles tend to be not consistent (it's from experience):
+
+    # Imaginary database in the form of a hash
+    %products = (
+        1001 =>    [ "usr/bin/perl t-shirt",    14.99],
+        1002 =>    [ "just perl t-shirt",       14.99],
+        1003 =>    [ "shebang hat",             15.99],
+        1004 =>    [ "linux mug",               19.99],
+        # on and on it goes....
+    );
+
+    # getting the run mode for the state. If doesn't exist,
+    # defaults to "display", which shows the cart's content
+    $cmd = $cgi->param("cmd") || "display";
+
+    if ( $cmd eq "display" ) {
+        print display_cart($cgi, $session);
+
+    } elsif ( $cmd eq "add" ) {
+        print add_item($cgi, $session, \%products,);
+
+    } elsif ( $cmd eq "remove") {
+        print remove_item($cgi, $session);
+
+    } elsif ( $cmd eq "clear" ) {
+        print clear_cart($cgi, $session);
+
+    } else {
+        print display_cart($cgi, $session);
+
+    }
+
+
+The above is the skeleton of the application. Now we start writing the functions (subroutines) associated with each run-mode. We'll start with C<add_item()>:
+
+    sub add_item {
+        my ($cgi, $session, $products) = @_;
+
+        # getting the itemID to be put into the cart
+        my $itemID = $cgi->param("itemID") or die "No item specified";
+
+        # getting the current cart's contents:
+        my $cart = $session->param("CART") || [];
+
+        # adding the selected item
+        push @{ $cart }, {
+            itemID => $itemID,
+            name   => $products->{$itemID}->[0],
+            price  => $products->{$itemID}->[1],
+        };
+
+        # now store the updated cart back into the session
+        $session->param( "CART", $cart );
+
+        # show the contents of the cart
+        return display_cart($cgi, $session);
+    }
+
+
+As you see, things are quite straight-forward this time as well. We're accepting three arguments, getting the itemID from the C<itemID> CGI parameter, retrieving contents of the current cart from the "CART" session parameter, updating the contents with the information we know about the item with the C<itemID>, and storing the modifed $cart back to "CART" session parameter. When done, we simply display the cart. If anything doesn't make sence to you, STOP! Read it over!
+
+Here are the contents for C<display_cart()>, which simply gets the shoping cart's contents from the session parameter and generates a list:
+
+    sub display_cart {
+        my ($cgi, $session) = @_;
+
+        # getting the cart's contents
+        my $cart = $session->param("CART") || [];
+        my $total_price = 0;
+        my $RV = q~<table><tr><th>Title</th><th>Price</th></tr>~;
+
+        if ( $cart ) {
+            for my $product ( @{$cart} ) {
+                $total_price += $product->{price};
+                $RV = qq~
+                    <tr>
+                        <td>$product->{name}</td>
+                        <td>$product->{price}</td>
+                    </tr>~;
+            }
+
+        } else {
+            $RV = qq~
+                <tr>
+                    <td colspan="2">There are no items in your cart yet</td>
+                </tr>~;
+        }
+
+        $RV = qq~
+            <tr>
+                <td><b>Total Price:</b></td>
+                <td><b>$total_price></b></td>
+            </tr></table>~;
+
+        return $RV;
+    }
+
+
+A more professional approach would be to take the HTML outside the program code by using B<HTML::Template>, in which case the above C<display_cart()> will look like:
+
+    sub display_cart {
+        my ($cgi, $session) = @_;
+
+        my $template = new HTML::Template(filename=>"cart.tmpl",
+                                          associate=>$session,
+                                          die_on_bad_params=>0);
+        return $template->output();
+
+    }
+
+And respective portion of the html template would be something like:
+
+    <!-- shopping cart starts -->
+    <table>
+        <tr>
+            <th>Title</th><th>Price</th>
+        </tr>
+        <TMPL_LOOP NAME=CART>
+        <tr>
+            <td> <TMPL_VAR NAME=NAME> </td>
+            <td> <TMPL_VAR NAME=PRICE> </td>
+        </tr>
+        </TMPL_LOOP>
+        <tr>
+            <td><b>Total Price:</b></td>
+            <td><b> <TMPL_VAR NAME=TOTAL_PRICE> </td></td>
+        </tr>
+    </table>
+    <!-- shopping cart ends -->
+
+A slight problem in the above template: TOTAL_PRICE doesn't exist. To fix this problem we need to introduce a slight modification to our C<add_item()>, where we also save the precalculated total price in the "total_price" session parameter. Try it yourself.
+
+If you've been following the examples, you shouldn't discover anything in the above code either. Let's move to C<remove_item()>. That's what the link for removing an item from the shopping cart will look like:
+
+    http://ultracgis.com/cart.cgi?cmd=remove;itemID=1001
+
+    sub remove_item {
+        my ($cgi, $session) = @_;
+
+        # getting the itemID from the CGI parameter
+        my $itemID = $cgi->param("itemID") or return undef;
+
+        # getting the cart data from the session
+        my $cart = $session->param("CART") or return undef;
+
+        my $idx = 0;
+        for my $product ( @{$cart} ) {
+            $product->{itemID} == $itemID or next;
+            splice( @{$cart}, $idx++, 1);
+        }
+
+        $session->param("CART", $cart);
+
+        return display_cart($cgi, $session);
+    }
+
+C<clear_cart()> will get even shorter
+
+    sub clear_cart {
+        my ($cgi, $session) = @_;
+        $session->clear(["CART"]);
+    }
+
+=head1 EXAMPLE: MEMBERS AREA
+
+=head2 PROBLEM
+
+You want to create an area in the part of your site/application where only restricted users should have access to. 
+
+=head2 SOLUTION
+
+=head1 AUTHOR
+
+    Sherzod Ruzmetov <sherzodr@cpan.org>
+
+=head1 SEE ALSO
+
+L<CGI::Session>, L<CGI>
+
+=cut

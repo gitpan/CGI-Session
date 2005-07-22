@@ -5,11 +5,8 @@ use Test::More;
 use CGI::Session::Test::Default;
 
 for ( "DBI", "DBD::SQLite", "Storable" ) {
-    eval "require $_";
-    if ( $@ ) {
-        plan(skip_all=>"$_ is NOT available");
-        exit(0);
-    }
+  eval "require $_"; 
+  plan(skip_all=>"$_ is NOT available") if $@;
 }
 
 my %dsn = (
@@ -40,6 +37,6 @@ unless ( defined $count ) {
 my $t = CGI::Session::Test::Default->new(
     dsn => "driver:sqlite;seRializer:storable",
     args=>{Handle=>$dbh, TableName=>$dsn{TableName}});
-    #args => \%dsn);
 
+plan tests => $t->number_of_tests;
 $t->run();

@@ -1,0 +1,38 @@
+This is a working collaborative TODO list. Please keep it up to date as you see
+fit. In the short term, let's focus on what it takes to make a solid 4.0
+release!
+
+[COMPATIBILITY]
+
+ - '-ip_match' is missing in 4.x. The code should be easy port from 3.x, as well
+    as some docs. Also, $CGI::Session::IP_MATCH needs to be supported. 
+
+ - Resolve this question of consistency versus compatibility for expires('param',0);
+   http://sourceforge.net/mailarchive/message.php?msg_id=12244228
+
+[TEST COVERAGE]
+ - All existing tests need to pass. 
+
+[INTERNALS]
+
+ - Make the code easier to follow by moving subroutines
+   next to their documentation. That allows you to confirm
+   at a glance that the code and documentation for a routine
+   match, and keep them in sync easier. 
+
+[ MISSING FEATURES / WISHLIST ] 
+
+ - Allow CGI::Session->new( $dbh );
+   This syntax would automatically figure out the CGI::Session driver name
+   based on the DBI driver. This can't work in every case because there is
+   not a 1-to-1 correspondence. For example, the PureSQL driver is an alternate
+   database backend. Still, because it can address the common cases with MySQL
+   and PostgreSQL drivers, it seems worthwhile. 
+
+ - Consider adding a redirect() method, as proposed here:
+   https://rt.cpan.org/Ticket/Display.html?id=2603 
+   The bug report has some starter code, but docs and tests are still needed.  
+
+ - Ticket #8090 Change to clear method allows clearing based on regular expression. 
+   Code patch has been submitted. Still need docs and test. 
+   

@@ -1,0 +1,63 @@
+package CGI::Session::Serialize::storable;
+
+# $Id: storable.pm 188 2005-07-22 04:47:20Z sherzodr $ 
+
+use strict;
+
+use Storable;
+require CGI::Session::ErrorHandler;
+
+use vars qw/$VERSION @ISA/;
+$VERSION = '1.5';
+@ISA     = qw( CGI::Session::ErrorHandler );
+
+=pod
+
+=head1 NAME
+
+CGI::Session::Serialize::storable - Serializer for CGI::Session
+
+=head1 DESCRIPTION
+
+This library can be used by CGI::Session to serialize session data. Uses L<Storable|Storable>.
+
+=head1 METHODS
+
+=over 4
+
+=item freeze($class, \%hash)
+
+Receives two arguments. First is the class name, the second is the data to be serialized.
+Should return serialized string on success, undef on failure. Error message should be set using
+C<set_error()|CGI::Session::ErrorHandler/"set_error()">
+
+=cut
+
+sub freeze {
+    my ($self, $data) = @_;
+    return Storable::freeze($data);
+}
+
+=item thaw($class, $string)
+
+Receives two arguments. First is the class name, second is the I<frozen> data string. Should return
+thawed data structure on success, undef on failure. Error message should be set 
+using C<set_error()|CGI::Session::ErrorHandler/"set_error()">
+
+=back
+
+=cut 
+
+sub thaw {
+    my ($self, $string) = @_;
+#    warn "thawing $string...\n";
+    return Storable::thaw($string);
+}
+
+=head1 LICENSING
+
+For support and licensing see L<CGI::Session|CGI::Session>
+
+=cut
+
+1;

@@ -17,9 +17,9 @@ my %dsn = (
     TableName   => 'sessions'
 );
 
-my $dbh = DBI->connect($dsn{DataSource}, '', '', {RaiseError=>0, PrintError=>0});
+my $dbh = DBI->connect($dsn{DataSource});
 unless ( $dbh ) {
-    plan(skip_all=>"Couldn't establish connection with the server");
+    plan(skip_all=>"Couldn't establish connection with the SQLite server");
     exit(0);
 }
 
@@ -40,4 +40,5 @@ my $t = CGI::Session::Test::Default->new(
     dsn => "driver:sqlite",
     args=>{Handle=>$dbh, TableName=>$dsn{TableName}});
 
+plan tests => $t->number_of_tests;
 $t->run();

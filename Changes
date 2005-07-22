@@ -1,6 +1,26 @@
 CGI::Session Change Log
 =====================================================================
 
+4.00_09 - Thursday, July 21, 2005
+
+   * CHANGE: Starting with 4.0, it will no longer work to use the syntax
+             of CGI::Session::DriverName(). This hasn't been a documented
+             API since CGI::Session 2.94, released in August, 2002.
+
+   * FIX: documented etime(), which was present in 3.x (Mark Stosberg)
+   * FIX: Added code, test and docs to make $CGI::Session::File::FileName work,
+          for 3.x compatibility. (Mark Stosberg)
+   * FIX: Providing an expire time like "-10" now works (Mark Stosberg)
+   * FIX: Restored close() method, for 3.x compatibility. (Mark Stosberg) 
+   * FIX: Make ->clear('email') work, for 3.95 compatibility (Mark Stosberg)
+   * FIX: Added back is_new() for compatibility with 3.95. (Mark Stosberg)
+   * FIX: Support for CGI::Simple is confirmed, resolving RT#6141 (Mark Stosberg) 
+   * FIX: Add code and tests for $CGI::Session::MySQL::TABLE_NAME, 
+     which worked in 3.x (Mark Stosberg) 
+
+   * DOCS: CGI::Session now has a public Subversion repository, thanks to Jason
+           Crome. See the bottom of the CGI::Session docs for details. 
+
 4.00_08 - Tuesday, March 15, 2005
 
     * FIX: Changes made in 4.00_07 rolled back
@@ -16,7 +36,7 @@ CGI::Session Change Log
 
 4.00_05 - Tuesday, February 22, 2005
 
-    * FIX: case insesitivity was not enforced properly in CGI::Session::parse_dsn()
+    * FIX: case insensitivity was not enforced properly in CGI::Session::parse_dsn()
 
 4.00_04 - Wednesday, February 16, 2005
 
@@ -77,4 +97,4 @@ CGI::Session Change Log
 	* Bug in POD documentation is fixed (thanks to Graham Barr)	
 
 
-Changes,v 3.12 2005/03/15 16:43:45 sherzodr Exp
+$Id: Changes 198 2005-07-22 07:09:57Z markstos $

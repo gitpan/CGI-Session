@@ -1,8 +1,8 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         CGI-Session
-version:      4.00_08
-version_from: Session.pm
+version:      4.00_09
+version_from: lib/CGI/Session.pm
 installdirs:  site
 requires:
     Data::Dumper:                  
@@ -10,4 +10,4 @@ requires:
     Test::More:                    
 
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.16
+generated_by: ExtUtils::MakeMaker version 6.17

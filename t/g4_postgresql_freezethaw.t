@@ -1,20 +1,29 @@
-my %dsn = (
-    DataSource  => $ENV{CGISESS_PGSQL_DSN}      || "dbi:mysql:test",
-    User        => $ENV{CGISESS_PGSQL_USER}     || $ENV{USER},
-    Password    => $ENV{CGISESS_PGSQL_PASSWORD} || undef,
-    TableName   => 'sessions'
-);
-
-
-
-
-
-
+my %dsn;
+if ($ENV{DBI_DSN} && $ENV{DBI_DSN} =~ m/^dbi:Pg:/) {
+    %dsn = (
+        DataSource  => $ENV{DBI_DSN},
+        Password    => $ENV{CGISESS_PGSQL_PASSWORD} || undef,
+        TableName   => 'sessions'
+    );
+}
+else {
+    %dsn = (
+        DataSource  => $ENV{CGISESS_PGSQL_DSN},
+        User        => $ENV{CGISESS_PGSQL_USER}     || $ENV{USER},
+        Password    => $ENV{CGISESS_PGSQL_PASSWORD} || undef,
+        TableName   => 'sessions'
+    );
+}
 
 use strict;
 use File::Spec;
 use Test::More;
 use CGI::Session::Test::Default;
+
+unless ( $dsn{DataSource} ) {
+    plan(skip_all=>"DataSource is not known");
+    exit(0);
+}
 
 for ( "DBI", "DBD::Pg", "FreezeThaw" ) {
     eval "require $_"; 
@@ -26,7 +35,7 @@ for ( "DBI", "DBD::Pg", "FreezeThaw" ) {
 
 my $dbh = DBI->connect($dsn{DataSource}, $dsn{User}, $dsn{Password}, {RaiseError=>0, PrintError=>0});
 unless ( $dbh ) {
-    plan(skip_all=>"Couldn't establish connection with the server");
+    plan(skip_all=>"Couldn't establish connection with the PostgreSQL server");
     exit(0);
 }
 
@@ -47,4 +56,5 @@ my $t = CGI::Session::Test::Default->new(
     dsn => "dr:postgresql;serializer:freezethaw",
     args=>{Handle=>$dbh, TableName=>$dsn{TableName}});
 
+plan tests => $t->number_of_tests;
 $t->run();

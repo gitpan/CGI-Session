@@ -1,5 +1,8 @@
+# $Id: g4_dbfile_storable.t 212 2005-08-30 11:47:14Z sherzodr $
 
 use strict;
+use diagnostics;
+
 use Test::More;
 use File::Spec;
 use CGI::Session::Test::Default;

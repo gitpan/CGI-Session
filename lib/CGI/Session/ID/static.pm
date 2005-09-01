@@ -1,11 +1,9 @@
 package CGI::Session::ID::static;
 
-# $Id: static.pm 133 2005-07-06 06:51:32Z markstos $
+# $Id: static.pm 216 2005-09-01 10:52:26Z sherzodr $
 
 use strict;
-#use diagnostics;
-
-use Carp;
+use Carp ("croak");
 use CGI::Session::ErrorHandler;
 
 $CGI::Session::ID::static::VERSION = '1.6';

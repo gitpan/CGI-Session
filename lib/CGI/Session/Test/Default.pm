@@ -1,13 +1,11 @@
 package CGI::Session::Test::Default;
 
 use strict;
-#use diagnostics;
-#use overload;
 use Carp;
 use Test::More;
 use Data::Dumper;
 
-$CGI::Session::Test::Default::VERSION = '1.51';
+$CGI::Session::Test::Default::VERSION = '1.52';
 
 =head1 CGI::Session::Test::Default
 
@@ -15,23 +13,23 @@ Run a suite of tests for a given CGI::Session::Driver
 
 =head2 new()
 
- my $t = CGI::Session::Test::Default->new(
-    # These are all optional, with default as follows
-    dsn   => "driver:file",
-    args  => undef,
-    tests => 77,
- );
+    my $t = CGI::Session::Test::Default->new(
+        # These are all optional, with default as follows
+        dsn   => "driver:file",
+        args  => undef,
+        tests => 77,
+    );
 
-Create a new test object, possibly overriding some defaults. 
+Create a new test object, possibly overriding some defaults.
 
-=cut 
+=cut
 
 sub new {
     my $class   = shift;
     my $self    = bless {
             dsn     => "driver:file",
             args    => undef,
-            tests   => 79,
+            tests   => 85,
             @_
     }, $class;
 
@@ -39,8 +37,8 @@ sub new {
 }
 
 =head2 number_of_tests()
- 
- my $new_num = $t->number_of_tests($new_num);
+
+    my $new_num = $t->number_of_tests($new_num);
 
 A setter/accessor method to affect the number of tests to run,
 after C<new()> has been called and before C<run()>.
@@ -59,15 +57,15 @@ sub number_of_tests {
 
 =head2 run()
 
- $t->run();
+    $t->run();
 
-Run the test suite. See C<new()> for setting related options. 
+Run the test suite. See C<new()> for setting related options.
 
 =cut
 
 sub run {
     my $self = shift;
-    
+
     use_ok("CGI::Session", "CGI::Session loaded successfully!");
 
     my $sid = undef;
@@ -122,11 +120,17 @@ sub run {
     sleep(1);
 
     SECOND: {
+            SKIP: {
             ok(1, "=== 2 ===");
             my $session;
             eval { $session = CGI::Session->load($self->{dsn}, $sid, $self->{args}) };
+
+            if ($@ || CGI::Session->errstr) {
+                skip "couldn't load session, bailing out: SQLite/Storable support is TODO", 56;
+            }
+
             is($@.CGI::Session->errstr,'','survived eval without error.');
-            ok($session, "Session was retreived successfully");
+            ok($session, "Session was retrieved successfully");
             ok(!$session->is_expired, "session isn't expired yet");
 
             is($session->id,$sid, "session IDs are consistent: " . $session->id);
@@ -147,10 +151,29 @@ sub run {
 
             # TODO: test many any other variations of expire() syntax
             $session->expire('+1s');
-            ok($session->etime, "etime set to " . $session->etime);
+            ok($session->etime == 1, "etime set to 1 second");
 
+            $session->expire("+1m");
+            ok($session->etime == 60, "etime set to one minute");
+
+            $session->expires("2h");
+            ok($session->etime == 7200, "etime set to two hours");
+
+            $session->expires("5d");
+            ok($session->etime == 432000, "etime set to 5 days");
+
+            $session->expires("-10s");
+            ok($session->etime == -10, "etime set to 10 seconds in the past");
+
+            #
+            # Setting the expiration time back to 1s, so that subsequent tests
+            # relying on this value pass
+            #
+            $session->expire("1s");
+            ok($session->etime == 1, "etime set back to one second");
             eval { $session->close(); };
             is($@, '', 'calling close method survives eval');
+        }
     }
 
     sleep(1);   # <-- letting the time tick
@@ -159,7 +182,7 @@ sub run {
     THREE: {
         ok(1, "=== 3 ===");
         my $session = CGI::Session->load($self->{dsn}, $sid, $self->{args}) or die CGI::Session->errstr;
-        ok($session, "Session instance loaded " . $session->id);
+        ok($session, "Session instance loaded ");
         ok(!$session->id, "session doesn't have ID");
         ok($session->is_empty, "session is empty, which is the same as above");
         #print $session->dump;
@@ -186,7 +209,7 @@ sub run {
 
     FOUR: {
         # We are intentionally removing the session stored in the datastore and will be requesting
-        # re-initilization of that id. This test is necessary since I noticed weird behaviours in
+        # re-initialization of that id. This test is necessary since I noticed weird behaviors in
         # some of my web applications that kept creating new sessions when the object requested
         # wasn't in the datastore.
         ok(1, "=== 4 ===");
@@ -200,7 +223,7 @@ sub run {
     }
 
 
-    
+
     FIVE: {
         ok(1, "=== 5 ===");
         my $session = CGI::Session->new($self->{dsn}, $sid, $self->{args}) or die CGI::Session->errstr;
@@ -254,14 +277,14 @@ sub run {
         ok($session, "Session object created successfully");
         ok($session->id eq $sid, "Previously stored object loaded successfully");
 
-        
+
         my $simple_object = $session->param("simple_object");
         ok(ref $simple_object eq "SimpleObjectClass", "SimpleObjectClass loaded successfully");
 
         SKIP: {
             my $dsn = CGI::Session->parse_dsn($self->{dsn});
             if ( !$dsn->{serializer} || ($dsn->{serializer} eq 'default') ) {
-                skip("Default serializer cannot serialize objects properly", 6);
+                skip("Default serializer cannot serialize objects properly", 7);
             }
             ok($simple_object->name eq "Sherzod Ruzmetov");
             ok($simple_object->emails(1) eq 'sherzodr@cpan.org');
@@ -269,6 +292,7 @@ sub run {
             ok($simple_object->blogs('lost+found') eq 'http://author.handalak.com/');
             ok(ref $session->param("overloaded_object") );
             ok($session->param("overloaded_object") eq "ABCDEFG", "Object is still overloaded");
+            ok(overload::Overloaded($session->param("overloaded_object")), "Object is really overloaded");
         }
         $session->delete();
     }

@@ -37,8 +37,6 @@ t/api3_incr.t
 t/api3_obj_store.t
 t/api3_obj_store_db_file.t
 t/cgi_simple.t
-t/cgisess.db
-t/cgisess.id
 t/complex_ds.t
 t/driver_dbi.t
 t/expire.t
@@ -58,6 +56,7 @@ t/g4_sqlite_freezethaw.t
 t/g4_sqlite_storable.t
 t/g4_storable.t
 t/header.t
+t/ip_matches.t
 t/is_new.t
 t/load.t
 t/parse_dsn.t

@@ -1,3 +1,8 @@
+# $Id: g4_mysql_storable.t 212 2005-08-30 11:47:14Z sherzodr $
+
+use strict;
+use diagnostics;
+
 my %dsn = (
     DataSource  => $ENV{CGISESS_MYSQL_DSN}      || "dbi:mysql:test",
     User        => $ENV{CGISESS_MYSQL_USER}     || $ENV{USER},
@@ -7,7 +12,6 @@ my %dsn = (
 );
 
 
-use strict;
 use File::Spec;
 use Test::More;
 use CGI::Session::Test::Default;

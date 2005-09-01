@@ -1,3 +1,8 @@
+# $Id: g4_mysql.t 212 2005-08-30 11:47:14Z sherzodr $
+
+use strict;
+use diagnostics;
+
 my %dsn;
 if (defined $ENV{DBI_DSN} && ($ENV{DBI_DSN} =~ m/^dbi:mysql:/)) {
     %dsn = (
@@ -17,7 +22,6 @@ else {
 }
 
 
-use strict;
 use File::Spec;
 use Test::More;
 use CGI::Session::Test::Default;

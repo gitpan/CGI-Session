@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id: purge.pl 124 2005-02-11 08:13:32Z sherzodr $
+# $Id: purge.pl 216 2005-09-01 10:52:26Z sherzodr $
 
 #
 # This script can be installed as a cron-job to run at specific intervals
@@ -12,3 +12,4 @@ use constant DSN_ARGS   => {};
 use CGI::Session;
 
 CGI::Session->find( DSN, sub {}, DSN_ARGS ) or die CGI::Session->errstr;
+

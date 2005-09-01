@@ -1,9 +1,8 @@
 package CGI::Session::Driver::db_file;
 
-# $Id: db_file.pm 133 2005-07-06 06:51:32Z markstos $
+# $Id: db_file.pm 216 2005-09-01 10:52:26Z sherzodr $
 
 use strict;
-#use diagnostics;
 
 use Carp;
 use DB_File;
@@ -12,8 +11,8 @@ use File::Basename;
 use CGI::Session::Driver;
 use Fcntl qw( :DEFAULT :flock );
 
-@CGI::Session::Driver::db_file::ISA         = qw( CGI::Session::Driver );
-$CGI::Session::Driver::db_file::VERSION     = '1.1';
+@CGI::Session::Driver::db_file::ISA         = ( "CGI::Session::Driver" );
+$CGI::Session::Driver::db_file::VERSION     = "1.2";
 $CGI::Session::Driver::db_file::FILE_NAME   = "cgisess.db";
 
 
@@ -153,10 +152,7 @@ CGI::Session::Driver::db_file - CGI::Session driver for BerkeleyDB using DB_File
 
 =head1 DESCRIPTION
 
-B<db_file> stores session data in BerkelyDB file using DB_File - Perl module.
-All sessions will be stored in a single file, specified in I<FileName> driver argument as
-in the above example. If I<FileName> isn't given, defaults to F</tmp/cgisess.db>, or its
-equivalent on a non-UNIX machine.
+B<db_file> stores session data in BerkelyDB file using L<DB_File|DB_File> - Perl module. All sessions will be stored in a single file, specified in I<FileName> driver argument as in the above example. If I<FileName> isn't given, defaults to F</tmp/cgisess.db>, or its equivalent on a non-UNIX system.
 
 If directory hierarchy leading to the file does not exist, will be created for you.
 

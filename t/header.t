@@ -1,3 +1,8 @@
+# $Id$
+
+use strict;
+use diagnostics;
+
 use Test::More qw/no_plan/;
 
 # Some driver independent tests for header();
@@ -11,4 +16,4 @@ is($@, '','has header() method');
 eval { $s->http_header() };
 is($@, '','has http_header() method');
 
-
+$s->delete();

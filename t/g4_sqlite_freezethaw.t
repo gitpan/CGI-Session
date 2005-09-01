@@ -1,10 +1,13 @@
+# $Id: g4_sqlite_freezethaw.t 212 2005-08-30 11:47:14Z sherzodr $
 
 use strict;
+use diagnostics;
+
 use File::Spec;
 use Test::More;
 use CGI::Session::Test::Default;
 
-for ( "DBI", "DBD::SQLite", "FreezeThaw" ) {
+for ( "DBI", "DBD::SQLite", "FreezeThaw", "MIME::Base64" ) {
     eval "require $_"; 
     if ( $@ ) {
         plan(skip_all=>"$_ is NOT available");

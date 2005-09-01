@@ -1,16 +1,14 @@
 package CGI::Session::Serialize::default;
 
-# $Id: default.pm 133 2005-07-06 06:51:32Z markstos $ 
+# $Id: default.pm 216 2005-09-01 10:52:26Z sherzodr $ 
 
 use strict;
-#use diagnostics;
-
 use Safe;
 use Data::Dumper;
 use CGI::Session::ErrorHandler;
 
-@CGI::Session::Serialize::default::ISA = qw( CGI::Session::ErrorHandler );
-$CGI::Session::Serialize::default::VERSION = '1.4';
+@CGI::Session::Serialize::default::ISA = ( "CGI::Session::ErrorHandler" );
+$CGI::Session::Serialize::default::VERSION = '1.5';
 
 
 sub freeze {
@@ -30,7 +28,7 @@ sub thaw {
     my ($class, $string) = @_;
 
     # To make -T happy
-    my ($safe_string) = $string =~ m/^(.*)$/;
+    my ($safe_string) = $string =~ m/^(.*)$/s;
     my $rv = Safe->new()->reval( $safe_string );
     if ( my $errmsg = $@ ) {
         return $class->set_error("thaw(): couldn't thaw. $@");
@@ -51,8 +49,7 @@ CGI::Session::Serialize::default - Default CGI::Session serializer
 
 =head1 DESCRIPTION
 
-This library is used by CGI::Session driver to serialize session data before storing
-it in disk.
+This library is used by CGI::Session driver to serialize session data before storing it in disk.
 
 All the methods are called as class methods.
 
@@ -62,22 +59,17 @@ All the methods are called as class methods.
 
 =item freeze($class, \%hash)
 
-Receives two arguments. First is the class name, the second is the data to be serialized.
-Should return serialized string on success, undef on failure. Error message should be set using
-C<set_error()|CGI::Session::ErrorHandler/"set_error()">
+Receives two arguments. First is the class name, the second is the data to be serialized. Should return serialized string on success, undef on failure. Error message should be set using C<set_error()|CGI::Session::ErrorHandler/"set_error()">
 
 =item thaw($class, $string)
 
-Received two arguments. First is the class name, second is the I<frozen> data string. Should return
-thawed data structure on success, undef on failure. Error message should be set 
-using C<set_error()|CGI::Session::ErrorHandler/"set_error()">
+Received two arguments. First is the class name, second is the I<frozen> data string. Should return thawed data structure on success, undef on failure. Error message should be set using C<set_error()|CGI::Session::ErrorHandler/"set_error()">
 
 =back
 
 =head1 WARNING
 
-May not be able to freeze/thaw complex objects. For that consider L<storable|CGI::Session::Serialize::storable>
-or L<freezethaw|CGI::Session::Serialize::freezethaw>
+May not be able to freeze/thaw complex objects. For that consider L<storable|CGI::Session::Serialize::storable> or L<freezethaw|CGI::Session::Serialize::freezethaw>
 
 =head1 LICENSING
 

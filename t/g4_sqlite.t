@@ -1,8 +1,12 @@
+# $Id: g4_sqlite.t 216 2005-09-01 10:52:26Z sherzodr $
 
 use strict;
+use diagnostics;
+
 use File::Spec;
 use Test::More;
 use CGI::Session::Test::Default;
+use Data::Dumper;
 
 for ( "DBI", "DBD::SQLite" ) {
     eval "require $_";
@@ -17,20 +21,20 @@ my %dsn = (
     TableName   => 'sessions'
 );
 
-my $dbh = DBI->connect($dsn{DataSource});
+my $dbh = DBI->connect($dsn{DataSource}, undef, undef, {RaiseError=>1, PrintError=>1});
 unless ( $dbh ) {
     plan(skip_all=>"Couldn't establish connection with the SQLite server");
     exit(0);
 }
 
-my ($count) = $dbh->selectrow_array("SELECT COUNT(*) FROM $dsn{TableName}");
-unless ( defined $count ) {
+my %tables = map{ s/['"]//g; ($_, 1) } $dbh->tables();
+unless ( exists $tables{ $dsn{TableName} } ) {
     unless( $dbh->do(qq|
         CREATE TABLE $dsn{TableName} (
             id CHAR(32) NOT NULL PRIMARY KEY,
             a_session TEXT NULL
         )|) ) {
-        plan(skip_all=>$dbh->errstr);
+        plan(skip_all=>"Couldn't create table $dsn{TableName}: " . $dbh->errstr);
         exit(0);
     }
 }

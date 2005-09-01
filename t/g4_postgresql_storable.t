@@ -1,3 +1,8 @@
+# $Id: g4_postgresql_storable.t 212 2005-08-30 11:47:14Z sherzodr $
+
+use strict;
+use diagnostics;
+
 my %dsn;
 if ($ENV{DBI_DSN} && $ENV{DBI_DSN} =~ m/^dbi:Pg:/) {
     %dsn = (
@@ -16,7 +21,6 @@ else {
 }
 
 
-use strict;
 use File::Spec;
 use Test::More;
 use CGI::Session::Test::Default;
@@ -27,7 +31,7 @@ unless ( $dsn{DataSource} ) {
 }
 
 for ( "DBI", "DBD::Pg", "Storable" ) {
-    eval "require $_"; 
+    eval "require $_";
     if ( $@ ) {
         plan(skip_all=>"$_ is NOT available");
         exit(0);
@@ -40,22 +44,22 @@ unless ( $dbh ) {
     exit(0);
 }
 
-my ($count) = $dbh->selectrow_array("SELECT COUNT(*) FROM $dsn{TableName}");
-unless ( defined $count ) {
-    unless( $dbh->do(qq|
-        CREATE TABLE $dsn{TableName} (
-            id CHAR(32) NOT NULL PRIMARY KEY,
-            a_session TEXT NULL
-        )|) ) {
-        plan(skip_all=>$dbh->errstr);
-        exit(0);
-    }
+eval {
+    $dbh->do(qq|drop table $dsn{TableName}|)
+};
+unless( $dbh->do(qq|
+    CREATE TABLE $dsn{TableName} (
+        id CHAR(32) NOT NULL PRIMARY KEY,
+        a_session BYTEA NULL
+    )|) ) {
+    plan(skip_all=>$dbh->errstr);
+    exit(0);
 }
 
 
 my $t = CGI::Session::Test::Default->new(
     dsn => "dr:postgresql;serializer:storable",
-    args=>{Handle=>$dbh, TableName=>$dsn{TableName}});
+    args=>{Handle=>$dbh, TableName=>$dsn{TableName}, ColumnType=>'binary'});
 
 plan tests => $t->number_of_tests;
 $t->run();

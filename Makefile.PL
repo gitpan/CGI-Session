@@ -49,7 +49,7 @@ WriteMakefile(
         'Data::Dumper'  => undef,
         'Test::More'    => undef,
     },
-    ABSTRACT_FROM  => 'lib/CGI/Session.pm',
+    ABSTRACT        => 'Persistent session data in CGI applications',
     AUTHOR          => 'Sherzod Ruzmetov <sherzodr@cpan.org>',
 );
 

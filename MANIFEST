@@ -60,6 +60,7 @@ t/ip_matches.t
 t/is_new.t
 t/load.t
 t/parse_dsn.t
+t/remote_addr.t
 t/str2seconds.t
 TODO
 META.yml                                 Module meta-data (added by MakeMaker)

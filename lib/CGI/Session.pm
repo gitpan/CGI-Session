@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 217 2005-09-01 21:37:42Z sherzodr $
+# $Id: Session.pm 218 2005-09-02 20:58:18Z sherzodr $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.01';
+$CGI::Session::VERSION  = '4.02';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -389,7 +389,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 217 2005-09-01 21:37:42Z sherzodr $
+# $Id: Session.pm 218 2005-09-02 20:58:18Z sherzodr $
 
 =pod
 
@@ -966,6 +966,12 @@ B<Note:> find() is meant to be convenient, not necessarily efficient. It's best 
 =item remote_addr()
 
 Returns the remote address of the user who created the session for the first time. Returns undef if variable REMOTE_ADDR wasn't present in the environment when the session was created.
+
+=cut
+
+sub remote_addr {   return $_[0]->{_DATA}->{_SESSION_REMOTE_ADDR}   }
+
+=pod
 
 =item errstr()
 

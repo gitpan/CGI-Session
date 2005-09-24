@@ -1,6 +1,9 @@
 CGI::Session Change Log
 =====================================================================
 
+    * INTERNAL: SQLite driver no longer needs MIME::Base64 for encoding (Matt LeBlanc)
+    * FIX: Default serializer can now serialize objects (Matt LeBlanc)
+
 4.02 - Friday, September 02, 2005
     * FIX: remote_addr() was missing (RT #14414])
 
@@ -116,4 +119,4 @@ CGI::Session Change Log
     * Bug in POD documentation is fixed (thanks to Graham Barr)
 
 
-$Id: Changes 218 2005-09-02 20:58:18Z sherzodr $
+$Id: Changes 221 2005-09-06 02:55:32Z markstos $

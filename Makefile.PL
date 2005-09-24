@@ -1,4 +1,4 @@
-# $Id: Makefile.PL 216 2005-09-01 10:52:26Z sherzodr $
+# $Id: Makefile.PL 219 2005-09-03 05:35:05Z markstos $
 
 use strict;
 use Text::Wrap;
@@ -48,6 +48,7 @@ WriteMakefile(
         'Digest::MD5'   => undef,
         'Data::Dumper'  => undef,
         'Test::More'    => undef,
+        'Scalar::Util'  => undef,
     },
     ABSTRACT        => 'Persistent session data in CGI applications',
     AUTHOR          => 'Sherzod Ruzmetov <sherzodr@cpan.org>',

@@ -1,11 +1,13 @@
 package CGI::Session::Serialize::default;
 
-# $Id: default.pm 216 2005-09-01 10:52:26Z sherzodr $ 
+# $Id: default.pm 224 2005-09-09 07:44:04Z markstos $ 
 
 use strict;
 use Safe;
 use Data::Dumper;
 use CGI::Session::ErrorHandler;
+use Scalar::Util qw(blessed reftype refaddr);
+use Carp "croak";
 
 @CGI::Session::Serialize::default::ISA = ( "CGI::Session::ErrorHandler" );
 $CGI::Session::Serialize::default::VERSION = '1.5';
@@ -28,12 +30,53 @@ sub thaw {
     my ($class, $string) = @_;
 
     # To make -T happy
-    my ($safe_string) = $string =~ m/^(.*)$/s;
-    my $rv = Safe->new()->reval( $safe_string );
+     my ($safe_string) = $string =~ m/^(.*)$/s;
+     my $rv = Safe->new->reval( $safe_string );
     if ( my $errmsg = $@ ) {
         return $class->set_error("thaw(): couldn't thaw. $@");
     }
+    __walk($rv);
     return $rv;
+}
+
+sub __walk {
+    my %seen;
+    my @filter = shift;
+    
+    while (defined(my $x = shift @filter)) {
+        $seen{refaddr $x || ''}++ and next;
+          
+        my $r = reftype $x or next;
+        if ($r eq "HASH") {
+            push @filter, __scan(@{$x}{keys %$x});
+        } elsif ($r eq "ARRAY") {
+            push @filter, __scan(@$x);
+        } elsif ($r eq "SCALAR" || $r eq "REF") {
+            push @filter, __scan($$x);
+        }
+    }
+}
+
+sub __scan {
+    for (@_) {
+        if (blessed $_) {
+            if (overload::Overloaded($_)) {
+                my $r = reftype $_;
+                if ($r eq "HASH") {
+                    $_ = bless { %$_ }, ref $_;
+                } elsif ($r eq "ARRAY") {
+                    $_ = bless [ @$_ ], ref $_;
+                } elsif ($r eq "SCALAR" || $r eq "REF") {
+                    $_ = bless \do{my $o = $$_},ref $_;
+                } else {
+                    croak "Do not know how to reconstitute blessed object of base type $r";
+                }
+            } else {
+                bless $_, ref $_;
+            }
+        }
+    }
+    return @_;
 }
 
 

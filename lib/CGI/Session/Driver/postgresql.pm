@@ -1,6 +1,6 @@
 package CGI::Session::Driver::postgresql;
 
-# $Id: postgresql.pm 216 2005-09-01 10:52:26Z sherzodr $
+# $Id: postgresql.pm 221 2005-09-06 02:55:32Z markstos $
 
 # CGI::Session::Driver::postgresql - PostgreSQL driver for CGI::Session
 #
@@ -64,7 +64,6 @@ sub store {
 sub __ex_and_ret {
     my ($dbh,$sql,$datastr,$sid,$type) = @_;
     eval {
-        local @SIG{qw(__DIE__ __WARN__)};
         my $sth = $dbh->prepare($sql) or return 0;
         $sth->bind_param(1,$datastr,{ pg_type => $type }) or return 0;
         $sth->bind_param(2,$sid) or return 0;

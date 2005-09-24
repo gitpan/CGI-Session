@@ -1,4 +1,4 @@
-# $Id: g4_mysql.t 212 2005-08-30 11:47:14Z sherzodr $
+# $Id: g4_mysql.t 223 2005-09-09 05:59:10Z markstos $
 
 use strict;
 use diagnostics;
@@ -39,9 +39,10 @@ for (qw/DBI DBD::mysql/) {
 require CGI::Session::Driver::mysql;
 my $dsnstring = CGI::Session::Driver::mysql->_mk_dsnstr(\%dsn);
 
-my $dbh = DBI->connect($dsnstring, $dsn{User}, $dsn{Password}, {RaiseError=>0, PrintError=>1});
+my $dbh;
+eval { $dbh = DBI->connect($dsnstring, $dsn{User}, $dsn{Password}, {RaiseError=>0, PrintError=>1}) };
 unless ( $dbh ) {
-    plan(skip_all=>"Couldn't establish connection with the MySQL server: " . DBI->errstr);
+    plan(skip_all=>"Couldn't establish connection with the MySQL server: " . (DBI->errstr || $@));
     exit(0);
 }
 

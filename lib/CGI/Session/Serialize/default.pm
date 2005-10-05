@@ -110,10 +110,6 @@ Received two arguments. First is the class name, second is the I<frozen> data st
 
 =back
 
-=head1 WARNING
-
-May not be able to freeze/thaw complex objects. For that consider L<storable|CGI::Session::Serialize::storable> or L<freezethaw|CGI::Session::Serialize::freezethaw>
-
 =head1 LICENSING
 
 For support and licensing see L<CGI::Session|CGI::Session>

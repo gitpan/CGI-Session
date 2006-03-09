@@ -1,4 +1,4 @@
-# $Id: /local/cgi-session/trunk/Makefile.PL 227 2005-09-03T05:35:05.159664Z markstos  $
+# $Id: Makefile.PL 251 2006-03-09 11:08:34Z tyler $
 
 use strict;
 use Text::Wrap;
@@ -51,7 +51,8 @@ WriteMakefile(
         'Scalar::Util'  => undef,
     },
     ABSTRACT        => 'Persistent session data in CGI applications',
-    AUTHOR          => 'Sherzod Ruzmetov <sherzodr@cpan.org>',
+    AUTHOR          => 'Sherzod Ruzmetov <sherzodr@cpan.org>', 
+    clean           => { FILES => [ 't/cgisess.*', 't/sessiondata' ] },
 );
 
 #

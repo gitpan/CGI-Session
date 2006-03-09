@@ -1,11 +1,15 @@
 CGI::Session Change Log
 =====================================================================
 
-4.06 - Wednesday, March 3rd, 2006
+4.07 - Thursday, March 9th, 2006
+
+    * INTERNAL: MANIFEST update to fix release. 
+
+4.06 - Wednesday, March 8th, 2006
 
     * FIX: some stray warnings when flushing:  "Use of uninitialized value in numeric eq (==)" (RT#14603)
     * NEW: JSON and YAML serializers (Tyler MacDonald)
-    * INTERAL: CGI::Session::Test::Default accepts a "skip" argument,
+    * INTERNAL: CGI::Session::Test::Default accepts a "skip" argument,
       listing tests that should be skipped. (Tyler)
 
 4.05 - Friday, March 3rd, 2006
@@ -164,4 +168,4 @@ CGI::Session Change Log
     * Bug in POD documentation is fixed (thanks to Graham Barr)
 
 
-$Id: /local/cgi-session/trunk/Changes 286 2006-03-09T03:07:01.898465Z mark  $
+$Id: Changes 250 2006-03-09 08:35:33Z markstos $

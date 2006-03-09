@@ -1,6 +1,6 @@
 package CGI::Session::Serialize::storable;
 
-# $Id: /local/cgi-session/trunk/lib/CGI/Session/Serialize/storable.pm 274 2006-03-02T02:53:47.269550Z mark  $
+# $Id: storable.pm 243 2006-03-02 08:21:50Z markstos $
 
 use strict;
 use Storable;

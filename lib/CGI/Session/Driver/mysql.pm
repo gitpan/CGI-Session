@@ -1,13 +1,13 @@
 package CGI::Session::Driver::mysql;
 
-# $Id: mysql.pm 243 2006-03-02 08:21:50Z markstos $
+# $Id: /local/cgi-session/trunk/lib/CGI/Session/Driver/mysql.pm 297 2006-03-16T02:27:26.386605Z mark  $
 
 use strict;
 use Carp;
 use CGI::Session::Driver::DBI;
 
 @CGI::Session::Driver::mysql::ISA       = qw( CGI::Session::Driver::DBI );
-$CGI::Session::Driver::mysql::VERSION   = "2.02";
+$CGI::Session::Driver::mysql::VERSION   = "2.03";
 
 sub _mk_dsnstr {
     my ($class, $dsn) = @_;

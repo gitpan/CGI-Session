@@ -1,6 +1,6 @@
 package CGI::Session::Driver::postgresql;
 
-# $Id: postgresql.pm 243 2006-03-02 08:21:50Z markstos $
+# $Id: /local/cgi-session/trunk/lib/CGI/Session/Driver/postgresql.pm 297 2006-03-16T02:27:26.386605Z mark  $
 
 # CGI::Session::Driver::postgresql - PostgreSQL driver for CGI::Session
 #
@@ -15,7 +15,7 @@ use Carp "croak";
 use CGI::Session::Driver::DBI;
 use DBD::Pg qw(PG_BYTEA PG_TEXT);
 
-$CGI::Session::Driver::postgresql::VERSION = '2.2';
+$CGI::Session::Driver::postgresql::VERSION = '2.4';
 @CGI::Session::Driver::postgresql::ISA     = qw( CGI::Session::Driver::DBI );
 
 
@@ -63,14 +63,15 @@ sub store {
 
 sub __ex_and_ret {
     my ($dbh,$sql,$datastr,$sid,$type) = @_;
+    # fix rt #18183
+    local $@;
     eval {
         my $sth = $dbh->prepare($sql) or return 0;
         $sth->bind_param(1,$datastr,{ pg_type => $type }) or return 0;
         $sth->bind_param(2,$sid) or return 0;
         $sth->execute() or return 0;
     };
-    return 0 if $@;
-    return 1;
+    return ! $@;
 }
 
 1;

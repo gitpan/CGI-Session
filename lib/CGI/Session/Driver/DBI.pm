@@ -1,6 +1,6 @@
 package CGI::Session::Driver::DBI;
 
-# $Id: DBI.pm 243 2006-03-02 08:21:50Z markstos $
+# $Id: /local/cgi-session/trunk/lib/CGI/Session/Driver/DBI.pm 297 2006-03-16T02:27:26.386605Z mark  $
 
 use strict;
 
@@ -9,7 +9,7 @@ use Carp;
 use CGI::Session::Driver;
 
 @CGI::Session::Driver::DBI::ISA = ( "CGI::Session::Driver" );
-$CGI::Session::Driver::DBI::VERSION = "1.3";
+$CGI::Session::Driver::DBI::VERSION = "1.4";
 
 
 sub init {

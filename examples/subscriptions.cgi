@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: subscriptions.cgi 121 2005-02-09 08:31:01Z sherzodr $
+# $Id: /local/cgi-session/trunk/examples/subscriptions.cgi 129 2005-02-09T08:31:01.000000Z sherzodr  $
 
 use strict;
 use CGI;
@@ -458,4 +458,4 @@ CSS
 }
 
 
-# $Id: subscriptions.cgi 121 2005-02-09 08:31:01Z sherzodr $
+# $Id: /local/cgi-session/trunk/examples/subscriptions.cgi 129 2005-02-09T08:31:01.000000Z sherzodr  $

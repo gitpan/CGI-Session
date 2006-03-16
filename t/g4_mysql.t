@@ -1,4 +1,4 @@
-# $Id: g4_mysql.t 242 2006-02-14 11:29:59Z sherzodr $
+# $Id: /local/cgi-session/trunk/t/g4_mysql.t 273 2006-02-16T03:30:35.734419Z mark  $
 
 use strict;
 use diagnostics;

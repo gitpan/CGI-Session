@@ -1,15 +1,24 @@
 CGI::Session Change Log
 =====================================================================
 
+4.08 - Wednesday, March 15th, 2006
+
+    * FIX: DESTROY was sometimes wiping out exception handling. RT#18183, Matt LeBlanc.
+    * SECURITY: Resolve some issues in: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=356555
+      - db_file and file now check for symlinks either explicitly or by using O_EXCL on sysopen
+      - file creation umask defaults to 660
+    * NEW: db_file and file drivers now accepts a UMask option. (Matt LeBlanc)
+    * INTERNAL: test suite clean up (Tyler MacDonald) 
+
 4.07 - Thursday, March 9th, 2006
 
     * INTERNAL: MANIFEST update to fix release. 
 
-4.06 - Wednesday, March 8th, 2006
+4.06 - Wednesday, March 3rd, 2006
 
     * FIX: some stray warnings when flushing:  "Use of uninitialized value in numeric eq (==)" (RT#14603)
     * NEW: JSON and YAML serializers (Tyler MacDonald)
-    * INTERNAL: CGI::Session::Test::Default accepts a "skip" argument,
+    * INTERAL: CGI::Session::Test::Default accepts a "skip" argument,
       listing tests that should be skipped. (Tyler)
 
 4.05 - Friday, March 3rd, 2006
@@ -168,4 +177,4 @@ CGI::Session Change Log
     * Bug in POD documentation is fixed (thanks to Graham Barr)
 
 
-$Id: Changes 250 2006-03-09 08:35:33Z markstos $
+$Id: /local/cgi-session/trunk/Changes 299 2006-03-16T02:29:35.503291Z mark  $

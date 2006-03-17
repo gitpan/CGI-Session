@@ -1,4 +1,4 @@
-# $Id: /local/cgi-session/trunk/t/g4_sqlite.t 234 2005-11-17T08:14:53.746168Z markstos  $
+# $Id: g4_sqlite.t 226 2005-11-17 08:14:53Z markstos $
 
 use strict;
 use diagnostics;

@@ -1,6 +1,6 @@
 package CGI::Session::Driver::db_file;
 
-# $Id: /local/cgi-session/trunk/lib/CGI/Session/Driver/db_file.pm 297 2006-03-16T02:27:26.386605Z mark  $
+# $Id: db_file.pm 260 2006-03-17 01:01:09Z antirice $
 
 use strict;
 
@@ -12,7 +12,7 @@ use CGI::Session::Driver;
 use Fcntl qw( :DEFAULT :flock );
 
 @CGI::Session::Driver::db_file::ISA         = ( "CGI::Session::Driver" );
-$CGI::Session::Driver::db_file::VERSION     = "1.4";
+$CGI::Session::Driver::db_file::VERSION     = "1.6";
 $CGI::Session::Driver::db_file::FILE_NAME   = "cgisess.db";
 $CGI::Session::Driver::db_file::UMask       = 0660;
 
@@ -22,7 +22,7 @@ sub init {
     $self->{FileName}  ||= $CGI::Session::Driver::db_file::FILE_NAME;
     unless ( $self->{Directory} ) {
         $self->{Directory} = dirname( $self->{FileName} );
-        $self->{Directory} = File::Spec->tmpdir() if $self->{Directory} eq '.' && substr($self->FileName,0,1) ne '.';
+        $self->{Directory} = File::Spec->tmpdir() if $self->{Directory} eq '.' && substr($self->{FileName},0,1) ne '.';
         $self->{FileName}  = basename( $self->{FileName} );
     }
     unless ( -d $self->{Directory} ) {
@@ -68,6 +68,7 @@ sub remove {
     my ($sid) = @_;
     croak "remove(): usage error" unless $sid;
 
+    
     my ($dbhash, $unlock) = $self->_tie_db_file(O_RDWR, LOCK_EX) or return;
     delete $dbhash->{$sid};
     untie(%$dbhash);

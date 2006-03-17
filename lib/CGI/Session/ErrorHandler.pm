@@ -1,6 +1,6 @@
 package CGI::Session::ErrorHandler;
 
-# $Id: /local/cgi-session/trunk/lib/CGI/Session/ErrorHandler.pm 274 2006-03-02T02:53:47.269550Z mark  $
+# $Id: ErrorHandler.pm 243 2006-03-02 08:21:50Z markstos $
 
 use strict;
 $CGI::Session::ErrorHandler::VERSION = "4.04";

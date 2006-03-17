@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 259 2006-03-16 22:11:02Z markstos $
+# $Id: Session.pm 242 2006-02-14 11:29:59Z sherzodr $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.09';
+$CGI::Session::VERSION  = '4.04_01';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -181,7 +181,7 @@ sub flush {
     my $self = shift;
 
     return unless $self->id;            # <-- empty session
-    return if !defined($self->{_STATUS}) or $self->{_STATUS} == 0;    # <-- neither new, nor deleted nor modified
+    return if $self->{_STATUS} == 0;    # <-- neither new, nor deleted nor modified
 
     if ( $self->_test_status(STATUS_NEW) && $self->_test_status(STATUS_DELETED) ) {
         $self->{_DATA} = {};
@@ -405,7 +405,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 259 2006-03-16 22:11:02Z markstos $
+# $Id: Session.pm 242 2006-02-14 11:29:59Z sherzodr $
 
 =pod
 
@@ -1079,16 +1079,6 @@ Full name: B<CGI::Session::Serialize::storable>.
 L<freezethaw|CGI::Session::Serialize::freezethaw> - serializes data using L<FreezeThaw>. Requires L<FreezeThaw>.
 Full name: B<CGI::Session::Serialize::freezethaw>
 
-=item *
-
-L<yaml|CGI::Session::Serialize::yaml> - serializes data using YAML. Requires L<YAML> or L<YAML::Syck>.
-Full name: B<CGI::Session::Serialize::yaml>
-
-=item *
-
-L<json|CGI::Session::Serialize::json> - serializes data using JSON. Requires L<JSON::Syck>.
-Full name: B<CGI::Session::Serialize::json>
-
 =back
 
 =head2 ID GENERATORS
@@ -1119,7 +1109,7 @@ CGI::Session evolved to what it is today with the help of following developers. 
 
 =over 4
 
-=item Andy Lester 
+=item Andy Lester E<lt>alester@flr.follett.comE<gt>
 
 =item Brian King E<lt>mrbbking@mac.comE<gt>
 

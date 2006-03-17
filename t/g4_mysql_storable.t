@@ -1,4 +1,4 @@
-# $Id: /local/cgi-session/trunk/t/g4_mysql_storable.t 246 2005-12-05T21:14:52.917253Z antirice  $
+# $Id: g4_mysql_storable.t 238 2005-12-05 21:14:52Z antirice $
 
 use strict;
 use diagnostics;

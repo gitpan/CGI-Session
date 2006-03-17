@@ -1,6 +1,6 @@
 package CGI::Session::Driver::sqlite;
 
-# $Id: /local/cgi-session/trunk/lib/CGI/Session/Driver/sqlite.pm 297 2006-03-16T02:27:26.386605Z mark  $
+# $Id: sqlite.pm 257 2006-03-16 07:56:41Z markstos $
 
 use strict;
 

@@ -1,31 +1,25 @@
 package CGI::Session::Driver::sqlite;
 
-# $Id: sqlite.pm 257 2006-03-16 07:56:41Z markstos $
+# $Id: sqlite.pm 280 2006-03-24 03:55:34Z antirice $
 
 use strict;
 
 use File::Spec;
 use base 'CGI::Session::Driver::DBI';
 use DBI qw(SQL_BLOB);
+use Fcntl;
 
-# @CGI::Session::Driver::sqlite::ISA        = qw( CGI::Session::Driver::DBI );
-$CGI::Session::Driver::sqlite::VERSION    = "1.4";
+$CGI::Session::Driver::sqlite::VERSION    = "1.7";
 
 sub init {
     my $self = shift;
 
-    $self->{DataSource} ||= File::Spec->catfile( File::Spec->tmpdir, 'sessions.sqlt' );
-    unless ( $self->{DataSource} =~ /^dbi:sqlite/i ) {
-        $self->{DataSource} = "dbi:SQLite:dbname=" . $self->{DataSource};
+    unless ( $self->{Handle}) {
+       $self->{DataSource} = "dbi:SQLite:dbname=" . $self->{DataSource} unless ( $self->{DataSource} =~ /^dbi:sqlite/i );
     }
 
-    $self->{Handle} ||= DBI->connect( $self->{DataSource}, '', '', {RaiseError=>1, PrintError=>1, AutoCommit=>1});
-    unless ( $self->{Handle} ) {
-        return $self->set_error( "init(): couldn't create \$dbh: " . $DBI::errstr );
-    }
-    if (ref $self->{Handle} eq 'CODE') {
-        $self->{Handle} = $self->{Handle}->();
-    }
+    $self->SUPER::init() or return;
+    
     $self->{_disconnect} = 1;
     $self->{Handle}->{sqlite_handle_binary_nulls} = 1;
     return 1;
@@ -79,8 +73,7 @@ CGI::Session::Driver::sqlite - CGI::Session driver for SQLite
 
 =head1 SYNOPSIS
 
-    $s = new CGI::Session("driver:sqlite", $sid);
-    $s = new CGI::Session("driver:sqlite", $sid, {DataSource=>'/tmp/sessions.sqlt'});
+    $s = new CGI::Session("driver:sqlite", $sid, {DataSource=>'/my/folder/sessions.sqlt'});
     $s = new CGI::Session("driver:sqlite", $sid, {Handle=>$dbh});
 
 =head1 DESCRIPTION
@@ -93,7 +86,7 @@ Supported driver arguments are I<DataSource> and I<Handle>. B<At most> only one 
 
 I<DataSource> should be in the form of C<dbi:SQLite:dbname=/path/to/db.sqlt>. If C<dbi:SQLite:> is missing it will be prepended for you. If I<Handle> is present it should be database handle (C<$dbh>) returned by L<DBI::connect()|DBI/connect()>.
 
-It's OK to drop the third argument to L<new()|CGI::Session::Driver/new()> altogether, in which case a database named F<sessions.sqlt> will be created in your machine's TEMPDIR folder, which is F</tmp> in UNIX.
+As of version 1.7 of this driver, the third argument is B<NOT> optional. Using a default database in the temporary directory is a security risk since anyone on the machine can create and/or read your session data. If you understand these risks and still want the old behavior, you can set the C<DataSource> option to I<'/tmp/sessions.sqlt'>.
 
 =head1 BUGS AND LIMITATIONS
 

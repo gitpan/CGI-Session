@@ -1,6 +1,6 @@
 package CGI::Session::Driver::db_file;
 
-# $Id: db_file.pm 260 2006-03-17 01:01:09Z antirice $
+# $Id: db_file.pm 266 2006-03-23 02:33:59Z antirice $
 
 use strict;
 
@@ -10,11 +10,13 @@ use File::Spec;
 use File::Basename;
 use CGI::Session::Driver;
 use Fcntl qw( :DEFAULT :flock );
+use vars qw( @ISA $VERSION $FILE_NAME $UMask $NO_FOLLOW );
 
-@CGI::Session::Driver::db_file::ISA         = ( "CGI::Session::Driver" );
-$CGI::Session::Driver::db_file::VERSION     = "1.6";
-$CGI::Session::Driver::db_file::FILE_NAME   = "cgisess.db";
-$CGI::Session::Driver::db_file::UMask       = 0660;
+@ISA         = ( "CGI::Session::Driver" );
+$VERSION     = "1.8";
+$FILE_NAME   = "cgisess.db";
+$UMask       = 0660;
+$NO_FOLLOW   = eval { O_NOFOLLOW } || 0;
 
 sub init {
     my $self = shift;
@@ -41,6 +43,7 @@ sub retrieve {
     my ($sid) = @_;
     croak "retrieve(): usage error" unless $sid;
 
+    return 0 unless -f $self->_db_file; 
     my ($dbhash, $unlock) = $self->_tie_db_file(O_RDONLY) or return;
     my $datastr =  $dbhash->{$sid};
     untie(%$dbhash);
@@ -54,7 +57,7 @@ sub store {
     my ($sid, $datastr) = @_;
     croak "store(): usage error" unless $sid && $datastr;
 
-    my ($dbhash, $unlock) = $self->_tie_db_file(O_RDWR|O_CREAT, LOCK_EX) or return;
+    my ($dbhash, $unlock) = $self->_tie_db_file(O_RDWR, LOCK_EX) or return;
     $dbhash->{$sid} = $datastr;
     untie(%$dbhash);
     $unlock->();
@@ -90,12 +93,14 @@ sub _lock {
     my $lock_file = $db_file . '.lck';
     if ( -l $lock_file ) {
         unlink($lock_file) or 
-          return $self->set_error("_lock(): '$lock_file' appears to be a symlink and I can't remove it: $!");
+          die $self->set_error("_lock(): '$lock_file' appears to be a symlink and I can't remove it: $!");
     }
-    sysopen(LOCKFH, $lock_file, O_RDWR|O_CREAT) or die "couldn't create lock file '$lock_file': $!";
+    sysopen(LOCKFH, $lock_file, O_RDWR|O_CREAT|$NO_FOLLOW) or die "couldn't create lock file '$lock_file': $!";
+    
+        
     flock(LOCKFH, $lock_type)                   or die "couldn't lock '$lock_file': $!";
     return sub {
-        close(LOCKFH) && unlink($lock_file);
+        close(LOCKFH); # && unlink($lock_file); # keep the lock file around
         1;
     };
 }
@@ -106,23 +111,36 @@ sub _tie_db_file {
     my $self                 = shift;
     my ($o_mode, $lock_type) = @_;
     $o_mode     ||= O_RDWR|O_CREAT;
+    
+    # protect against symlinks
+    $o_mode     |= $NO_FOLLOW;
 
-    my $db_file     = File::Spec->catfile( $self->{Directory}, $self->{FileName} );
+    my $db_file     = $self->_db_file;
     my $unlock = $self->_lock($db_file, $lock_type);
     my %db;
+        
+    my $create = ! -e $db_file;
     
     if ( -l $db_file ) {
+        $create = 1;
         unlink($db_file) or 
           return $self->set_error("_tie_db_file(): '$db_file' appears to be a symlink and I can't remove it: $!");
-    }    
+    }
+    
+    $o_mode = O_RDWR|O_CREAT|O_EXCL if $create;
+    
     unless( tie %db, "DB_File", $db_file, $o_mode, $self->{UMask} ){
         $unlock->();
         return $self->set_error("_tie_db_file(): couldn't tie '$db_file': $!");
     }
+
     return (\%db, $unlock);
 }
 
-
+sub _db_file {
+    my $self = shift;
+    return File::Spec->catfile( $self->{Directory}, $self->{FileName} );
+}
 
 sub traverse {
     my $self = shift;
@@ -143,10 +161,6 @@ sub traverse {
     $unlock->();
     return 1;
 }
-
-
-
-
 
 
 1;

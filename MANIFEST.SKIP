@@ -12,6 +12,8 @@ docs
 \.bak$
 \.orig$
 \.rej$
+\.mine$
 \.gz$
+\.r\d+$
 .*sessiondata.*
 .*cgisess.*

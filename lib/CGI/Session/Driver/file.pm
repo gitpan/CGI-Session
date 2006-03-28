@@ -1,6 +1,6 @@
 package CGI::Session::Driver::file;
 
-# $Id: file.pm 257 2006-03-16 07:56:41Z markstos $
+# $Id: file.pm 283 2006-03-28 04:11:11Z antirice $
 
 use strict;
 
@@ -8,7 +8,7 @@ use Carp;
 use File::Spec;
 use Fcntl qw( :DEFAULT :flock :mode );
 use CGI::Session::Driver;
-use vars qw( $FileName $NoFlock $UMask );
+use vars qw( $FileName $NoFlock $UMask $NO_FOLLOW );
 
 BEGIN {
     # keep historical behavior
@@ -19,10 +19,11 @@ BEGIN {
 }
 
 @CGI::Session::Driver::file::ISA        = ( "CGI::Session::Driver" );
-$CGI::Session::Driver::file::VERSION    = "3.7";
+$CGI::Session::Driver::file::VERSION    = "3.8";
 $FileName                               = "cgisess_%s";
 $NoFlock                                = 0;
 $UMask                                  = 0660;
+$NO_FOLLOW                              = eval { O_NOFOLLOW } || 0;
 
 sub init {
     my $self = shift;
@@ -41,20 +42,29 @@ sub init {
     return 1;
 }
 
+sub _file {
+    my ($self,$sid) = @_;
+    return File::Spec->catfile($self->{Directory}, sprintf( $FileName, $sid ));
+}
+
 sub retrieve {
     my $self = shift;
     my ($sid) = @_;
 
-    my $directory   = $self->{Directory};
-    my $file        = sprintf( $FileName, $sid );
-    my $path        = File::Spec->catfile($directory, $file);
-
+    my $path = $self->_file($sid);
+    
     return 0 unless -e $path;
 
     # make certain our filehandle goes away when we fall out of scope
     local *FH;
 
-    sysopen(FH, $path, O_RDONLY | O_EXCL ) || return $self->set_error( "retrieve(): couldn't open '$path': $!" );
+    if (-l $path) {
+        unlink($path) or 
+          return $self->set_error("retrieve(): '$path' appears to be a symlink and I couldn't remove it: $!");
+        return 0; # we deleted this so we have no hope of getting back anything
+    }
+    sysopen(FH, $path, O_RDONLY | $NO_FOLLOW ) || return $self->set_error( "retrieve(): couldn't open '$path': $!" );
+    
     $self->{NoFlock} || flock(FH, LOCK_SH) or return $self->set_error( "retrieve(): couldn't lock '$path': $!" );
 
     my $rv = "";
@@ -71,25 +81,32 @@ sub store {
     my $self = shift;
     my ($sid, $datastr) = @_;
     
-    my $directory = $self->{Directory};
-    my $file      = sprintf( $FileName, $sid );
-    my $path      = File::Spec->catfile($directory, $file);
+    my $path = $self->_file($sid);
     
     # make certain our filehandle goes away when we fall out of scope
     local *FH;
     
-    # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=356555 suggests we use O_EXCL, to avoid
-    #  symlink attacks but we may already have a true file and we can just overwrite the file if it exists
-    #  so let's do the awkward thing
+    my $mode = O_WRONLY|$NO_FOLLOW;
+    
+    # kill symlinks when we spot them
     if (-l $path) {
         unlink($path) or 
           return $self->set_error("store(): '$path' appears to be a symlink and I couldn't remove it: $!");
     }
-    sysopen(FH, $path, O_WRONLY|O_CREAT, $self->{UMask}) or return $self->set_error( "store(): couldn't open '$path': $!" );
+    
+    $mode = O_RDWR|O_CREAT|O_EXCL unless -e $path;
+    
+    sysopen(FH, $path, $mode, $self->{UMask}) or return $self->set_error( "store(): couldn't open '$path': $!" );
+    
+    # sanity check to make certain we're still ok
+    if (-l $path) {
+        return $self->set_error("store(): '$path' is a symlink, check for malicious processes");
+    }
+    
     # prevent race condition (RT#17949)
-    truncate(FH, 0)  or return $self->set_error( "store(): couldn't truncate '$path': $!" );
     $self->{NoFlock} || flock(FH, LOCK_EX)  or return $self->set_error( "store(): couldn't lock '$path': $!" );
-
+    truncate(FH, 0)  or return $self->set_error( "store(): couldn't truncate '$path': $!" );
+    
     print FH $datastr;
     close(FH)               or return $self->set_error( "store(): couldn't close '$path': $!" );
     return 1;
@@ -183,8 +200,7 @@ So all the three lines in the SYNOPSIS section of this manual produce the same r
 If specified B<Directory> does not exist, all necessary directory hierarchy will be created.
 
 By default, sessions are created with a umask of 0660. If you wish to change the umask for a session, pass
-a B<UMask> option with an octal representation of the umask you would like for said session. To change
-the default umask for all sessions, alter C<$CGI::Session::Driver::file::UMask>.
+a B<UMask> option with an octal representation of the umask you would like for said session. 
 
 =head1 NOTES
 

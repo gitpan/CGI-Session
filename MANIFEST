@@ -3,9 +3,6 @@ examples/purge.pl
 examples/subscriptions.cgi
 INSTALL
 lib/CGI/Session.pm
-lib/CGI/Session.pm.mine
-lib/CGI/Session.pm.r242
-lib/CGI/Session.pm.r249
 lib/CGI/Session/Driver.pm
 lib/CGI/Session/Driver/db_file.pm
 lib/CGI/Session/Driver/DBI.pm
@@ -17,7 +14,6 @@ lib/CGI/Session/ErrorHandler.pm
 lib/CGI/Session/ID/incr.pm
 lib/CGI/Session/ID/md5.pm
 lib/CGI/Session/ID/static.pm
-lib/CGI/Session/Query.pm
 lib/CGI/Session/Serialize/default.pm
 lib/CGI/Session/Serialize/freezethaw.pm
 lib/CGI/Session/Serialize/json.pm
@@ -70,4 +66,6 @@ t/load.t
 t/parse_dsn.t
 t/remote_addr.t
 t/str2seconds.t
+t/symlink_db_file.t
+t/symlink_file.t
 META.yml                                 Module meta-data (added by MakeMaker)

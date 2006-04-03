@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 277 2006-03-24 00:04:43Z antirice $
+# $Id: Session.pm 285 2006-03-30 03:38:19Z antirice $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.10';
+$CGI::Session::VERSION  = '4.11';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -139,10 +139,17 @@ sub query {
 
 
 sub name {
-    unless ( defined $_[1] ) {
-        return $_[0]->{_NAME} || $CGI::Session::NAME;
+    my $self = shift;
+    
+    if (ref $self) {
+        unless ( @_ ) {
+            return $self->{_NAME} || $CGI::Session::NAME;
+        }
+        return $self->{_NAME} = $_[0];
     }
-    $_[0]->{_NAME} = $_[1];
+    
+    $CGI::Session::NAME = $_[0] if @_;
+    return $CGI::Session::NAME;
 }
 
 
@@ -407,7 +414,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 277 2006-03-24 00:04:43Z antirice $
+# $Id: Session.pm 285 2006-03-30 03:38:19Z antirice $
 
 =pod
 

@@ -1,6 +1,11 @@
 CGI::Session Change Log
 =====================================================================
 
+4.11 - Friday, March 31, 2006
+    
+    * FIX: Since 4.10, using name() as a class method was broken. This has
+      been fixed, and regression tests for both uses have been added. (Matt LeBlanc)
+
 4.10 - Tuesday, March 28, 2006
 
     * SECURITY: Hopefully this settles all of the problems with symlinks. Both the file
@@ -196,4 +201,4 @@ CGI::Session Change Log
     * Bug in POD documentation is fixed (thanks to Graham Barr)
 
 
-$Id: Changes 282 2006-03-24 04:00:01Z antirice $
+$Id: Changes 288 2006-04-01 02:00:32Z antirice $

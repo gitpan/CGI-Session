@@ -1,6 +1,6 @@
 package CGI::Session::Driver::DBI;
 
-# $Id: DBI.pm 290 2006-04-07 19:49:08Z markstos $
+# $Id: DBI.pm 298 2006-04-12 20:50:10Z antirice $
 
 use strict;
 
@@ -9,7 +9,7 @@ use Carp;
 use CGI::Session::Driver;
 
 @CGI::Session::Driver::DBI::ISA = ( "CGI::Session::Driver" );
-$CGI::Session::Driver::DBI::VERSION = "1.5";
+$CGI::Session::Driver::DBI::VERSION = "1.6";
 
 
 sub init {
@@ -111,13 +111,8 @@ sub remove {
     my ($sid) = @_;
     croak "remove(): usage error" unless $sid;
 
-    my $dbh = $self->{Handle};
-    my $sql = sprintf("DELETE FROM %s WHERE id='%s'", $self->table_name, $sid);
-    my $rc = $self->{Handle}->do(
-            'DELETE FROM'. $self->{Handle}->quote($self->table_name)
-                 .' WHERE id= ?',{},$sid );
-
-    unless ( $dbh->do($sql) ) {
+    my $rc = $self->{Handle}->do( 'DELETE FROM '. $self->table_name .' WHERE id= ?',{},$sid );
+    unless ( $rc ) {
         croak "remove(): \$dbh->do failed!";
     }
     

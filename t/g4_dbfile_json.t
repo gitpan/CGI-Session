@@ -9,16 +9,19 @@ use CGI::Session::Test::Default;
 
 our %serializers;
 
+# If you add a new option here, update the skip_all msg below. 
 our %options = (
     'JSON::Syck'      =>  { skip    =>  [85 .. 89, 91 .. 101] },
 );
+
+plan skip_all => 'DB_File is NOT available' unless eval { require DB_File };
 
 foreach my $i (keys(%options)) {
     $serializers{$i}++ if eval "use $i (); 1";
 }
 
 unless(%serializers) {
-    plan skip_all => "Neither YAML or YAML::Syck are available";
+    plan skip_all => "JSON::Syck is not available.";
 }
 
 my @test_objects;

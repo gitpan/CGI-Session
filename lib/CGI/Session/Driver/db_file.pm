@@ -1,6 +1,6 @@
 package CGI::Session::Driver::db_file;
 
-# $Id: db_file.pm 266 2006-03-23 02:33:59Z antirice $
+# $Id: db_file.pm 296 2006-04-10 23:20:28Z antirice $
 
 use strict;
 
@@ -13,7 +13,7 @@ use Fcntl qw( :DEFAULT :flock );
 use vars qw( @ISA $VERSION $FILE_NAME $UMask $NO_FOLLOW );
 
 @ISA         = ( "CGI::Session::Driver" );
-$VERSION     = "1.8";
+$VERSION     = "1.9";
 $FILE_NAME   = "cgisess.db";
 $UMask       = 0660;
 $NO_FOLLOW   = eval { O_NOFOLLOW } || 0;
@@ -112,8 +112,12 @@ sub _tie_db_file {
     my ($o_mode, $lock_type) = @_;
     $o_mode     ||= O_RDWR|O_CREAT;
     
-    # protect against symlinks
-    $o_mode     |= $NO_FOLLOW;
+    # DB_File will not touch a file unless it recognizes the format
+    # we can't detect the version of the underlying database without some very heavy checks so the easiest thing is
+    # to disable this for opening of the database
+    
+    # # protect against symlinks
+    # $o_mode     |= $NO_FOLLOW;
 
     my $db_file     = $self->_db_file;
     my $unlock = $self->_lock($db_file, $lock_type);

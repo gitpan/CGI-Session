@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 289 2006-04-01 08:41:52Z markstos $
+# $Id: Session.pm 299 2006-04-12 20:56:26Z antirice $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.12';
+$CGI::Session::VERSION  = '4.13';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -306,7 +306,7 @@ sub cookie {
         $cookie = $query->cookie( -name=>$self->name, -value=>$self->id, -expires=> '-1d', @_ );
     } 
     elsif ( my $t = $self->expire ) {
-        $cookie = $query->cookie( -name=>$self->name, -value=>$self->id, -expires=> $t . 's', @_ );
+        $cookie = $query->cookie( -name=>$self->name, -value=>$self->id, -expires=> '+' . $t . 's', @_ );
     } 
     else {
         $cookie = $query->cookie( -name=>$self->name, -value=>$self->id, @_ );
@@ -414,7 +414,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 289 2006-04-01 08:41:52Z markstos $
+# $Id: Session.pm 299 2006-04-12 20:56:26Z antirice $
 
 =pod
 

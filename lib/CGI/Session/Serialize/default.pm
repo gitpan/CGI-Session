@@ -1,6 +1,6 @@
 package CGI::Session::Serialize::default;
 
-# $Id: default.pm 243 2006-03-02 08:21:50Z markstos $ 
+# $Id: /mirror/cgi-session/trunk/lib/CGI/Session/Serialize/default.pm 275 2006-03-02T08:21:50.329307Z markstos  $ 
 
 use strict;
 use Safe;

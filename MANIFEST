@@ -41,6 +41,7 @@ t/cgi_simple.t
 t/complex_ds.t
 t/driver_dbi.t
 t/expire.t
+t/find.t
 t/flush.t
 t/g4.t
 t/g4_dbfile.t
@@ -63,6 +64,7 @@ t/header.t
 t/ip_matches.t
 t/is_new.t
 t/load.t
+t/name.t
 t/parse_dsn.t
 t/remote_addr.t
 t/str2seconds.t

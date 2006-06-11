@@ -1,4 +1,4 @@
-# $Id: Makefile.PL 251 2006-03-09 11:08:34Z tyler $
+# $Id: /mirror/cgi-session/trunk/Makefile.PL 288 2006-03-09T11:08:34.672952Z tyler  $
 
 use strict;
 use Text::Wrap;

@@ -1,6 +1,6 @@
 package CGI::Session::Driver::DBI;
 
-# $Id: DBI.pm 298 2006-04-12 20:50:10Z antirice $
+# $Id: /mirror/cgi-session/trunk/lib/CGI/Session/Driver/DBI.pm 340 2006-04-12T20:50:10.976508Z antirice  $
 
 use strict;
 

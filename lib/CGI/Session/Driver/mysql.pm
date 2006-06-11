@@ -1,6 +1,6 @@
 package CGI::Session::Driver::mysql;
 
-# $Id: mysql.pm 257 2006-03-16 07:56:41Z markstos $
+# $Id: /mirror/cgi-session/trunk/lib/CGI/Session/Driver/mysql.pm 298 2006-03-16T07:56:41.787786Z markstos  $
 
 use strict;
 use Carp;

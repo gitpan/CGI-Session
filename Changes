@@ -1,6 +1,21 @@
 CGI::Session Change Log
 =====================================================================
 
+4.14 - Sunday, June 11, 2006
+
+    * NEW: The find() command now has better documentation. (Ron Savage, Matt LeBlanc)
+    * FIX: find() no longer changes the access or modified times (RT#18442) (Matt LeBlanc)
+    * FIX: param() called with two parameters now returns the value set, if any (RT#18912) (Matt LeBlanc)
+    * FIX: driver, serializer, and id generator names are now untainted (RT#18873) (Matt LeBlanc)
+    * INTERNAL: automatic flushing has been documented to be unreliable, although
+      it was recommended in the past. Automatic flushing can be affected adversely 
+      in persistent environments and in some cases by third party software. There are 
+      also some cases in which flushing happened automatically in 3.x, but quit working
+      with 4.x. See these tickets for details.
+
+       http://rt.cpan.org/Ticket/Display.html?id=17541
+       http://rt.cpan.org/Ticket/Display.html?id=17299
+
 4.13 - Wednesday, April 12, 2006
 
     * FIX: Applied patch to fix cookie method (RT#18493,Nobuaki ITO)
@@ -63,13 +78,12 @@ CGI::Session Change Log
 4.04 - Wednesday, March 01, 2006
     * NEW: File driver now has option to disable flock (for those running
       Win 9x, VMS, MacPerl, VOS and RISC OS). (Matt LeBlanc)
-    * FIX: If DBI driver wass initialized using 'Handle', Driver::DBI::init()
+    * FIX: If DBI driver was initialized using 'Handle', Driver::DBI::init()
       returned false, and Driver::new() thought init faild and kept returning
       undef. The problem was fixed by making sure Driver::DBI::init() returned
       true. (Sherzod)
     * Added .*cgisess.* to disclude cgisess.db, cgisess.id, and any session
       files created in the t directory. (Matt LeBlanc)
-
     * FIX: File driver now respects $CGI::Session::File::FileName for 3.9x
       compatibility. (Matt LeBlanc)
     * FIX: Default serializer now properly handles data structures that appear
@@ -213,4 +227,4 @@ CGI::Session Change Log
     * Bug in POD documentation is fixed (thanks to Graham Barr)
 
 
-$Id: Changes 300 2006-04-12 21:18:52Z antirice $
+$Id: /mirror/cgi-session/trunk/Changes 362 2006-06-11T17:02:41.852663Z markstos  $

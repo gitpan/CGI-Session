@@ -1,6 +1,6 @@
 package CGI::Session::Driver::file;
 
-# $Id: /mirror/cgi-session/trunk/lib/CGI/Session/Driver/file.pm 331 2006-04-01T08:41:52.518199Z markstos  $
+# $Id: file.pm 289 2006-04-01 08:41:52Z markstos $
 
 use strict;
 
@@ -19,7 +19,7 @@ BEGIN {
 }
 
 @CGI::Session::Driver::file::ISA        = ( "CGI::Session::Driver" );
-$CGI::Session::Driver::file::VERSION    = "3.9";
+$CGI::Session::Driver::file::VERSION    = "4.20";
 $FileName                               = "cgisess_%s";
 $NoFlock                                = 0;
 $UMask                                  = 0660;

@@ -1,6 +1,6 @@
 package CGI::Session::ID::incr;
 
-# $Id: /mirror/cgi-session/trunk/lib/CGI/Session/ID/incr.pm 275 2006-03-02T08:21:50.329307Z markstos  $
+# $Id: incr.pm 243 2006-03-02 08:21:50Z markstos $
 
 use strict;
 use File::Spec;
@@ -8,7 +8,7 @@ use Carp "croak";
 use Fcntl qw( :DEFAULT :flock );
 use CGI::Session::ErrorHandler;
 
-$CGI::Session::ID::incr::VERSION = '1.6';
+$CGI::Session::ID::incr::VERSION = '4.20';
 @CGI::Session::ID::incr::ISA     = qw( CGI::Session::ErrorHandler );
 
 

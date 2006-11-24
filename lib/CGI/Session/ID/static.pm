@@ -1,12 +1,12 @@
 package CGI::Session::ID::static;
 
-# $Id: /mirror/cgi-session/trunk/lib/CGI/Session/ID/static.pm 275 2006-03-02T08:21:50.329307Z markstos  $
+# $Id: static.pm 243 2006-03-02 08:21:50Z markstos $
 
 use strict;
 use Carp ("croak");
 use CGI::Session::ErrorHandler;
 
-$CGI::Session::ID::static::VERSION = '1.7';
+$CGI::Session::ID::static::VERSION = '4.20';
 @::CGI::Session::ID::static::ISA   = qw( CGI::Session::ErrorHandler );
 
 sub generate_id {

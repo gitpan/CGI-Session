@@ -1,12 +1,12 @@
 package CGI::Session::Serialize::freezethaw;
 
-# $Id: /mirror/cgi-session/trunk/lib/CGI/Session/Serialize/freezethaw.pm 275 2006-03-02T08:21:50.329307Z markstos  $ 
+# $Id: freezethaw.pm 243 2006-03-02 08:21:50Z markstos $ 
 
 use strict;
 use FreezeThaw;
 use CGI::Session::ErrorHandler;
 
-$CGI::Session::Serialize::freezethaw::VERSION = '1.7';
+$CGI::Session::Serialize::freezethaw::VERSION = 4.2;
 @CGI::Session::Serialize::freezethaw::ISA     = ( "CGI::Session::ErrorHandler" );
 
 sub freeze {

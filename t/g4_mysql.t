@@ -1,22 +1,23 @@
-# $Id: /mirror/cgi-session/trunk/t/g4_mysql.t 272 2006-02-14T11:29:59.639693Z sherzodr  $
+# $Id: g4_mysql.t 338 2006-10-26 04:32:03Z sherzodr $
 
 use strict;
 use diagnostics;
 
 my %dsn;
-if (defined $ENV{DBI_DSN} && ($ENV{DBI_DSN} =~ m/^dbi:mysql:/)) {
+if ($ENV{DBI_DSN} && ($ENV{DBI_DSN} =~ m/^dbi:mysql:/)) {
     %dsn = (
         DataSource  => $ENV{DBI_DSN},
-        Password    => $ENV{CGISESS_MYSQL_PASSWORD} || undef,
+        User        => $ENV{DBI_USER},
+        Password    => $ENV{DBI_PASS},
         TableName   => 'sessions'
     );
 }
 else {
     %dsn = (
         DataSource  => $ENV{CGISESS_MYSQL_DSN},
-        User        => $ENV{CGISESS_MYSQL_USER}     || $ENV{USER},
-        Password    => $ENV{CGISESS_MYSQL_PASSWORD} || undef,
-        Socket      => $ENV{CGISESS_MYSQL_SOCKET}   || undef,
+        User        => $ENV{CGISESS_MYSQL_USER},
+        Password    => $ENV{CGISESS_MYSQL_PASS},
+        Socket      => $ENV{CGISESS_MYSQL_SOCKET},
         TableName   => 'sessions'
     );
 }
@@ -40,7 +41,7 @@ require CGI::Session::Driver::mysql;
 my $dsnstring = CGI::Session::Driver::mysql->_mk_dsnstr(\%dsn);
 
 my $dbh;
-eval { $dbh = DBI->connect($dsnstring, $dsn{User}, $dsn{Password}, {RaiseError=>0, PrintError=>1}) };
+eval { $dbh = DBI->connect($dsnstring, $dsn{User}, $dsn{Password}, {RaiseError=>0, PrintError=>0}) };
 if ( $@ ) {
     plan(skip_all=>"Couldn't establish connection with the MySQL server: " . (DBI->errstr || $@));
     exit(0);

@@ -1,4 +1,4 @@
-# $Id: /mirror/cgi-session/trunk/t/g4_freezethaw.t 272 2006-02-14T11:29:59.639693Z sherzodr  $
+# $Id: g4_freezethaw.t 242 2006-02-14 11:29:59Z sherzodr $
 
 use strict;
 use diagnostics;

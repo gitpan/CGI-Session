@@ -1,21 +1,22 @@
-# $Id: /mirror/cgi-session/trunk/t/g4_postgresql.t 220 2005-08-30T11:47:14.305150Z sherzodr  $
+# $Id: g4_postgresql.t 336 2006-10-26 02:17:31Z markstos $
 
 use strict;
 use diagnostics;
 
 my %dsn;
-if ($ENV{DBI_DSN} && $ENV{DBI_DSN} =~ m/^dbi:Pg:/) {
+if ($ENV{DBI_DSN} && ($ENV{DBI_DSN} =~ m/^dbi:Pg:/)) {
     %dsn = (
         DataSource  => $ENV{DBI_DSN},
-        Password    => $ENV{CGISESS_PGSQL_PASSWORD} || undef,
+        User        => $ENV{DBI_USER},
+        Password    => $ENV{DBI_PASS},
         TableName   => 'sessions'
     );
 }
 else {
     %dsn = (
-        DataSource  => $ENV{CGISESS_PGSQL_DSN},
-        User        => $ENV{CGISESS_PGSQL_USER}     || $ENV{USER},
-        Password    => $ENV{CGISESS_PGSQL_PASSWORD} || undef,
+        DataSource  => $ENV{CGISESS_PG_DSN},
+        User        => $ENV{CGISESS_PG_USER},
+        Password    => $ENV{CGISESS_PG_PASS},
         TableName   => 'sessions'
     );
 }

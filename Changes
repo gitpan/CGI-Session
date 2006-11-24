@@ -1,6 +1,34 @@
 CGI::Session Change Log
 =====================================================================
 
+4.20_1 - Friday, November 24, 2006
+
+    * FIX: -ip_match now works even when it's not the last import item. (RT#21779)
+    * FIX: In the PostgreSQL driver, a race condition is when storing is now worked around. (Mark Stosberg)
+    * FIX: Added important clarification and example to MySQL driver docs that the session column
+           needs to be defined as a primary key to avoid duplicate sessions. (Justin Simoni, Mark Stosberg)
+    * FIX: The default serializer now works correctly with certain data structures. (RT#?) (Matt LeBlanc)
+    * FIX: A documentation bug in find() was fixed (Matt LeBlanc)
+    * FIX: Documented how to declare a database handle to be used on demand, which was introduced
+           in 4.04. (Mark Stosberg)
+    * FIX: Connections made with SQLite now disconnect only when appropriate, instead of always. 
+           This addresses a symptom seen as "attempt to prepare on inactive database handle"
+           (Jaldhar Vyas, Sherzod, Mark Stosberg)
+    * FIX: Args to the constructor for CGI::Session and the drivers are now always shallow
+           copied rather than used directly, to prevent modification. 
+           (RT#21952, Franck Porcher, Sherzod, Mark Stosberg)
+    * FIX: The documentation for expire($param, $time) was made more explicit
+           (pjf, Mark Stosberg) 
+    * NEW: Added recommended use of flush() to the Synopsis (Michael Renner, RT#22333)
+    * NEW: Added links to Japanese translations of the documentation (Makio Tsukamoto)
+           http://digit.que.ne.jp/work/index.cgi?Perldoc/ja
+    * INTERNAL: Update test to workaround YAML versions less than 0.58. (Matt LeBlanc)
+    * INTERNAL: param() code was refactored for clarity (Mark Stosberg, Ali ISIK, RT#21782)
+    * INTERNAL: new() and load() were refactored (Ali Isik)
+    * INTERNAL: renamed some environment variables used for testing (Ron Savage)
+    * INTERNAL: Multi key-value syntax of param() now always returns number of keys
+      successfully processed, 0 if no key/values were processed. 
+
 4.14 - Sunday, June 11, 2006
 
     * NEW: The find() command now has better documentation. (Ron Savage, Matt LeBlanc)
@@ -227,4 +255,4 @@ CGI::Session Change Log
     * Bug in POD documentation is fixed (thanks to Graham Barr)
 
 
-$Id: /mirror/cgi-session/trunk/Changes 362 2006-06-11T17:02:41.852663Z markstos  $
+$Id: Changes 350 2006-11-23 19:01:39Z markstos $

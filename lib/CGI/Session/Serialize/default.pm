@@ -1,6 +1,6 @@
 package CGI::Session::Serialize::default;
 
-# $Id: /mirror/cgi-session/trunk/lib/CGI/Session/Serialize/default.pm 275 2006-03-02T08:21:50.329307Z markstos  $ 
+# $Id: default.pm 322 2006-06-30 05:16:17Z antirice $ 
 
 use strict;
 use Safe;
@@ -12,7 +12,7 @@ use vars qw( %overloaded );
 require overload;
 
 @CGI::Session::Serialize::default::ISA = ( "CGI::Session::ErrorHandler" );
-$CGI::Session::Serialize::default::VERSION = '1.7';
+$CGI::Session::Serialize::default::VERSION = '4.20';
 
 
 sub freeze {
@@ -46,7 +46,7 @@ sub thaw {
 
 sub __walk {
     my %seen;
-    my @filter = shift;
+    my @filter = __scan(shift);
     local %overloaded;
     
     while (defined(my $x = shift @filter)) {

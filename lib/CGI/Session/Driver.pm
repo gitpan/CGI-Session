@@ -1,6 +1,6 @@
 package CGI::Session::Driver;
 
-# $Id: /mirror/cgi-session/trunk/lib/CGI/Session/Driver.pm 275 2006-03-02T08:21:50.329307Z markstos  $
+# $Id: Driver.pm 347 2006-11-23 18:45:34Z markstos $
 
 use strict;
 #use diagnostics;
@@ -8,22 +8,19 @@ use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
-$CGI::Session::Driver::VERSION = "4.04";
+$CGI::Session::Driver::VERSION = "4.20";
 @CGI::Session::Driver::ISA     = qw(CGI::Session::ErrorHandler);
 
 sub new {
     my $class = shift;
-    my ($args) = @_;
+    my $args  = shift || {};
 
-    if ( $args ) {
-        unless ( ref $args ) {
-            croak "Invalid argument type passed to driver: " . Dumper($args);
-        }
-    } else {
-        $args = {};
+    unless ( ref $args ) {
+        croak "$class->new(): Invalid argument type passed to driver";
     }
 
-    my $self = bless ($args, $class);
+    # perform a shallow copy of $args, to prevent modification
+    my $self = bless ({%$args}, $class);
     return $self if $self->init();
     return $self->set_error( "%s->init() returned false", $class);
 }

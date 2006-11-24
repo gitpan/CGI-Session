@@ -1,6 +1,6 @@
 package CGI::Session::Driver::sqlite;
 
-# $Id: /mirror/cgi-session/trunk/lib/CGI/Session/Driver/sqlite.pm 331 2006-04-01T08:41:52.518199Z markstos  $
+# $Id: sqlite.pm 346 2006-11-23 18:39:12Z markstos $
 
 use strict;
 
@@ -9,7 +9,7 @@ use base 'CGI::Session::Driver::DBI';
 use DBI qw(SQL_BLOB);
 use Fcntl;
 
-$CGI::Session::Driver::sqlite::VERSION    = "1.8";
+$CGI::Session::Driver::sqlite::VERSION    = "4.20";
 
 sub init {
     my $self = shift;
@@ -20,7 +20,6 @@ sub init {
 
     $self->SUPER::init() or return;
     
-    $self->{_disconnect} = 1;
     $self->{Handle}->{sqlite_handle_binary_nulls} = 1;
     return 1;
 }

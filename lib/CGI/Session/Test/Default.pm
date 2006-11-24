@@ -11,7 +11,7 @@ our $CURRENT;
 sub ok_later (&;$);
     
 
-$CGI::Session::Test::Default::VERSION = '1.54';
+$CGI::Session::Test::Default::VERSION = '4.20';
 
 =head1 CGI::Session::Test::Default
 
@@ -147,7 +147,7 @@ sub run {
             ok($session, "Session was retrieved successfully");
             ok(!$session->is_expired, "session isn't expired yet");
 
-            is($session->id,$sid, "session IDs are consistent: " . $session->id);
+            is($session->id,$sid, "session IDs are consistent");
             ok($session->atime > $session->ctime, "ctime should be older than atime");
             ok(!$session->etime, "etime shouldn't be set yet");
 

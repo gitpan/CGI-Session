@@ -1,6 +1,6 @@
 package CGI::Session::Driver::DBI;
 
-# $Id: /mirror/cgi-session/trunk/lib/CGI/Session/Driver/DBI.pm 340 2006-04-12T20:50:10.976508Z antirice  $
+# $Id: DBI.pm 345 2006-11-23 18:10:49Z markstos $
 
 use strict;
 
@@ -9,7 +9,7 @@ use Carp;
 use CGI::Session::Driver;
 
 @CGI::Session::Driver::DBI::ISA = ( "CGI::Session::Driver" );
-$CGI::Session::Driver::DBI::VERSION = "1.6";
+$CGI::Session::Driver::DBI::VERSION = "4.20";
 
 
 sub init {
@@ -17,6 +17,9 @@ sub init {
     if ( defined $self->{Handle} )  {
         if (ref $self->{Handle} eq 'CODE') {
             $self->{Handle} = $self->{Handle}->();
+        }
+        else {
+            # We assume the handle is working, and there is nothing to do. 
         }
     }
     else {
@@ -111,7 +114,7 @@ sub remove {
     my ($sid) = @_;
     croak "remove(): usage error" unless $sid;
 
-    my $rc = $self->{Handle}->do( 'DELETE FROM '. $self->table_name .' WHERE id= ?',{},$sid );
+   my $rc = $self->{Handle}->do( 'DELETE FROM '. $self->table_name .' WHERE id= ?',{},$sid );
     unless ( $rc ) {
         croak "remove(): \$dbh->do failed!";
     }
@@ -124,10 +127,10 @@ sub DESTROY {
     my $self = shift;
 
     unless ( $self->{Handle}->{AutoCommit} ) {
-        $self->{Handle}->commit();
+        $self->{Handle}->commit;
     }
     if ( $self->{_disconnect} ) {
-        $self->{Handle}->disconnect();
+        $self->{Handle}->disconnect;
     }
 }
 
@@ -197,20 +200,27 @@ Following driver arguments are supported:
 
 =item DataSource
 
-First argument to be passed to L<DBI|DBI>->L<connect()|DBI/connect()>.
+First argument to be passed to L<DBI|DBI>->L<connect()|DBI/connect()>. If the driver makes
+the database connection itself, it will also explicitly disconnect from the database when 
+the driver object is DESTROYed.
 
 =item User
 
-User privileged to connect to the database defined in I<DataSource>.
+User privileged to connect to the database defined in C<DataSource>.
 
 =item Password
 
-Password of the I<User> privileged to connect to the database defined in I<DataSource>
+Password of the I<User> privileged to connect to the database defined in C<DataSource>
 
 =item Handle
 
-To set existing database handle object ($dbh) returned by DBI->connect(). I<Handle> will override all the
-above arguments, if any present.
+An existing L<DBI> database handle object. The handle can be created on demand
+by providing a code reference as a argument, such as C<<sub{DBI->connect}>>.
+This way, the database connection is only created if it actually needed. This can be useful
+when combined with a framework plugin like L<CGI::Application::Plugin::Session>, which creates
+a CGI::Session object on demand as well. 
+
+C<Handle> will override all the above arguments, if any present.
 
 =item TableName
 

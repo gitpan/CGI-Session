@@ -1,6 +1,6 @@
 package CGI::Session::Driver::DBI;
 
-# $Id: DBI.pm 345 2006-11-23 18:10:49Z markstos $
+# $Id: DBI.pm 351 2006-11-24 14:16:50Z markstos $
 
 use strict;
 

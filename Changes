@@ -1,6 +1,10 @@
 CGI::Session Change Log
 =====================================================================
 
+4.20 - Monday, December 4, 2006
+
+    * INTERNAL: No Changes since 4.20_1. Declaring stable. 
+
 4.20_1 - Friday, November 24, 2006
 
     * FIX: -ip_match now works even when it's not the last import item. (RT#21779)
@@ -255,4 +259,4 @@ CGI::Session Change Log
     * Bug in POD documentation is fixed (thanks to Graham Barr)
 
 
-$Id: Changes 350 2006-11-23 19:01:39Z markstos $
+$Id: Changes 353 2006-12-05 02:10:19Z markstos $

@@ -1,6 +1,6 @@
 package CGI::Session::Driver::postgresql;
 
-# $Id: postgresql.pm 342 2006-11-23 17:19:32Z markstos $
+# $Id: postgresql.pm 351 2006-11-24 14:16:50Z markstos $
 
 # CGI::Session::Driver::postgresql - PostgreSQL driver for CGI::Session
 #

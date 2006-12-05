@@ -1,6 +1,6 @@
 package CGI::Session::ID::md5;
 
-# $Id: md5.pm 243 2006-03-02 08:21:50Z markstos $
+# $Id: md5.pm 351 2006-11-24 14:16:50Z markstos $
 
 use strict;
 use Digest::MD5;

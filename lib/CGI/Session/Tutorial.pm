@@ -1,6 +1,6 @@
 package CGI::Session::Tutorial;
 
-# $Id: Tutorial.pm 243 2006-03-02 08:21:50Z markstos $
+# $Id: Tutorial.pm 351 2006-11-24 14:16:50Z markstos $
 
 $CGI::Session::Tutorial::VERSION = '4.20';
 

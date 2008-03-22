@@ -1,6 +1,6 @@
 package CGI::Session::Serialize::default;
 
-# $Id: default.pm 351 2006-11-24 14:16:50Z markstos $ 
+# $Id: default.pm 394 2008-03-22 02:35:30Z markstos $ 
 
 use strict;
 use Safe;
@@ -12,7 +12,7 @@ use vars qw( %overloaded );
 require overload;
 
 @CGI::Session::Serialize::default::ISA = ( "CGI::Session::ErrorHandler" );
-$CGI::Session::Serialize::default::VERSION = '4.20';
+$CGI::Session::Serialize::default::VERSION = '4.29_1';
 
 
 sub freeze {

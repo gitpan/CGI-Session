@@ -1,6 +1,6 @@
 package CGI::Session::Driver::file;
 
-# $Id: file.pm 351 2006-11-24 14:16:50Z markstos $
+# $Id: file.pm 394 2008-03-22 02:35:30Z markstos $
 
 use strict;
 
@@ -19,7 +19,7 @@ BEGIN {
 }
 
 @CGI::Session::Driver::file::ISA        = ( "CGI::Session::Driver" );
-$CGI::Session::Driver::file::VERSION    = "4.20";
+$CGI::Session::Driver::file::VERSION    = '4.29_1';
 $FileName                               = "cgisess_%s";
 $NoFlock                                = 0;
 $UMask                                  = 0660;
@@ -185,6 +185,8 @@ Naming conventions of session files are defined by C<$CGI::Session::Driver::file
 Default value of this variable is I<cgisess_%s>, where %s will be replaced with respective session ID. Should
 you wish to set your own FileName template, do so before requesting for session object:
 
+    use CGI::Session::Driver::file; # This line is mandatory.
+    # Time passes...
     $CGI::Session::Driver::file::FileName = "%s.dat";
     $s = new CGI::Session();
 

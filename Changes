@@ -1,6 +1,51 @@
 CGI::Session Change Log
 =====================================================================
 
+4.29_1 - Saturday, March 15, 2008
+
+    Special Thanks to Ron Savage who did the bulk of the work to put this release together. 
+
+    * FIX: Patch CGI::Session to fix RT#29138 (Patch by Barry Friedman)
+    * NEW: Add a note to CGI::Session's POD referring to utf8 problems, and include references
+           to RT#21981 (Reported by erwan) and RT#28516 (Reported by jasoncrowther)
+    * NEW: Add t/bug21981.t to help make uses aware that "use encoding 'utf8';" in a program,
+           or "$dbh->do(qq|set names 'utf8'|);", when also using CGI::Session, can lead to error
+           messages such as (respectively):
+           - Can't locate object method "renewed" via package "Encode::utf8" or
+           - Can't locate object method "errstr" via package "CGI::Session::Serialize::storable"
+           (Patch by Ron Savage)
+    * FIX: Patch CGI::Session::Driver::DBI.pm to fix RT#24601 (Patch by latypoff)
+    * FIX: Patch CGI::Session::Driver::DBI.pm to fix RT#24355 (Reported by fenlisesi, patch by Ron Savage)
+	* NEW: Add t/bug24285.t to ensure session data files are created properly when the user specifies a
+           directory other than /tmp (Reported by William Pearson RT#24285, patch by Ron Savage)
+    * FIX: Patch t/ip_matches.t and t/bug21592.t to remove test files left in /tmp, to fix RT#29969
+           (Reported by ANDK, patch by Ron Savage)
+    * FIX: Patch POD for CGI::Session::Driver::file to clarify how to use the option to change the
+           file name pattern used to created session files (Report by appleaday RT#33635,
+           patch by Ron Savage)
+    * FIX: Patch CGI::Session::Driver::sqlite to add sub DESTROY to fix RT#32932
+           (Patch by Alexander Batyrshin, corrected by Ron Savage)
+    * FIX: Remove CGI::Session::Seralize::json and t/g4_dbfile_json.t until such time as this code
+           can be made to work reliably. Both JSON::Syck and JSON::XS have been tried, and in both
+           cases t/g4_dbfile_json.t dies horribly (but differently). Patch POD for CGI::Session to
+           remove references to JSON. RT#25325 (Reported by bkw, patch by Ron Savage)
+    * NEW: Patch CGI::Session's POD and load() to allow the session/cookie name default of CGISESSID
+           to be overridden. (Patch by Lee Carmichael RT#33437, reformatted by Ron Savage). Lee has
+           also patched t/name.t to test the new functionality
+    * NEW: Split CGI::Session::Serialize::yaml out into its own distro. Get it hot from CPAN!
+    * NEW: Add Build.PL for Module::Build users
+    * NEW: Support specification of both the id column name and the a_session column name in the
+           sessions table, by extending the options acceptable in CGI::Session->new(..,..,{here}).
+           Allow:   {TableName => 'session',  IdColName => 'my_id', DataColName => 'my_data'}.
+           Default: {TableName => 'sessions', IdColName => 'id',    DataColName => 'a_session'}.
+           Allow any 1, 2 or 3 of these options. Missing keys default as specified.
+           (Patch by Chris RT#2224. Implemented differently by Ron Savage). Supported drivers:
+           o MySQL (native to CGI::Session)
+           o ODBC (separate distro, CGI::Session::Driver::odbc V 1.01)
+           o Oracle (separate distro, CGI::Session::Driver::oracle V 1.01)
+           o Postgres (native)
+           o SQLite (native)
+
 4.20 - Monday, December 4, 2006
 
     * INTERNAL: No Changes since 4.20_1. Declaring stable. 
@@ -259,4 +304,4 @@ CGI::Session Change Log
     * Bug in POD documentation is fixed (thanks to Graham Barr)
 
 
-$Id: Changes 353 2006-12-05 02:10:19Z markstos $
+$Id: Changes 395 2008-03-22 02:39:06Z markstos $

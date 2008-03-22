@@ -1,8 +1,8 @@
 package CGI::Session::Tutorial;
 
-# $Id: Tutorial.pm 351 2006-11-24 14:16:50Z markstos $
+# $Id: Tutorial.pm 394 2008-03-22 02:35:30Z markstos $
 
-$CGI::Session::Tutorial::VERSION = '4.20';
+$CGI::Session::Tutorial::VERSION = '4.29_1';
 
 =pod
 

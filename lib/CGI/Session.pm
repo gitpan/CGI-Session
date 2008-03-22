@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 353 2006-12-05 02:10:19Z markstos $
+# $Id: Session.pm 395 2008-03-22 02:39:06Z markstos $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.20';
+$CGI::Session::VERSION  = '4.29_1';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -80,6 +80,7 @@ sub new {
         }
         $dataref->{_SESSION_ID} = $id;
         $dataref->{_SESSION_CTIME} = $dataref->{_SESSION_ATIME} = time();
+        $dataref->{_SESSION_REMOTE_ADDR} = $ENV{REMOTE_ADDR} || "";
         $self->_set_status( STATUS_NEW );
     }
     return $self;
@@ -446,7 +447,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 353 2006-12-05 02:10:19Z markstos $
+# $Id: Session.pm 395 2008-03-22 02:39:06Z markstos $
 
 =pod
 
@@ -496,6 +497,17 @@ CGI::Session - persistent session data in CGI applications
 CGI-Session is a Perl5 library that provides an easy, reliable and modular session management system across HTTP requests.
 Persistency is a key feature for such applications as shopping carts, login/authentication routines, and application that
 need to carry data across HTTP requests. CGI::Session does that and many more.
+
+=head1 A Warning about UTF8
+
+Trying to use UTF8 in a program which uses CGI::Session has lead to problems. See RT#21981 and RT#28516.
+
+In the first case the user tried "use encoding 'utf8';" in the program, and in the second case the user tried
+"$dbh->do(qq|set names 'utf8'|);".
+
+Until this problem is understood and corrected, users are advised to avoid UTF8 in conjunction with CGI::Session.
+
+For details, see: http://rt.cpan.org/Public/Bug/Display.html?id=28516 (and ...id=21981).
 
 =head1 TRANSLATIONS
 
@@ -556,6 +568,8 @@ Following is the overview of all the available methods accessible via CGI::Sessi
 
 =head2 new( $dsn, $query||$sid, \%dsn_args )
 
+=head2 new( $dsn, $query||$sid, \%dsn_args, \%session_params )
+
 Constructor. Returns new session object, or undef on failure. Error message is accessible through L<errstr() - class method|CGI::Session::ErrorHandler/errstr>. If called on an already initialized session will re-initialize the session based on already configured object. This is only useful after a call to L<load()|/"load">.
 
 Can accept up to three arguments, $dsn - Data Source Name, $query||$sid - query object OR a string representing session id, and finally, \%dsn_args, arguments used by $dsn components.
@@ -598,15 +612,29 @@ For example, to get CGI::Session store its data using DB_File and serialize data
 
 If called with three arguments, first two will be treated as in the previous example, and third argument will be C<\%dsn_args>, which will be passed to C<$dsn> components (namely, driver, serializer and id generators) for initialization purposes. Since all the $dsn components must initialize to some default value, this third argument should not be required for most drivers to operate properly.
 
+If called with four arguments, the first three match previous examples. The fourth argument must be a hash reference with parameters to be used by the CGI::Session object. (see \%session_params above )
+
+The following is a list of the current keys:
+
+=over
+
+=item *
+
+B<name> - Name to use for the cookie/query parameter name. This defaults to CGISESSID. This can be altered or accessed by the C<name> accessor.
+
+=back
+
 undef is acceptable as a valid placeholder to any of the above arguments, which will force default behavior.
 
 =head2 load()
 
-=head2 load($query||$sid)
+=head2 load( $query||$sid )
 
-=head2 load($dsn, $query||$sid)
+=head2 load( $dsn, $query||$sid )
 
-=head2 load($dsn, $query, \%dsn_args);
+=head2 load( $dsn, $query, \%dsn_args )
+
+=head2 load( $dsn, $query, \%dsn_args, \%session_params )
 
 Accepts the same arguments as new(), and also returns a new session object, or
 undef on failure.  The difference is, L<new()|/"new"> can create new session if
@@ -637,7 +665,7 @@ Notice, all I<expired> sessions are empty, but not all I<empty> sessions are exp
 sub load {
     my $class = shift;
     return $class->set_error( "called as instance method")    if ref $class;
-    return $class->set_error( "Too many arguments")  if @_ > 4;
+    return $class->set_error( "Too many arguments")  if @_ > 5;
 
     my $self = bless {
         _DATA       => {
@@ -661,7 +689,7 @@ sub load {
         _QUERY      => undef        # query object
     }, $class;
 
-    my ($dsn,$query_or_sid,$dsn_args,$update_atime);
+    my ($dsn,$query_or_sid,$dsn_args,$update_atime,$params);
     # load($query||$sid)
     if ( @_ == 1 ) {
         $self->_set_query_or_sid($_[0]);
@@ -670,6 +698,18 @@ sub load {
     # load($dsn, $query||$sid)
     elsif ( @_ > 1 ) {
         ($dsn, $query_or_sid, $dsn_args,$update_atime) = @_;
+
+        # Make it backwards-compatible (update_atime is an undocumented key in %$params).
+        # In fact, update_atime as a key is not used anywhere in the code as yet.
+        # This patch is part of the patch for RT#33437.
+        if ( ref $update_atime and ref $update_atime eq 'HASH' ) {
+            $params = {%$update_atime};
+            $update_atime = $params->{'update_atime'};
+
+            if ($params->{'name'}) {
+                $self->{_NAME} = $params->{'name'};
+            }
+        }
 
         # Since $update_atime is not part of the public API
         # we ignore any value but the one we use internally: 0.
@@ -1257,11 +1297,6 @@ Full name: B<CGI::Session::Serialize::freezethaw>
 L<yaml|CGI::Session::Serialize::yaml> - serializes data using YAML. Requires L<YAML> or L<YAML::Syck>.
 Full name: B<CGI::Session::Serialize::yaml>
 
-=item *
-
-L<json|CGI::Session::Serialize::json> - serializes data using JSON. Requires L<JSON::Syck>.
-Full name: B<CGI::Session::Serialize::json>
-
 =back
 
 =head2 ID GENERATORS
@@ -1320,11 +1355,11 @@ This library is free software. You can modify and or distribute it under the sam
 You can see what the developers have been up to since the last release by
 checking out the code repository. You can browse the Subversion repository from here:
 
- http://svn.cromedome.net/
+ http://svn.cromedome.net/repos/CGI-Session
 
 Or check it directly with C<svn> from here:
 
- svn://svn.cromedome.net/CGI-Session
+ https://svn.cromedome.net/repos/CGI-Session
 
 =head1 SUPPORT
 

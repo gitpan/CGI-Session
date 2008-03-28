@@ -1,4 +1,4 @@
-# $Id: Makefile.PL 336 2006-10-26 02:17:31Z markstos $
+# $Id: Makefile.PL 399 2008-03-26 02:23:24Z ron $
 
 use strict;
 use Text::Wrap;
@@ -42,17 +42,18 @@ print "\n";
 print "-" x 40, "\n";
 
 WriteMakefile(
-    NAME            => 'CGI::Session',
-    VERSION_FROM            => 'lib/CGI/Session.pm',
-    PREREQ_PM       => {
+    NAME         => 'CGI::Session',
+    VERSION_FROM => 'lib/CGI/Session.pm',
+    PL_FILES     => {},
+    PREREQ_PM    => {
         'Digest::MD5'   => undef,
         'Data::Dumper'  => undef,
         'Test::More'    => undef,
         'Scalar::Util'  => undef,
     },
-    ABSTRACT        => 'Persistent session data in CGI applications',
-    AUTHOR          => 'Sherzod Ruzmetov <sherzodr@cpan.org>',
-    clean           => { FILES => [ 't/cgisess.*', 't/sessiondata' ] },
+    ABSTRACT => 'Persistent session data in CGI applications',
+    AUTHOR   => 'Sherzod Ruzmetov <sherzodr@cpan.org>',
+    clean    => { FILES => [ 't/cgisess.*', 't/sessiondata' ] },
 );
 
 #

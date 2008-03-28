@@ -37,7 +37,7 @@ t/api3_incr.t
 t/api3_obj_store.t
 t/api3_obj_store_db_file.t
 t/bug21952.t
-t/bug21981.t
+t/bug21981.todo
 t/bug24285.t
 t/cgi_simple.t
 t/complex_ds.t

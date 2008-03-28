@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 395 2008-03-22 02:39:06Z markstos $
+# $Id: Session.pm 401 2008-03-28 01:41:44Z markstos $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.29_1';
+$CGI::Session::VERSION  = '4.29_2';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -447,7 +447,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 395 2008-03-22 02:39:06Z markstos $
+# $Id: Session.pm 401 2008-03-28 01:41:44Z markstos $
 
 =pod
 

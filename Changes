@@ -1,6 +1,21 @@
 CGI::Session Change Log
 =====================================================================
 
+4.30 - Friday, April 25, 2008
+
+    * FIX: Patch POD for CGI::Session in various places, to emphasize even more that auto-flushing is
+           unreliable, and that flush() should always be called explicitly before the program exits.
+           The changes are a new section just after SYNOPSIS and DESCRIPTION, and the PODs for flush(),
+           and delete(). See RT#17299 and RT#34668
+    * NEW: Add t/new_with_undef.t and t/load_with_undef.t to explicitly demonstrate the effects of
+           calling new() and load() with various types of undefined or fake parameters. See RT#34668
+    * FIX: Patch POD for new() and load() to clarify the result of calling these with undef, or with
+           an initialized CGI object with an undefined or fake CGISESSID. See RT#34668.
+           Specifically: You are strongly advised to run the old-fashioned
+           'make test TEST_FILES=t/new_with_undef.t TEST_VERBOSE=1' or the new-fangled
+           'prove -v t/new_with_undef.t', for both new*.t and load*.t, and examine the output
+    * FIX: Patch POD in various tiny ways to improve the grammar
+
 4.29_2 - Thursday, March 27, 2008
 
     * FIX: stop ExtUtils::MakeMaker trying to create Build.PL (Ron Savage)
@@ -305,4 +320,4 @@ CGI::Session Change Log
     * Bug in POD documentation is fixed (thanks to Graham Barr)
 
 
-$Id: Changes 401 2008-03-28 01:41:44Z markstos $
+$Id: Changes 406 2008-04-08 00:56:29Z ron $

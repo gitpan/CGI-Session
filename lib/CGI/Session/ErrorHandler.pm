@@ -3,7 +3,7 @@ package CGI::Session::ErrorHandler;
 # $Id: ErrorHandler.pm 394 2008-03-22 02:35:30Z markstos $
 
 use strict;
-$CGI::Session::ErrorHandler::VERSION = '4.29_1';
+$CGI::Session::ErrorHandler::VERSION = '4.30';
 
 =pod
 

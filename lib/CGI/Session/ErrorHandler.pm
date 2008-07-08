@@ -1,9 +1,9 @@
 package CGI::Session::ErrorHandler;
 
-# $Id: ErrorHandler.pm 415 2008-06-16 14:40:45Z markstos $
+# $Id: ErrorHandler.pm 420 2008-07-08 01:23:06Z markstos $
 
 use strict;
-$CGI::Session::ErrorHandler::VERSION = '4.31';
+$CGI::Session::ErrorHandler::VERSION = '4.33';
 
 =pod
 

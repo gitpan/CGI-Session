@@ -1,6 +1,6 @@
 package CGI::Session::Driver::DBI;
 
-# $Id: DBI.pm 415 2008-06-16 14:40:45Z markstos $
+# $Id: DBI.pm 420 2008-07-08 01:23:06Z markstos $
 
 use strict;
 
@@ -9,7 +9,7 @@ use Carp;
 use CGI::Session::Driver;
 
 @CGI::Session::Driver::DBI::ISA = ( "CGI::Session::Driver" );
-$CGI::Session::Driver::DBI::VERSION = '4.31';
+$CGI::Session::Driver::DBI::VERSION = '4.33';
 
 
 sub init {
@@ -47,9 +47,7 @@ sub table_name {
 
     no strict 'refs';
     if ( @_ ) {
-        my $new_name = shift;
-        $self->{TableName}           = $new_name;
-        ${ $class . "::TABLE_NAME" } = $new_name;
+        $self->{TableName} = shift;
     }
 
     unless (defined $self->{TableName}) {

@@ -1,6 +1,6 @@
 package CGI::Session::Driver::sqlite;
 
-# $Id: sqlite.pm 415 2008-06-16 14:40:45Z markstos $
+# $Id: sqlite.pm 420 2008-07-08 01:23:06Z markstos $
 
 use strict;
 
@@ -9,7 +9,7 @@ use base 'CGI::Session::Driver::DBI';
 use DBI qw(SQL_BLOB);
 use Fcntl;
 
-$CGI::Session::Driver::sqlite::VERSION    = '4.31';
+$CGI::Session::Driver::sqlite::VERSION    = '4.33';
 
 sub init {
     my $self = shift;

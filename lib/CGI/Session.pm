@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 420 2008-07-08 01:23:06Z markstos $
+# $Id: Session.pm 425 2008-07-13 02:38:51Z markstos $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.33';
+$CGI::Session::VERSION  = '4.34';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -447,7 +447,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 420 2008-07-08 01:23:06Z markstos $
+# $Id: Session.pm 425 2008-07-13 02:38:51Z markstos $
 
 =pod
 
@@ -773,6 +773,12 @@ sub load {
     }
 
     $self->_load_pluggables();
+
+    # Did load_pluggable fail? If so, tell our caller.
+    if ($class->errstr)
+    {
+        return $class->errstr;
+    }
 
     if (not defined $self->{_CLAIMED_ID}) {
         my $query = $self->query();

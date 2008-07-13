@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         CGI-Session
-version:      4.33
+version:      4.34
 version_from: lib/CGI/Session.pm
 installdirs:  site
 requires:

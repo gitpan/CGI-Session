@@ -1,6 +1,6 @@
 package CGI::Session::Driver::file;
 
-# $Id: file.pm 420 2008-07-08 01:23:06Z markstos $
+# $Id: file.pm 425 2008-07-13 02:38:51Z markstos $
 
 use strict;
 
@@ -19,7 +19,7 @@ BEGIN {
 }
 
 @CGI::Session::Driver::file::ISA        = ( "CGI::Session::Driver" );
-$CGI::Session::Driver::file::VERSION    = '4.33';
+$CGI::Session::Driver::file::VERSION    = '4.34';
 $FileName                               = "cgisess_%s";
 $NoFlock                                = 0;
 $UMask                                  = 0660;
@@ -44,6 +44,14 @@ sub init {
 
 sub _file {
     my ($self,$sid) = @_;
+    my $id = $sid;
+    $id =~ s|\\|/|g;
+
+	if ($id =~ m|/|)
+    {
+        return $self->set_error( "_file(): Session ids cannot contain \\ or / chars: $sid" );
+    }
+
     return File::Spec->catfile($self->{Directory}, sprintf( $FileName, $sid ));
 }
 

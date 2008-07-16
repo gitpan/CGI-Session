@@ -70,4 +70,4 @@ t/remote_addr.t
 t/str2seconds.t
 t/symlink_db_file.t
 t/symlink_file.t
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml

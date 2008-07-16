@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 425 2008-07-13 02:38:51Z markstos $
+# $Id: Session.pm 430 2008-07-16 00:36:15Z markstos $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.34';
+$CGI::Session::VERSION  = '4.35';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -56,11 +56,16 @@ sub new {
         #
         # Called as a class method as in CGI::Session->new()
         #
+
+        # Start fresh with error reporting. Errors in past objects shouldn't affect this one. 
+        $class->set_error('');
+
         $self = $class->load( @args );
         if (not defined $self) {
             return $class->set_error( "new(): failed: " . $class->errstr );
         }
     }
+
     my $dataref = $self->{_DATA};
     unless ($dataref->{_SESSION_ID}) {
         #
@@ -447,7 +452,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 425 2008-07-13 02:38:51Z markstos $
+# $Id: Session.pm 430 2008-07-16 00:36:15Z markstos $
 
 =pod
 
@@ -709,7 +714,7 @@ or the new-fangled 'prove -v t/new_with_undef.t', for both new*.t and load*.t, a
 sub load {
     my $class = shift;
     return $class->set_error( "called as instance method")    if ref $class;
-    return $class->set_error( "Too many arguments")  if @_ > 5;
+    return $class->set_error( "Too many arguments provided to load()")  if @_ > 5;
 
     my $self = bless {
         _DATA       => {
@@ -758,7 +763,7 @@ sub load {
         # Since $update_atime is not part of the public API
         # we ignore any value but the one we use internally: 0.
         if (defined $update_atime and $update_atime ne '0') {
-            return $class->set_error( "Too many arguments");
+            return $class->set_error( "Too many arguments to load(). First extra argument was: $update_atime");
          }
 
         if ( defined $dsn ) {      # <-- to avoid 'Uninitialized value...' warnings
@@ -774,11 +779,8 @@ sub load {
 
     $self->_load_pluggables();
 
-    # Did load_pluggable fail? If so, tell our caller.
-    if ($class->errstr)
-    {
-        return $class->errstr;
-    }
+    # Did load_pluggable fail? If so, return undef, just like $class->set_error() would
+    return undef if $class->errstr;
 
     if (not defined $self->{_CLAIMED_ID}) {
         my $query = $self->query();

@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 430 2008-07-16 00:36:15Z markstos $
+# $Id: Session.pm 431 2008-09-12 07:58:26Z ron $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.35';
+$CGI::Session::VERSION  = '4.36';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -452,7 +452,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 430 2008-07-16 00:36:15Z markstos $
+# $Id: Session.pm 431 2008-09-12 07:58:26Z ron $
 
 =pod
 
@@ -1186,7 +1186,8 @@ Notice, above \&code didn't have to do anything, because load(), which is called
         my ($session) = @_;
         next if $session->is_empty;    # <-- already expired?!
         if ( ($session->ctime + 3600*240) <= time() ) {
-            $session->delete() or warn "couldn't remove " . $session->id . ": " . $session->errstr;
+            $session->delete();
+            $session->flush(); # Recommended practice says use flush() after delete().
         }
     }
 

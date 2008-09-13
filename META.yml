@@ -1,6 +1,6 @@
 ---
 name: CGI-Session
-version: 4.35
+version: 4.36
 author:
   - 'Sherzod Ruzmetov <sherzodr@cpan.org>'
 abstract: Persistent session data in CGI applications
@@ -17,7 +17,7 @@ build_requires:
 provides:
   CGI::Session:
     file: lib/CGI/Session.pm
-    version: 4.35
+    version: 4.36
   CGI::Session::Driver:
     file: lib/CGI/Session/Driver.pm
     version: 4.33

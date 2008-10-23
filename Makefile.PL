@@ -1,4 +1,4 @@
-# $Id: Makefile.PL 427 2008-07-14 04:25:54Z ron $
+# $Id: Makefile.PL 433 2008-10-23 02:48:10Z markstos $
 
 use strict;
 use Text::Wrap;
@@ -131,6 +131,11 @@ WriteMakefile(
     ABSTRACT => 'Persistent session data in CGI applications',
     AUTHOR   => 'Sherzod Ruzmetov <sherzodr@cpan.org>',
     clean    => { FILES => [ 't/cgisess.*', 't/sessiondata' ] },
+    EXTRA_META => "
+no_index:
+    package:
+    - SimpleObjectClass
+",
 );
 
 #

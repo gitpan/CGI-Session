@@ -1,8 +1,34 @@
 CGI::Session Change Log
 =====================================================================
 
+4.38 - Friday, October 31, 2008
+    * INTERNAL: Rename SimpleObjectClass to CGI::Session::Test::SimpleObjectClass 
+                to avoid namespace ownership issue (Mark Stosberg). 
+    * INTERNAL: We now list CGI.pm 3.26 or greater as a dependency. You are still  
+                welcome to use other query objects, but this version of CGI.pm
+                fixes a bug in the strictness of HTTP expiration times, which
+                Safari in particular is sensitive to. So, if you are using
+                CGI.pm, you should upgrade to at least this version.  RT#34216,
+                thanks to Astar, Michael Hampton, Ron Savage and Mark Stosberg. 
+    * INTERNAL: return explicit values in _set_status and _unset_status 
+                (RT#39201, Mario Domgoergen, Mark Stosberg) 
+
+    * FIX: RT#37877: The storable serializer wasn't properly inheriting the 'errstr'
+           method. This could have resulted an error like:
+           "Can't locate errstr via package "CGI::Session::Serialize::storable"
+           Thanks to Michael Greenish, Mark Stosberg.  
+    * FIX: RT#40405 reported a case where the default serializer would have a problem after the user
+      	   set a parameter's value to undef, in certain circumstances.
+    	   A test file was kindly provided by cowomally[...]nullium.net.
+    	   The fix was spelled out by Matt LeBlanc
+    * FIX: RT#39679 pointed out a simplification in method remove() in CGI::Session::Driver::file.
+      	   By calling _file() instead of duplicating code, we get the benefit of extra error checking.
+      	   Thanx to Sergiy Borodych for noticing this
+    * FIX: Stop using the return value of delete() in t/find.t. This means that when the patch
+	  	   provided in RT#37752 is applied, t/find.t will not start failing
+
 4.37 - Wednesday, October 22, 2008
-    * INTERNAL - Patch Makefile.PL and Build.PL to request that SimpleObjectClass not be indexed. 
+    * INTERNAL: Patch Makefile.PL and Build.PL to request that SimpleObjectClass not be indexed. 
 
 4.36 - Friday, September 12, 2008
     * FIX: The sample code for find() had 2 errors in it:
@@ -381,4 +407,4 @@ CGI::Session Change Log
     * Bug in POD documentation is fixed (thanks to Graham Barr)
 
 
-$Id: Changes 434 2008-10-23 02:56:38Z markstos $
+$Id: Changes 446 2008-11-01 03:01:15Z ron $

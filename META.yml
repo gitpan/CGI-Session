@@ -1,6 +1,6 @@
 ---
 name: CGI-Session
-version: 4.37
+version: 4.38
 author:
   - 'Sherzod Ruzmetov <sherzodr@cpan.org>'
 abstract: Persistent session data in CGI applications
@@ -8,6 +8,7 @@ license: artistic
 resources:
   license: http://opensource.org/licenses/artistic-license.php
 requires:
+  CGI: 3.26
   Data::Dumper: 0
   Digest::MD5: 0
   Scalar::Util: 0
@@ -17,61 +18,62 @@ build_requires:
 provides:
   CGI::Session:
     file: lib/CGI/Session.pm
-    version: 4.37
+    version: 4.38
   CGI::Session::Driver:
     file: lib/CGI/Session/Driver.pm
-    version: 4.33
+    version: 4.38
   CGI::Session::Driver::DBI:
     file: lib/CGI/Session/Driver/DBI.pm
-    version: 4.33
+    version: 4.38
   CGI::Session::Driver::db_file:
     file: lib/CGI/Session/Driver/db_file.pm
-    version: 4.33
+    version: 4.38
   CGI::Session::Driver::file:
     file: lib/CGI/Session/Driver/file.pm
-    version: 4.34
+    version: 4.38
   CGI::Session::Driver::mysql:
     file: lib/CGI/Session/Driver/mysql.pm
-    version: 4.33
+    version: 4.38
   CGI::Session::Driver::postgresql:
     file: lib/CGI/Session/Driver/postgresql.pm
-    version: 4.33
+    version: 4.38
   CGI::Session::Driver::sqlite:
     file: lib/CGI/Session/Driver/sqlite.pm
-    version: 4.33
+    version: 4.38
   CGI::Session::ErrorHandler:
     file: lib/CGI/Session/ErrorHandler.pm
-    version: 4.33
+    version: 4.38
   CGI::Session::ID::incr:
     file: lib/CGI/Session/ID/incr.pm
-    version: 4.33
+    version: 4.38
   CGI::Session::ID::md5:
     file: lib/CGI/Session/ID/md5.pm
     version: 4.33
   CGI::Session::ID::static:
     file: lib/CGI/Session/ID/static.pm
-    version: 4.33
+    version: 4.38
   CGI::Session::Serialize::default:
     file: lib/CGI/Session/Serialize/default.pm
-    version: 4.33
+    version: 4.38
   CGI::Session::Serialize::freezethaw:
     file: lib/CGI/Session/Serialize/freezethaw.pm
-    version: 4.2
+    version: 4.38
   CGI::Session::Serialize::storable:
     file: lib/CGI/Session/Serialize/storable.pm
-    version: 4.33
+    version: 4.38
   CGI::Session::Test::Default:
     file: lib/CGI/Session/Test/Default.pm
-    version: 4.33
+    version: 4.38
+  CGI::Session::Test::SimpleObjectClass:
+    file: lib/CGI/Session/Test/Default.pm
   CGI::Session::Tutorial:
     file: lib/CGI/Session/Tutorial.pm
-    version: 4.33
+    version: 4.38
   OverloadedObjectClass:
     file: lib/CGI/Session/Test/Default.pm
-  SimpleObjectClass:
-    file: lib/CGI/Session/Test/Default.pm
 no_index:
-  package: SimpleObjectClass
+  package:
+    - CGI::Session::Test::SimpleObjectClass
 generated_by: Module::Build version 0.2806
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html

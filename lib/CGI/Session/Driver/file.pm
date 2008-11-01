@@ -1,6 +1,6 @@
 package CGI::Session::Driver::file;
 
-# $Id: file.pm 425 2008-07-13 02:38:51Z markstos $
+# $Id: file.pm 447 2008-11-01 03:46:08Z markstos $
 
 use strict;
 
@@ -19,7 +19,7 @@ BEGIN {
 }
 
 @CGI::Session::Driver::file::ISA        = ( "CGI::Session::Driver" );
-$CGI::Session::Driver::file::VERSION    = '4.34';
+$CGI::Session::Driver::file::VERSION    = '4.38';
 $FileName                               = "cgisess_%s";
 $NoFlock                                = 0;
 $UMask                                  = 0660;
@@ -122,12 +122,9 @@ sub store {
 
 
 sub remove {
-    my $self = shift;
+    my $self  = shift;
     my ($sid) = @_;
-
-    my $directory = $self->{Directory};
-    my $file      = sprintf( $FileName, $sid );
-    my $path      = File::Spec->catfile($directory, $file);
+    my $path  = $self -> _file($sid);
     unlink($path) or return $self->set_error( "remove(): couldn't unlink '$path': $!" );
     return 1;
 }

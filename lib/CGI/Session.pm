@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 447 2008-11-01 03:46:08Z markstos $
+# $Id: Session.pm 454 2008-12-16 01:20:54Z markstos $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.38';
+$CGI::Session::VERSION  = '4.39';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -455,7 +455,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 447 2008-11-01 03:46:08Z markstos $
+# $Id: Session.pm 454 2008-12-16 01:20:54Z markstos $
 
 =pod
 
@@ -481,9 +481,6 @@ CGI::Session - persistent session data in CGI applications
 
     # Flush the data from memory to the storage driver at least before your
     # program finishes since auto-flushing can be unreliable.
-    # Warning: A bug in your logic whereby the DBI handle has gone
-    # out of scope before flush() is called means flush() won't work
-    # (when the session is a database session), so don't do that.
     $session->flush();
 
     # Retrieving data:
@@ -506,88 +503,7 @@ CGI::Session - persistent session data in CGI applications
 
 =head1 DESCRIPTION
 
-CGI-Session is a Perl5 library that provides an easy, reliable and modular session management system across HTTP requests.
-Persistency is a key feature for such applications as shopping carts, login/authentication routines, and application that
-need to carry data across HTTP requests. CGI::Session does that and many more.
-
-=head1 A Warning about Auto-flushing
-
-As mentioned above in the Synopsis, auto-flushing can be unreliable.
-
-Consequently, you should regard it as mandatory that sessions always need to be explicitly flushed before the
-program exits.
-
-For instance, in a C<CGI::Application>-based program, C<sub teardown()> would be the appropriate place to do this.
-
-This is all part of what might be called "Object life-cycle 'v' Program life-cycle".
-
-In the simplest case the program has one object of type CGI::Session, and that object is destroyed when the
-program exits.
-
-If, however, you wish to delete objects explicitly, then each call to C<delete()> should be followed by a call
-to C<flush()>.
-
-Warning: A bug in your logic whereby the DBI handle has gone out
-out of scope before flush() is called means flush() won't work
-(when the session is a database session), so don't do that.
-
-For more detail, see the discussion of the C<delete()> method, below.
-
-=head1 A Warning about UTF8
-
-Trying to use UTF8 in a program which uses CGI::Session has lead to problems. See RT#21981 and RT#28516.
-
-In the first case the user tried "use encoding 'utf8';" in the program, and in the second case the user tried
-"$dbh->do(qq|set names 'utf8'|);".
-
-Until this problem is understood and corrected, users are advised to avoid UTF8 in conjunction with CGI::Session.
-
-For details, see: http://rt.cpan.org/Public/Bug/Display.html?id=28516 (and ...id=21981).
-
-=head1 TRANSLATIONS
-
-This document is also available in Japanese.
-
-=over 4
-
-=item o 
-
-Translation based on 4.14: http://digit.que.ne.jp/work/index.cgi?Perldoc/ja
-
-=item o
-
-Translation based on 3.11, including Cookbook and Tutorial: http://perldoc.jp/docs/modules/CGI-Session-3.11/
-
-=back
-
-=head1 TO LEARN MORE
-
-Current manual is optimized to be used as a quick reference. To learn more both about the philosophy and CGI::Session
-programming style, consider the following:
-
-=over 4
-
-=item *
-
-L<CGI::Session::Tutorial|CGI::Session::Tutorial> - extended CGI::Session manual. Also includes library architecture and driver specifications.
-
-=item *
-
-We also provide mailing lists for CGI::Session users. To subscribe to the list or browse the archives visit https://lists.sourceforge.net/lists/listinfo/cgi-session-user
-
-=item *
-
-B<RFC 2965> - "HTTP State Management Mechanism" found at ftp://ftp.isi.edu/in-notes/rfc2965.txt
-
-=item *
-
-L<CGI|CGI> - standard CGI library
-
-=item *
-
-L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session.
-
-=back
+CGI::Session provides an easy, reliable and modular session management system across HTTP requests.
 
 =head1 METHODS
 
@@ -980,23 +896,18 @@ reference to an array, only the named parameters are cleared.
 
 Synchronizes data in memory  with the copy serialized by the driver. Call flush() 
 if you need to access the session from outside the current session object. You should
-at least call flush() before your program exits. 
+call flush() sometime before your program exits. 
 
 As a last resort, CGI::Session will automatically call flush for you just
-before the program terminates or session object goes out of scope. This automatic
-behavior was the recommended behavior until the 4.x series. Automatic flushing
-has since proven to be unreliable, and in some cases is now required in places
-that worked with 3.x. For further details see:
+before the program terminates or session object goes out of scope. Automatic
+flushing has proven to be unreliable, and in some cases is now required
+in places that worked with CGI::Session 3.x. 
 
- http://rt.cpan.org/Ticket/Display.html?id=17541
- http://rt.cpan.org/Ticket/Display.html?id=17299
+Always explicitly calling C<flush()> on the session before the
+program exits is recommended. For extra safety, call it immediately after
+every important session update.
 
-Consequently, always explicitly calling C<flush()> on the session before the program exits
-should be regarded as mandatory until this problem is rectified.
-
-Warning: A bug in your logic whereby the DBI handle has gone out
-out of scope before flush() is called means flush() won't work
-(when the session is a database session), so don't do that.
+Also see L<A Warning about Auto-flushing>
 
 =head2 atime()
 
@@ -1159,16 +1070,10 @@ L<is_empty()|/"is_empty"> is useful only if you wanted to catch requests for exp
 
 =head2 delete()
 
-Deletes a session from the data store and empties session data from memory, completely, so subsequent read/write requests on the same object will fail. Technically speaking, though, it will only set the object's status to I<STATUS_DELETED>.
-
-The intention is that in due course (of the program's execution) this will trigger L<flush()|/"flush">, and flush() will do the actual removal.
-
-However: Auto-flushing can be unreliable, and always explicitly calling C<flush()> on the session after C<delete()>
-should be regarded as mandatory until this problem is rectified.
-
-Warning: A bug in your logic whereby the DBI handle has gone out
-out of scope before flush() is called means flush() won't work
-(when the session is a database session), so don't do that.
+Sets the objects status to be "deleted".  Subsequent read/write requests on the
+same object will fail.  To physically delete it from the data store you need to call L<flush()>.
+CGI::Session attempts to do this automatically when the object is being destroyed (usually as
+the script exits), but see L<A Warning about Auto-flushing>.
 
 =head2 find( \&code )
 
@@ -1392,6 +1297,70 @@ L<static|CGI::Session::ID::static> - generates static session ids. B<CGI::Sessio
 
 =back
 
+=head1 A Warning about Auto-flushing
+
+Auto-flushing can be unreliable for the following reasons. Explict flushing
+after key session updates is recommended. 
+
+=over 4
+
+=item If the C<DBI> handle goes out of scope before the session variable
+
+For database-stored sessions, if the C<DBI> handle has gone out of scope before
+the auto-flushing happens, auto-flushing will fail.
+
+=item Circular references
+
+If the calling code contains a circular reference, it's possible that your
+C<CGI::Session> object will not be destroyed until it is too late for
+auto-flushing to work. You can find circular references with a tool like
+L<Devel::Cycle>.
+
+In particular, these modules are known to contain circular references which
+lead to this problem:
+
+=over 4
+
+=item CGI::Application::Plugin::DebugScreen V 0.06
+
+=item CGI::Application::Plugin::ErrorPage before version 1.20
+
+=back
+
+=item Signal handlers
+
+If your application may receive signals, there is an increased chance that the
+signal will arrive after the session was updated but before it is auto-flushed
+at object destruction time.
+
+=back
+
+=head1 A Warning about UTF8
+
+Trying to use UTF8 in a program which uses CGI::Session has lead to problems. See RT#21981 and RT#28516.
+
+In the first case the user tried "use encoding 'utf8';" in the program, and in the second case the user tried
+"$dbh->do(qq|set names 'utf8'|);".
+
+Until this problem is understood and corrected, users are advised to avoid UTF8 in conjunction with CGI::Session.
+
+For details, see: http://rt.cpan.org/Public/Bug/Display.html?id=28516 (and ...id=21981).
+
+=head1 TRANSLATIONS
+
+This document is also available in Japanese.
+
+=over 4
+
+=item o 
+
+Translation based on 4.14: http://digit.que.ne.jp/work/index.cgi?Perldoc/ja
+
+=item o
+
+Translation based on 3.11, including Cookbook and Tutorial: http://perldoc.jp/docs/modules/CGI-Session-3.11/
+
+=back
 
 =head1 CREDITS
 
@@ -1415,7 +1384,16 @@ CGI::Session evolved to what it is today with the help of following developers. 
 
 =item Shawn Sorichetti
 
+=item Ron Savage
+
+=item Rhesa Rozendaal
+
+He suggested Devel::Cycle to help debugging.
+
 =back
+
+Also, many people on the CGI::Application and CGI::Session mailing lists have contributed ideas and
+suggestions, and battled publicly with bugs, all of which has helped.
 
 =head1 COPYRIGHT
 
@@ -1449,25 +1427,30 @@ Sherzod Ruzmetov E<lt>sherzodr@cpan.orgE<gt>, http://author.handalak.com/
 Mark Stosberg became a co-maintainer during the development of 4.0. C<markstos@cpan.org>.
 Ron Savage became a co-maintainer during the development of 4.30. C<rsavage@cpan.org>.
 
-=head1 SEE ALSO
+=head1 SEE ALSO 
+
+To learn more both about the philosophy and CGI::Session programming style,
+consider the following:
 
 =over 4
 
 =item *
 
-L<CGI::Session::Tutorial|CGI::Session::Tutorial> - extended CGI::Session manual
+L<CGI::Session::Tutorial|CGI::Session::Tutorial> - extended CGI::Session manual. Also includes library architecture and driver specifications.
 
 =item *
 
-B<RFC 2965> - "HTTP State Management Mechanism" found at ftp://ftp.isi.edu/in-notes/rfc2965.txt
+We also provide mailing lists for CGI::Session users. To subscribe to the list
+or browse the archives visit
+https://lists.sourceforge.net/lists/listinfo/cgi-session-user
+
+=item * B<RFC 2109> - The primary spec for cookie handing in use, defining the  "Cookie:" and "Set-Cookie:" HTTP headers.
+Available at L<http://www.ietf.org/rfc/rfc2109.txt>. A newer spec, RFC 2965 is meant to obsolete it with "Set-Cookie2" 
+and "Cookie2" headers, but even of 2008, the newer spec is not widely supported. See L<http://www.ietf.org/rfc/rfc2965.txt>
 
 =item *
 
-L<CGI|CGI> - standard CGI library
-
-=item *
-
-L<Apache::Session|Apache::Session> - another fine alternative to CGI::Session
+L<Apache::Session|Apache::Session> - an alternative to CGI::Session.
 
 =back
 

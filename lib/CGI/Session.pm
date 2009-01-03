@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 454 2008-12-16 01:20:54Z markstos $
+# $Id: Session.pm 456 2009-01-03 01:16:43Z markstos $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.39';
+$CGI::Session::VERSION  = '4.40';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -455,7 +455,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 454 2008-12-16 01:20:54Z markstos $
+# $Id: Session.pm 456 2009-01-03 01:16:43Z markstos $
 
 =pod
 
@@ -1413,8 +1413,8 @@ Or check it directly with C<svn> from here:
 
 =head1 SUPPORT
 
-If you need help using CGI::Session consider the mailing list. You can ask the list by sending your questions to
-cgi-session-user@lists.sourceforge.net .
+If you need help using CGI::Session, ask on the mailing list. You can ask the
+list by sending your questions to cgi-session-user@lists.sourceforge.net .
 
 You can subscribe to the mailing list at https://lists.sourceforge.net/lists/listinfo/cgi-session-user .
 
@@ -1422,10 +1422,14 @@ Bug reports can be submitted at http://rt.cpan.org/NoAuth/ReportBug.html?Queue=C
 
 =head1 AUTHOR
 
-Sherzod Ruzmetov E<lt>sherzodr@cpan.orgE<gt>, http://author.handalak.com/
+Sherzod Ruzmetov C<sherzodr@cpan.org>
 
 Mark Stosberg became a co-maintainer during the development of 4.0. C<markstos@cpan.org>.
+
 Ron Savage became a co-maintainer during the development of 4.30. C<rsavage@cpan.org>.
+
+If you would like support, ask on the mailing list as describe above. The
+maintainers and other users are subscribed to it. 
 
 =head1 SEE ALSO 
 

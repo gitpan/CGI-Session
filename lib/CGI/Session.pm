@@ -1,13 +1,13 @@
 package CGI::Session;
 
-# $Id: Session.pm 456 2009-01-03 01:16:43Z markstos $
+# $Id: Session.pm 459 2009-03-21 02:00:17Z markstos $
 
 use strict;
 use Carp;
 use CGI::Session::ErrorHandler;
 
 @CGI::Session::ISA      = qw( CGI::Session::ErrorHandler );
-$CGI::Session::VERSION  = '4.40';
+$CGI::Session::VERSION  = '4.41';
 $CGI::Session::NAME     = 'CGISESSID';
 $CGI::Session::IP_MATCH = 0;
 
@@ -455,7 +455,7 @@ sub find {
     return 1;
 }
 
-# $Id: Session.pm 456 2009-01-03 01:16:43Z markstos $
+# $Id: Session.pm 459 2009-03-21 02:00:17Z markstos $
 
 =pod
 
@@ -1190,10 +1190,11 @@ Returns a dump of the session object. Useful for debugging purposes only.
 
 =head2 header()
 
-Replacement for L<CGI.pm|CGI>'s header() method. Without this method, you usually need to create a CGI::Cookie object and send it as part of the HTTP header:
+A wrapper for L<CGI.pm|CGI>'s header() method. Calling this method
+is equivalent to something like this:
 
     $cookie = CGI::Cookie->new(-name=>$session->name, -value=>$session->id);
-    print $cgi->header(-cookie=>$cookie);
+    print $cgi->header(-cookie=>$cookie, @_);
 
 You can minimize the above into:
 
@@ -1202,9 +1203,10 @@ You can minimize the above into:
 It will retrieve the name of the session cookie from C<$session->name()> which defaults to C<$CGI::Session::NAME>. If you want to use a different name for your session cookie, do something like following before creating session object:
 
     CGI::Session->name("MY_SID");
-    $session = new CGI::Session(undef, $cgi, \%attrs);
+    $session = CGI::Session->new(undef, $cgi, \%attrs);
 
-Now, $session->header() uses "MY_SID" as a name for the session cookie.
+Now, $session->header() uses "MY_SID" as a name for the session cookie. For all additional options that can
+be passed, see the C<header()> docs in L<CGI>. 
 
 =head2 query()
 
@@ -1345,6 +1347,13 @@ In the first case the user tried "use encoding 'utf8';" in the program, and in t
 Until this problem is understood and corrected, users are advised to avoid UTF8 in conjunction with CGI::Session.
 
 For details, see: http://rt.cpan.org/Public/Bug/Display.html?id=28516 (and ...id=21981).
+
+Lastly, note that parameters such as 'utf-8' can be passed to the C<header()> method
+when C<header()> is used to send a cookie. E.g.:
+
+	print $session->header(charset => 'utf-8');
+
+See L</header()> for a fuller discussion of the use of the C<header()> method in conjunction with cookies.
 
 =head1 TRANSLATIONS
 

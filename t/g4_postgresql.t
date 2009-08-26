@@ -1,4 +1,4 @@
-# $Id: g4_postgresql.t 389 2008-03-13 04:16:02Z ron $
+# $Id$
 
 use strict;
 use diagnostics;

@@ -1,4 +1,5 @@
 Build.PL
+Changelog.ini
 Changes
 examples/purge.pl
 examples/subscriptions.cgi
@@ -64,10 +65,13 @@ t/header.t
 t/ip_matches.t
 t/is_new.t
 t/load.t
+t/load_with_undef.t
 t/name.t
+t/new_with_undef.t
 t/parse_dsn.t
 t/remote_addr.t
+t/session_param_undef.t
 t/str2seconds.t
 t/symlink_db_file.t
 t/symlink_file.t
-META.yml
+META.yml                                 Module meta-data (added by MakeMaker)

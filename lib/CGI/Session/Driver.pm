@@ -1,6 +1,6 @@
 package CGI::Session::Driver;
 
-# $Id: Driver.pm 447 2008-11-01 03:46:08Z markstos $
+# $Id$
 
 use strict;
 #use diagnostics;

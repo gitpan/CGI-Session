@@ -1,4 +1,4 @@
-# $Id: g4_mysql.t 419 2008-06-29 01:58:12Z ron $
+# $Id$
 
 use strict;
 use diagnostics;

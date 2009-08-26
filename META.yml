@@ -1,15 +1,22 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         CGI-Session
-version:      4.41
-version_from: lib/CGI/Session.pm
-installdirs:  site
-requires:
+--- #YAML:1.0
+name:                CGI-Session
+version:             4.42
+abstract:            Persistent session data in CGI applications
+license:             ~
+author:              
+    - Sherzod Ruzmetov <sherzodr@cpan.org>
+generated_by:        ExtUtils::MakeMaker version 6.44
+distribution_type:   module
+requires:     
     CGI:                           3.26
     Data::Dumper:                  
     Digest::MD5:                   
     Scalar::Util:                  
     Test::More:                    
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3
 
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30_01
+no_index:
+    package:
+    - CGI::Session::Test::SimpleObjectClass

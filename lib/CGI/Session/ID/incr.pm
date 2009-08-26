@@ -1,6 +1,6 @@
 package CGI::Session::ID::incr;
 
-# $Id: incr.pm 447 2008-11-01 03:46:08Z markstos $
+# $Id$
 
 use strict;
 use File::Spec;

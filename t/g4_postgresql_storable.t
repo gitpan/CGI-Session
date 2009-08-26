@@ -1,4 +1,4 @@
-# $Id: g4_postgresql_storable.t 336 2006-10-26 02:17:31Z markstos $
+# $Id$
 
 use strict;
 use diagnostics;

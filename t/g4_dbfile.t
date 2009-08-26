@@ -1,4 +1,4 @@
-# $Id: g4_dbfile.t 212 2005-08-30 11:47:14Z sherzodr $
+# $Id$
 
 use strict;
 use diagnostics;

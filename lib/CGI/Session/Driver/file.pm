@@ -1,6 +1,6 @@
 package CGI::Session::Driver::file;
 
-# $Id: file.pm 447 2008-11-01 03:46:08Z markstos $
+# $Id$
 
 use strict;
 

@@ -1,4 +1,4 @@
-# $Id: g4_sqlite.t 341 2006-11-23 16:41:32Z markstos $
+# $Id$
 
 use strict;
 use diagnostics;

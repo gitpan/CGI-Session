@@ -1,4 +1,4 @@
-# $Id: Makefile.PL 440 2008-11-01 01:34:54Z markstos $
+# $Id$
 
 use strict;
 use Text::Wrap;

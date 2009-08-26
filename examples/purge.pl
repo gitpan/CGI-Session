@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id: purge.pl 216 2005-09-01 10:52:26Z sherzodr $
+# $Id$
 
 #
 # This script can be installed as a cron-job to run at specific intervals

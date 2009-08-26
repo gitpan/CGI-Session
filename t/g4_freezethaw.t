@@ -1,4 +1,4 @@
-# $Id: g4_freezethaw.t 242 2006-02-14 11:29:59Z sherzodr $
+# $Id$
 
 use strict;
 use diagnostics;

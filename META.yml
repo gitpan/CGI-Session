@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               CGI-Session
-version:            4.43
+version:            4.44
 abstract:           Persistent session data in CGI applications
 author:
     - Sherzod Ruzmetov <sherzodr@cpan.org>
@@ -20,7 +20,7 @@ no_index:
     directory:
         - t
         - inc
-generated_by:       ExtUtils::MakeMaker version 6.55_02
+generated_by:       ExtUtils::MakeMaker version 6.56
 meta-spec:
     url:      http://module-build.sourceforge.net/META-spec-v1.4.html
     version:  1.4

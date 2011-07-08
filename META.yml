@@ -25,7 +25,7 @@ no_index:
 provides:
   CGI::Session:
     file: lib/CGI/Session.pm
-    version: 4.46
+    version: 4.47
   CGI::Session::Driver:
     file: lib/CGI/Session/Driver.pm
     version: 4.43
@@ -70,7 +70,7 @@ provides:
     version: 4.43
   CGI::Session::Test::Default:
     file: lib/CGI/Session/Test/Default.pm
-    version: 4.46
+    version: 4.47
   CGI::Session::Test::SimpleObjectClass:
     file: lib/CGI/Session/Test/Default.pm
     version: 0
@@ -88,4 +88,4 @@ requires:
 resources:
   license: http://opensource.org/licenses/artistic-license.php
   repository: http://github.com/cromedome/cgi-session
-version: 4.46
+version: 4.47

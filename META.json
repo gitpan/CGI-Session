@@ -48,7 +48,7 @@
    "provides" : {
       "CGI::Session" : {
          "file" : "lib/CGI/Session.pm",
-         "version" : "4.46"
+         "version" : "4.47"
       },
       "CGI::Session::Driver" : {
          "file" : "lib/CGI/Session/Driver.pm",
@@ -108,7 +108,7 @@
       },
       "CGI::Session::Test::Default" : {
          "file" : "lib/CGI/Session/Test/Default.pm",
-         "version" : "4.46"
+         "version" : "4.47"
       },
       "CGI::Session::Test::SimpleObjectClass" : {
          "file" : "lib/CGI/Session/Test/Default.pm",
@@ -132,5 +132,5 @@
          "url" : "http://github.com/cromedome/cgi-session"
       }
    },
-   "version" : "4.46"
+   "version" : "4.47"
 }

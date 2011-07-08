@@ -4,7 +4,7 @@
       "Sherzod Ruzmetov <sherzodr@cpan.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.110930",
+   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.110440",
    "keywords" : [
       "session",
       "http"
@@ -19,7 +19,10 @@
    "name" : "CGI-Session",
    "no_index" : {
       "package" : [
-         "CGI::Session::Test::SimpleObjectClass"
+         "CGI::Session::Test::SimpleObjectClass",
+         "CGI::Session::Test::Default",
+         "OverloadedObjectClass",
+         "OverloadedClass"
       ]
    },
    "prereqs" : {
@@ -45,7 +48,7 @@
    "provides" : {
       "CGI::Session" : {
          "file" : "lib/CGI/Session.pm",
-         "version" : "4.45"
+         "version" : "4.46"
       },
       "CGI::Session::Driver" : {
          "file" : "lib/CGI/Session/Driver.pm",
@@ -105,7 +108,7 @@
       },
       "CGI::Session::Test::Default" : {
          "file" : "lib/CGI/Session/Test/Default.pm",
-         "version" : "4.43"
+         "version" : "4.46"
       },
       "CGI::Session::Test::SimpleObjectClass" : {
          "file" : "lib/CGI/Session/Test/Default.pm",
@@ -115,7 +118,7 @@
          "file" : "lib/CGI/Session/Tutorial.pm",
          "version" : "4.43"
       },
-      "OverloadedObjectClass" : {
+      "OverloadedClass" : {
          "file" : "lib/CGI/Session/Test/Default.pm",
          "version" : 0
       }
@@ -123,11 +126,11 @@
    "release_status" : "stable",
    "resources" : {
       "license" : [
-         "http://www.perlfoundation.org/artistic_license_1_0"
+         "http://opensource.org/licenses/artistic-license.php"
       ],
       "repository" : {
          "url" : "http://github.com/cromedome/cgi-session"
       }
    },
-   "version" : "4.45"
+   "version" : "4.46"
 }

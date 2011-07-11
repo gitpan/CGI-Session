@@ -7,7 +7,7 @@ build_requires:
 configure_requires:
   Module::Build: 0.38
 dynamic_config: 1
-generated_by: 'Module::Build version 0.38, CPAN::Meta::Converter version 2.110440'
+generated_by: 'Module::Build version 0.38, CPAN::Meta::Converter version 2.110930'
 keywords:
   - session
   - http
@@ -25,7 +25,7 @@ no_index:
 provides:
   CGI::Session:
     file: lib/CGI/Session.pm
-    version: 4.47
+    version: 4.48
   CGI::Session::Driver:
     file: lib/CGI/Session/Driver.pm
     version: 4.43
@@ -88,4 +88,4 @@ requires:
 resources:
   license: http://opensource.org/licenses/artistic-license.php
   repository: http://github.com/cromedome/cgi-session
-version: 4.47
+version: 4.48

@@ -4,7 +4,7 @@
       "Sherzod Ruzmetov <sherzodr@cpan.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.110440",
+   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.110930",
    "keywords" : [
       "session",
       "http"
@@ -48,7 +48,7 @@
    "provides" : {
       "CGI::Session" : {
          "file" : "lib/CGI/Session.pm",
-         "version" : "4.47"
+         "version" : "4.48"
       },
       "CGI::Session::Driver" : {
          "file" : "lib/CGI/Session/Driver.pm",
@@ -132,5 +132,5 @@
          "url" : "http://github.com/cromedome/cgi-session"
       }
    },
-   "version" : "4.47"
+   "version" : "4.48"
 }
